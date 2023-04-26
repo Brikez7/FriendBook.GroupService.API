@@ -1,4 +1,4 @@
-﻿namespace FriendBook.CommentServer.API.Domain.DTO
+﻿namespace FriendBook.GroupService.API.Domain.DTO
 {
     public class GroupDTO
     {

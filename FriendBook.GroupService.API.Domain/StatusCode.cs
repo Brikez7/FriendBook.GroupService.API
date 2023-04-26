@@ -4,18 +4,16 @@
     {
         EntityNotFound = 0,
 
-        ArticleCreate = 1,
-        ArticleUpdate = 2,
-        ArticleDelete = 3,
-        ArticleRead = 4,
+        GroupCreate = 1,
+        GroupUpdate = 2,
+        GroupDelete = 3,
+        GroupRead = 4,
 
-        //Kafka status code
-        TopicCreate = 11,
-        TopicAlreadyExists = 12,
-        MessageSend = 13,
+
 
         OK = 200,
         OKNoContent = 204,
+        IdNotFound = 401,
         InternalServerError = 500,
     }
 }

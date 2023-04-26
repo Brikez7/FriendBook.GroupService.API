@@ -1,8 +1,8 @@
-﻿using FriendBook.CommentServer.API.DAL.Repositories.Interfaces;
-using FriendBook.CommentServer.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
+using FriendBook.GroupService.API.Domain.Entities;
 using System.Security.Cryptography.X509Certificates;
 
-namespace FriendBook.CommentServer.API.DAL.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class GroupRepository : IGroupRepository
     {

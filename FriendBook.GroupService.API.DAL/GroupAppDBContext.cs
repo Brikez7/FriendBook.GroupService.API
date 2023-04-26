@@ -1,8 +1,8 @@
-﻿using FriendBook.CommentServer.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace FriendBook.CommentServer.API.DAL
+namespace FriendBook.GroupService.API.DAL
 {
     public class GroupAppDBContext : DbContext
     {

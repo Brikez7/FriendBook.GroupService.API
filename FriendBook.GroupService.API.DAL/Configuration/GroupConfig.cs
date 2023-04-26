@@ -1,9 +1,9 @@
-﻿using FriendBook.CommentServer.API.DAL.Configuration.DataType;
-using FriendBook.CommentServer.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.DAL.Configuration.DataType;
+using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FriendBook.CommentServer.API.DAL.Configuration
+namespace FriendBook.GroupService.API.DAL.Configuration
 {
     public class GroupConfig : IEntityTypeConfiguration<Group>
     {

@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FriendBook.GroupService.API.BLL\FriendBook.GroupService.API.BLL.csproj" />
     <ProjectReference Include="..\FriendBook.GroupService.API.DAL\FriendBook.GroupService.API.DAL.csproj" />
   </ItemGroup>
 

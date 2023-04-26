@@ -1,6 +1,6 @@
-﻿using FriendBook.CommentServer.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.CommentServer.API.DAL.Repositories.Interfaces
+namespace FriendBook.GroupService.API.DAL.Repositories.Interfaces
 {
     public interface IGroupRepository
     {
