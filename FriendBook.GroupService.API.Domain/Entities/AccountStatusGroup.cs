@@ -14,6 +14,11 @@
             RoleAccount = roleAccount;
         }
 
+        public AccountStatusGroup(Guid id)
+        {
+            Id = id;
+        }
+
         public Group? Group { get; set; }
     }
 }

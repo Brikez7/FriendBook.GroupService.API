@@ -15,19 +15,21 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
 
         public async Task<AccountStatusGroup> AddAsync(AccountStatusGroup entity)
         {
-            var entity = await _dbContext.AddAsync(entity);
+            var createdEntity = await _dbContext.AccountsStatusGroups.AddAsync(entity);
 
-            return entity;
+            return createdEntity.Entity;
         }
 
         public bool Delete(AccountStatusGroup entity)
         {
-            throw new NotImplementedException();
+            var deletedEntity = _dbContext.AccountsStatusGroups.Remove(entity);
+
+            return true;
         }
 
         public IQueryable<AccountStatusGroup> GetAsync()
         {
-            throw new NotImplementedException();
+            return _dbContext.AccountsStatusGroups;
         }
 
         public async Task<bool> SaveAsync()
@@ -39,7 +41,9 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
 
         public AccountStatusGroup Update(AccountStatusGroup entity)
         {
-            throw new NotImplementedException();
+            var updatedEntity = _dbContext.AccountsStatusGroups.Update(entity);
+
+            return updatedEntity.Entity;
         }
     }
 }

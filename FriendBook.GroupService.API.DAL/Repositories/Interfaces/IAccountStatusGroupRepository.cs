@@ -2,7 +2,7 @@
 
 namespace FriendBook.GroupService.API.DAL.Repositories.Interfaces
 {
-    public interface IAccountStatusGroup
+    public interface IAccountStatusGroupRepository
     {
         public Task<AccountStatusGroup> AddAsync(AccountStatusGroup entity);
         public AccountStatusGroup Update(AccountStatusGroup entity);

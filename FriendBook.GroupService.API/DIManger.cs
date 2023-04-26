@@ -16,6 +16,7 @@ namespace FriendBook.GroupService.API
         public static void AddRepositores(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
+            webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
         }
 
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
