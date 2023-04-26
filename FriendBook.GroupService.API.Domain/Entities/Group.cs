@@ -13,10 +13,10 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
         }
 
-        public Group(GroupDTO commentDTO, Guid accountId)
+        public Group(GroupDTO groupDTO, Guid accountId)
         {
-            Id = commentDTO.GuidGroupId; 
-            Name = commentDTO.Name;
+            Id = groupDTO.GroupId; 
+            Name = groupDTO.Name;
             AccountId = accountId;
             CreatedDate = DateTime.Now;
         }
