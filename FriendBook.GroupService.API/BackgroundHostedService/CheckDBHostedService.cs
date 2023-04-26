@@ -1,6 +1,6 @@
-﻿using FriendBook.CommentServer.API.DAL;
+﻿using FriendBook.GroupService.API.DAL;
 
-namespace FriendBook.CommentServer.API.BackgroundHostedService
+namespace FriendBook.GroupService.API.BackgroundHostedService
 {
     public class CheckDBHostedService : BackgroundService
     {

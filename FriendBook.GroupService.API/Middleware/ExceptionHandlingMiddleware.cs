@@ -1,9 +1,9 @@
-﻿using FriendBook.CommentServer.API.Domain.DTO;
+﻿using FriendBook.GroupService.API.Domain.DTO;
 using Npgsql;
 using System.Net;
 using System.Security.Authentication;
 
-namespace FriendBook.CommentServer.API.Middleware
+namespace FriendBook.GroupService.API.Middleware
 {
     public class ExceptionHandlingMiddleware
     {

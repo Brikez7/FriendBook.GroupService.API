@@ -1,15 +1,15 @@
-﻿using FriendBook.CommentServer.API.DAL.Repositories;
-using FriendBook.CommentServer.API.DAL.Repositories.Interfaces;
-using FriendBook.CommentServer.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.DAL.Repositories;
+using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
+using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.OData;
-using FriendBook.CommentServer.API.Middleware;
-using FriendBook.CommentServer.API.BackgroundHostedService;
+using FriendBook.GroupService.API.Middleware;
+using FriendBook.GroupService.API.BackgroundHostedService;
 
-namespace FriendBook.CommentServer.API
+namespace FriendBook.GroupService.API
 {
     public static class DIManger
     {

@@ -1,6 +1,4 @@
-
-using FriendBook.CommentServer.API;
-using FriendBook.CommentServer.API.DAL;
+using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API
@@ -27,7 +25,6 @@ namespace FriendBook.GroupService.API
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

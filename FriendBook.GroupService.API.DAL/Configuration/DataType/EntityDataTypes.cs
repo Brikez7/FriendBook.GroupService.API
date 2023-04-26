@@ -1,4 +1,4 @@
-﻿namespace FriendBook.CommentServer.API.DAL.Configuration.DataType
+﻿namespace FriendBook.GroupService.API.DAL.Configuration.DataType
 {
     public static class EntityDataTypes
     {

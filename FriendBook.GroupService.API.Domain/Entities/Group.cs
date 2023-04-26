@@ -1,6 +1,6 @@
-﻿using FriendBook.CommentServer.API.Domain.DTO;
+﻿using FriendBook.GroupService.API.Domain.DTO;
 
-namespace FriendBook.CommentServer.API.Domain.Entities
+namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class Group
     {
