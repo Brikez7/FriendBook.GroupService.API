@@ -1,0 +1,50 @@
+﻿using FriendBook.CommentServer.API.DAL.Repositories.Interfaces;
+using FriendBook.CommentServer.API.Domain.Entities;
+using System.Security.Cryptography.X509Certificates;
+
+namespace FriendBook.CommentServer.API.DAL.Repositories
+{
+    public class GroupRepository : IGroupRepository
+    {
+        private readonly GroupAppDBContext _db;
+
+        public GroupRepository(GroupAppDBContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<Group> AddAsync(Group entity)
+        {
+            var createdEntity = await _db.Groups.AddAsync(entity);
+
+            return createdEntity.Entity;
+        }
+
+        public bool Delete(Group entity)
+        {
+            _db.Groups.Remove(entity);
+
+            return true;
+        }
+
+        public IQueryable<Group> GetAsync()
+        {
+
+            return _db.Groups.AsQueryable();
+        }
+
+        public async Task<bool> SaveAsync()
+        {
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+
+        public Group Update(Group entity)
+        {
+            var updatedEntity = _db.Groups.Update(entity);
+
+            return updatedEntity.Entity;
+        }
+    }
+}

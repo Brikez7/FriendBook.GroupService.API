@@ -1,4 +1,8 @@
 
+using FriendBook.CommentServer.API;
+using FriendBook.CommentServer.API.DAL;
+using Microsoft.EntityFrameworkCore;
+
 namespace FriendBook.GroupService.API
 {
     public class Program
@@ -7,10 +11,17 @@ namespace FriendBook.GroupService.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddSingleton(builder.Configuration);
+            builder.AddRepositores();
+            builder.AddServices();
+            builder.AddAuthProperty();
+            builder.AddODataProperty();
+            builder.AddHostedServices();
+
+            builder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
+                builder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -26,7 +37,6 @@ namespace FriendBook.GroupService.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
