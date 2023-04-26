@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/FriendBook.GroupService.API.Domain/RoleAccount.cs
+/FriendBook.GroupService.API.Domain/Entities/GroupStatus.cs
