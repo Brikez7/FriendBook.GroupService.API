@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.Domain.Entities;
 using System.Security.Cryptography.X509Certificates;
 
-namespace FriendBook.GroupService.API.DAL.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
 {
     public class GroupRepository : IGroupRepository
     {
