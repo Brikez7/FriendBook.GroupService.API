@@ -25,5 +25,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
             Id = id;
         }
+
+        public IEnumerable<AccountStatusGroup>? AccountStatusGroups { get; set; } 
     }
 }
