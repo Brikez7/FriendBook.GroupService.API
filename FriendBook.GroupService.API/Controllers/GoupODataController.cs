@@ -1,21 +1,26 @@
+using FriendBook.GroupService.API.BLL.Interfaces;
+using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [ApiController]
-    [Route("group/[controller]")]
-    public class GoupODataController : ControllerBase
+    public class GroupODataController : ODataController
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+        private readonly IGroupService _groupService;
 
-        private readonly ILogger<GoupODataController> _logger;
-
-        public GoupODataController(ILogger<GoupODataController> logger)
+        public GroupODataController(IGroupService relationshipService)
         {
-            _logger = logger;
+            _groupService = relationshipService;
+        }
+
+        [HttpGet("odata/v1/Group")]
+        [EnableQuery]
+        public IQueryable<Group> GetGroup()
+        {
+
+            return _groupService.GetGroupOData().Data;
         }
     }
 }
