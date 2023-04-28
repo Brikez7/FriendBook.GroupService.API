@@ -2,7 +2,7 @@
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
-    public class AccountStatusGroup 
+    public class AccountStatusGroup
     {
         public Guid? Id { get; set; }
         public Guid AccountId { get; set; }

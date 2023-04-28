@@ -1,5 +1,4 @@
 ﻿using FriendBook.GroupService.API.DAL.Configuration.DataType;
-using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

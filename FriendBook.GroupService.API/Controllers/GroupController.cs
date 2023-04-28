@@ -17,9 +17,7 @@ namespace FriendBook.GroupService.API.Controllers
         {
             _groupService = groupService;
         }
-        /// <summary>
-        /// Созвониться с Ильей
-        /// </summary>
+
         [HttpDelete("Group")]
         public async Task<BaseResponse<IActionResult>> DeleteGroup([FromQuery] Guid id)
         {
