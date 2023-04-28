@@ -5,7 +5,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
     public class Group
     {
         public Guid? Id { get; set; }
-        public Guid AccountId { get; set; }
+        public Guid CreatedId { get; set; }
         public string Name { get; set; } = null!;
         public DateTime CreatedDate { get; set; }
 
@@ -17,7 +17,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
             Id = groupDTO.GroupId; 
             Name = groupDTO.Name;
-            AccountId = accountId;
+            CreatedId = accountId;
             CreatedDate = DateTime.Now;
         }
 

@@ -41,7 +41,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public BaseResponse<IQueryable<Group>> GetGroupOData()
         {
-            var groups = _groupRepository.GetAsync();
+            var groups = _groupRepository.Get();
             if (groups.Count() == 0)
             {
                 return new StandartResponse<IQueryable<Group>>()

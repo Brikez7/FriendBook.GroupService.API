@@ -10,7 +10,6 @@ namespace FriendBook.GroupService.API.Domain.DTO
     {
         public Guid GroupId { get; set; }
         public Guid AccountId { get; set; }
-        public string Name { get; set; } = null!;
         public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
     }
 }

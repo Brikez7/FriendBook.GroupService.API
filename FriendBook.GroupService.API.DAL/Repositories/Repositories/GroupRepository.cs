@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
-using System.Security.Cryptography.X509Certificates;
 
 namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
 {
@@ -27,9 +26,8 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
             return true;
         }
 
-        public IQueryable<Group> GetAsync()
+        public IQueryable<Group> Get()
         {
-
             return _db.Groups.AsQueryable();
         }
 

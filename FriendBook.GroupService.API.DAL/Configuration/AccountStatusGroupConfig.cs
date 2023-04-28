@@ -20,7 +20,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("pk_account_status_groups_id");
 
-            builder.Property(e => e.IdAccount)
+            builder.Property(e => e.AccountId)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("account_id");
 

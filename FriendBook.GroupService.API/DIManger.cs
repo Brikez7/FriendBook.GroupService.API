@@ -28,6 +28,7 @@ namespace FriendBook.GroupService.API
         {
             var odataBuilder = new ODataConventionModelBuilder();
             odataBuilder.EntitySet<Group>("Group");
+            odataBuilder.EntitySet<AccountStatusGroup>("AccountStatusGroup");
 
             webApplicationBuilder.Services.AddControllers().AddOData(opt =>
             {

@@ -6,20 +6,20 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
 {
+    [Route("api/GroupOData[controller]")]
     public class GroupODataController : ODataController
     {
         private readonly IGroupService _groupService;
 
-        public GroupODataController(IGroupService relationshipService)
+        public GroupODataController(IGroupService groupService)
         {
-            _groupService = relationshipService;
+            _groupService = groupService;
         }
 
-        [HttpGet("odata/v1/Group")]
+        [HttpGet("OData/Groups")]
         [EnableQuery]
-        public IQueryable<Group> GetGroup()
+        public IQueryable<Group> GetGroups()
         {
-
             return _groupService.GetGroupOData().Data;
         }
     }
