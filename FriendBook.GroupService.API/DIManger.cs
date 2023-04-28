@@ -1,5 +1,4 @@
-﻿using FriendBook.GroupService.API.DAL.Repositories;
-using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
+﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,6 +7,7 @@ using System.Text;
 using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
 using FriendBook.GroupService.API.BackgroundHostedService;
+using FriendBook.GroupService.API.DAL.Repositories.Repositories;
 
 namespace FriendBook.GroupService.API
 {
@@ -16,6 +16,7 @@ namespace FriendBook.GroupService.API
         public static void AddRepositores(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
+            webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
         }
 
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
@@ -27,6 +28,7 @@ namespace FriendBook.GroupService.API
         {
             var odataBuilder = new ODataConventionModelBuilder();
             odataBuilder.EntitySet<Group>("Group");
+            odataBuilder.EntitySet<AccountStatusGroup>("AccountStatusGroup");
 
             webApplicationBuilder.Services.AddControllers().AddOData(opt =>
             {

@@ -8,43 +8,42 @@ namespace FriendBook.GroupService.API.BLL.Services
 {
     public class GroupService : IGroupService
     {
-        private readonly IGroupRepository _commentRepository;
+        private readonly IGroupRepository _groupRepository;
 
         public GroupService(IGroupRepository commentRepository)
         {
-            _commentRepository = commentRepository;
+            _groupRepository = commentRepository;
         }
 
-        public async Task<BaseResponse<Group>> CreateGroup(Group comment)
+        public async Task<BaseResponse<Group>> CreateGroup(Group group)
         {
-            var createdRelationship = await _commentRepository.AddAsync(comment);
-            await _commentRepository.SaveAsync();
+            var createdGroup = await _groupRepository.AddAsync(group);
+            await _groupRepository.SaveAsync();
 
             return new StandartResponse<Group>()
             {
-                Data = createdRelationship,
+                Data = createdGroup,
                 StatusCode = StatusCode.GroupCreate
             };
         }
 
         public async Task<BaseResponse<bool>> DeleteGroup(Guid id)
         {
-            var createdRelationship = _commentRepository.Delete(new Group(id));
-            await _commentRepository.SaveAsync();
+            var Result = _groupRepository.Delete(new Group(id));
+            await _groupRepository.SaveAsync();
 
             return new StandartResponse<bool>()
             {
-                Data = createdRelationship,
+                Data = Result,
                 StatusCode = StatusCode.GroupDelete
             };
         }
 
         public BaseResponse<IQueryable<Group>> GetGroupOData()
         {
-            var contents = _commentRepository.GetAsync();
-            if (contents.Count() == 0)
+            var groups = _groupRepository.Get();
+            if (groups.Count() == 0)
             {
-
                 return new StandartResponse<IQueryable<Group>>()
                 {
                     Message = "entity not found"
@@ -53,8 +52,20 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             return new StandartResponse<IQueryable<Group>>()
             {
-                Data = contents,
+                Data = groups,
                 StatusCode = StatusCode.GroupRead
+            };
+        }
+
+        public async Task<BaseResponse<Group>> UpdateGroup(Group group)
+        {
+            var updatedGroup = _groupRepository.Update(group);
+            await _groupRepository.SaveAsync();
+
+            return new StandartResponse<Group>()
+            {
+                Data = updatedGroup,
+                StatusCode = StatusCode.GroupUpdate
             };
         }
     }

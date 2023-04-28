@@ -5,7 +5,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
     public class Group
     {
         public Guid? Id { get; set; }
-        public Guid AccountId { get; set; }
+        public Guid CreatedId { get; set; }
         public string Name { get; set; } = null!;
         public DateTime CreatedDate { get; set; }
 
@@ -13,11 +13,11 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
         }
 
-        public Group(GroupDTO commentDTO, Guid accountId)
+        public Group(GroupDTO groupDTO, Guid accountId)
         {
-            Id = commentDTO.GuidGroupId; 
-            Name = commentDTO.Name;
-            AccountId = accountId;
+            Id = groupDTO.GroupId;
+            Name = groupDTO.Name;
+            CreatedId = accountId;
             CreatedDate = DateTime.Now;
         }
 
@@ -25,5 +25,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
             Id = id;
         }
+
+        public IEnumerable<AccountStatusGroup>? AccountStatusGroups { get; set; }
     }
 }

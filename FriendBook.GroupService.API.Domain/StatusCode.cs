@@ -4,12 +4,15 @@
     {
         EntityNotFound = 0,
 
-        GroupCreate = 1,
-        GroupUpdate = 2,
-        GroupDelete = 3,
-        GroupRead = 4,
+        GroupCreate = 11,
+        GroupUpdate = 12,
+        GroupDelete = 13,
+        GroupRead = 14,
 
-
+        AccountStatusGroupCreate = 21,
+        AccountStatusGroupUpdate = 22,
+        AccountStatusGroupDelete = 23,
+        AccountStatusGroupRead = 24,
 
         OK = 200,
         OKNoContent = 204,

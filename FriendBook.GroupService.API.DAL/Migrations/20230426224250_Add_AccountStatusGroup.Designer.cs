@@ -3,6 +3,7 @@ using System;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
     [DbContext(typeof(GroupAppDBContext))]
-    partial class GroupAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230426224250_Add_AccountStatusGroup")]
+    partial class Add_AccountStatusGroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,13 +32,9 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("pk_account_status_groups_id");
 
-                    b.Property<Guid>("AccountId")
+                    b.Property<Guid>("IdAccount")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
-
-                    b.Property<Guid>("CreaterId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("creater_account_id");
 
                     b.Property<Guid>("IdGroup")
                         .HasColumnType("uuid")

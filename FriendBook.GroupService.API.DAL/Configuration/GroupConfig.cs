@@ -7,7 +7,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 {
     public class GroupConfig : IEntityTypeConfiguration<Group>
     {
-        public const string Table_name = "comments";
+        public const string Table_name = "groups";
 
         public void Configure(EntityTypeBuilder<Group> builder)
         {
@@ -15,14 +15,14 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasKey(e => new { e.Id });
 
-            builder.HasIndex(e => e.AccountId);
+            builder.HasIndex(e => e.CreatedId);
 
             builder.Property(e => e.Id)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("pk_group_id");
 
-            builder.Property(e => e.AccountId)
-                   .HasColumnType(EntityDataTypes.Character_varying)
+            builder.Property(e => e.CreatedId)
+                   .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("account_id");
 
             builder.Property(e => e.Name)
