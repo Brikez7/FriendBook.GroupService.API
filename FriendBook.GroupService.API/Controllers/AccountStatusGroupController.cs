@@ -1,11 +1,12 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.Controllers
@@ -13,7 +14,7 @@ namespace FriendBook.GroupService.API.Controllers
     [Route("api/AccountStatusGroup[controller]")]
     [ApiController]
     [Authorize]
-    public class AccountStatusGroupController : ControllerBase
+    public class AccountStatusGroupController : ODataController
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
         private readonly IGroupService _groupService;
@@ -50,6 +51,7 @@ namespace FriendBook.GroupService.API.Controllers
 
             return StatusCode(((int)Domain.StatusCode.IdNotFound));
         }
+
         [HttpPost("AccountStatusGroup")]
         public async Task<BaseResponse<AccountStatusGroup>> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
@@ -67,6 +69,7 @@ namespace FriendBook.GroupService.API.Controllers
                 Message = "Id not found or user not outorisation"
             };
         }
+
         [HttpPost("Group")]
         public async Task<BaseResponse<AccountStatusGroup>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
@@ -83,6 +86,13 @@ namespace FriendBook.GroupService.API.Controllers
                 StatusCode = Domain.StatusCode.IdNotFound,
                 Message = "Id not found or user not outorisation"
             };
+        }
+
+        [HttpGet("OData/Groups")]
+        [EnableQuery]
+        public IQueryable<AccountStatusGroup> GetAccountStatusGroups()
+        {
+            return _accountStatusGroupService.GetAccountStatusGroupOData().Data;
         }
     }
 }

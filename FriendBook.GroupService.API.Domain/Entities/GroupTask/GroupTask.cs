@@ -1,10 +1,21 @@
-﻿namespace FriendBook.GroupService.API.Domain.Entities
+﻿using FriendBook.GroupService.API.Domain.DTO;
+
+namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class GroupTask
     {
+        private GroupTaskDTO groupDTO;
+        private Guid userId;
+
         public GroupTask(Guid id)
         {
             Id = id;
+        }
+
+        public GroupTask(GroupTaskDTO groupDTO, Guid userId)
+        {
+            this.groupDTO = groupDTO;
+            this.userId = userId;
         }
 
         public Guid? Id { get; set; }

@@ -3,7 +3,6 @@ using FriendBook.GroupService.API.Domain.CustomClaims;
 using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -11,28 +10,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/Group[controller]")]
-    [Authorize]
-    public class GroupController : ODataController
+    public class GroupTaskController : ODataController
     {
-        private readonly IGroupService _groupService;
+        private readonly IGroupTaskService _groupTaskService;
 
-        public GroupController(IGroupService groupService)
+        public GroupTaskController(IGroupTaskService groupTaskService)
         {
-            _groupService = groupService;
+            _groupTaskService = groupTaskService;
         }
 
         [HttpDelete("Delete")]
-        public async Task<BaseResponse<IActionResult>> DeleteGroup([FromQuery] Guid id)
+        public async Task<BaseResponse<IActionResult>> DeleteGroupTask([FromQuery] Guid id)
         {
             Guid userId;
             if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
             {
-                var group = await _groupService.GetGroupOData().Data
+                var groupTask = await _groupTaskService.GetGroupTaskOData().Data
                 ?.Where(x => x.Id == id)
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
-                if (group == null)
+                if (groupTask == null)
                 {
                     return new StandartResponse<IActionResult>
                     {
@@ -40,9 +37,9 @@ namespace FriendBook.GroupService.API.Controllers
                         Data = NotFound()
                     };
                 }
-                else if (group.CreatedId == userId)
+                else if (groupTask.AccountId == userId)
                 {
-                    var resourse = await _groupService.DeleteGroup(id);
+                    var resourse = await _groupTaskService.DeleteGroupTask(id);
 
                     return new StandartResponse<IActionResult>
                     {
@@ -50,45 +47,48 @@ namespace FriendBook.GroupService.API.Controllers
                     };
                 }
 
-                return  new StandartResponse<IActionResult> 
-                { 
+                return new StandartResponse<IActionResult>
+                {
                     Data = Forbid()
                 };
             }
 
-            return new StandartResponse<IActionResult> { 
-                Data = StatusCode(((int)Domain.StatusCode.IdNotFound)) 
+            return new StandartResponse<IActionResult>
+            {
+                Data = StatusCode(((int)Domain.StatusCode.IdNotFound))
             };
         }
         [HttpPost("Create")]
-        public async Task<BaseResponse<Group>> CreateGroup(GroupDTO groupDTO)
+        public async Task<BaseResponse<GroupTask>> CreateGroup(GroupTaskDTO groupDTO)
         {
             Guid userId;
             if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
             {
-                var newGroup = new Group(groupDTO,userId);
-                var resourse = await _groupService.CreateGroup(newGroup);
+                /// Испроавить
+                var newGroupTask = new GroupTask(groupDTO, userId);
+                var resourse = await _groupTaskService.CreateGroupTask(newGroupTask);
 
                 return resourse;
             }
-            return new StandartResponse<Group> 
-            { 
+            return new StandartResponse<GroupTask>
+            {
                 StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not фutorisation"
+                Message = "Id not found or user not autorisation"
             };
         }
         [HttpPut("Update")]
-        public async Task<BaseResponse<Group>> UpdateGroup(GroupDTO groupDTO)
+        public async Task<BaseResponse<GroupTask>> UpdateGroup(GroupTaskDTO groupDTO)
         {
             Guid userId;
             if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
             {
-                var newGroup = new Group(groupDTO, userId);
-                var resourse = await _groupService.UpdateGroup(newGroup);
+                /// исправить
+                var newGroupTask = new GroupTask(groupDTO, userId);
+                var resourse = await _groupTaskService.UpdateGroupTask(newGroupTask);
 
                 return resourse;
             }
-            return new StandartResponse<Group>
+            return new StandartResponse<GroupTask>
             {
                 StatusCode = Domain.StatusCode.IdNotFound,
                 Message = "Id not found or user not outorisation"
@@ -96,9 +96,9 @@ namespace FriendBook.GroupService.API.Controllers
         }
         [HttpGet("OData/Get")]
         [EnableQuery]
-        public IQueryable<Group> GetGroups()
+        public IQueryable<GroupTask> GetGroups()
         {
-            return _groupService.GetGroupOData().Data;
+            return _groupTaskService.GetGroupTaskOData().Data;
         }
     }
 }
