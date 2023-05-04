@@ -1,8 +1,7 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
-namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class AccountStatusGroupRepository : IAccountStatusGroupRepository
     {

@@ -2,6 +2,11 @@
 {
     public class GroupTask
     {
+        public GroupTask(Guid id)
+        {
+            Id = id;
+        }
+
         public Guid? Id { get; set; }
         public Guid AccountId { get; set; }
         public Guid GroupId { get; set; }

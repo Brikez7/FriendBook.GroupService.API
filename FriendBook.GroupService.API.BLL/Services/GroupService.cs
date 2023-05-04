@@ -10,9 +10,9 @@ namespace FriendBook.GroupService.API.BLL.Services
     {
         private readonly IGroupRepository _groupRepository;
 
-        public GroupService(IGroupRepository commentRepository)
+        public GroupService(IGroupRepository groupRepository)
         {
-            _groupRepository = commentRepository;
+            _groupRepository = groupRepository;
         }
 
         public async Task<BaseResponse<Group>> CreateGroup(Group group)

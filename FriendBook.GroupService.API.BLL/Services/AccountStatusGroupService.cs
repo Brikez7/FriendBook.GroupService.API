@@ -1,14 +1,8 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.DAL.Repositories.Repositories;
 using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {

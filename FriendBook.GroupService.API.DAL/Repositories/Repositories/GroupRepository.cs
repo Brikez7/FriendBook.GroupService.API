@@ -1,7 +1,7 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class GroupRepository : IGroupRepository
     {

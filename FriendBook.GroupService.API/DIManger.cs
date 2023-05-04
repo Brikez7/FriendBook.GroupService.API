@@ -7,7 +7,10 @@ using System.Text;
 using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
 using FriendBook.GroupService.API.BackgroundHostedService;
-using FriendBook.GroupService.API.DAL.Repositories.Repositories;
+using FriendBook.GroupService.API.DAL.Repositories;
+using FriendBook.GroupService.API.BLL.Interfaces;
+using FriendBook.GroupService.API.BLL.Services;
+using GroupService = FriendBook.GroupService.API.BLL.Services.GroupService;
 
 namespace FriendBook.GroupService.API
 {
@@ -17,18 +20,24 @@ namespace FriendBook.GroupService.API
         {
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
+            webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
         }
 
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
+            webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
+            webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
+            webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
         }
 
 
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {
             var odataBuilder = new ODataConventionModelBuilder();
+
             odataBuilder.EntitySet<Group>("Group");
             odataBuilder.EntitySet<AccountStatusGroup>("AccountStatusGroup");
+            odataBuilder.EntitySet<GroupTask>("GroupTask");
 
             webApplicationBuilder.Services.AddControllers().AddOData(opt =>
             {
