@@ -30,7 +30,6 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 Data = createdAccountaStatusGroup,
                 StatusCode = StatusCode.AccountStatusGroupCreate
-                ICollection
             };
         }
 

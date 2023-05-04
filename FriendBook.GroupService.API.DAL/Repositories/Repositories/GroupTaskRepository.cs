@@ -45,4 +45,4 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
         }
     }
 }
-}
+
