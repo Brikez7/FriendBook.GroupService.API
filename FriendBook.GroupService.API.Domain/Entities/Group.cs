@@ -11,6 +11,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
 
         public Group()
         {
+            List<Group> groups = new List<Group>();
         }
 
         public Group(GroupDTO groupDTO, Guid accountId)
@@ -27,5 +28,6 @@ namespace FriendBook.GroupService.API.Domain.Entities
         }
 
         public IEnumerable<AccountStatusGroup>? AccountStatusGroups { get; set; }
+        public IEnumerable<GroupTask>? GroupTasks { get; set; }
     }
 }

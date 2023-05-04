@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.Domain.DTO
+namespace FriendBook.GroupService.API.Domain
 {
     public class AccountStatusGroupDTO
     {
         public Guid GroupId { get; set; }
         public Guid AccountId { get; set; }
-        public StatusAccount RoleAccount { get; set; } = StatusAccount.Default;
+        public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
     }
 }

@@ -9,7 +9,7 @@ namespace FriendBook.GroupService.API.DAL
         public const string NameConnection = "NpgConnectionString";
         public DbSet<Group> Groups { get; set; }
         public DbSet<AccountStatusGroup> AccountsStatusGroups { get; set; }
-
+        public DbSet<GroupTask> GroupTasks { get; set; }
         public void UpdateDatabase()
         {
             Database.EnsureDeleted();
