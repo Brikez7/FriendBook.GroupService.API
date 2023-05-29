@@ -11,94 +11,85 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/Group[controller]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class GroupController : ODataController
     {
         private readonly IGroupService _groupService;
-
-        public GroupController(IGroupService groupService)
+        private readonly IAccountStatusGroupService _accountStatusGroupService;
+        public GroupController(IGroupService groupService, IAccountStatusGroupService accountStatusGroupService)
         {
+            _accountStatusGroupService = accountStatusGroupService;
             _groupService = groupService;
         }
 
-        [HttpDelete("Delete")]
-        public async Task<BaseResponse<IActionResult>> DeleteGroup([FromQuery] Guid id)
+        [HttpDelete("Delete/{idGroup}")]
+        public async Task<IActionResult> DeleteGroup(string idGroup)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var group = await _groupService.GetGroupOData().Data
-                ?.Where(x => x.Id == id)
+            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
+            var idUser = Guid.Parse(id);
+            var idGroupGuid = Guid.Parse(idGroup);
+            /// Get group
+            var group = await _groupService.GetGroupOData().Data
+                ?.Where(x => x.Id == idGroupGuid)
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
                 if (group == null)
                 {
-                    return new StandartResponse<IActionResult>
+                    return Ok(new StandartResponse<string>
                     {
                         Message = "group not found",
-                        Data = NotFound()
-                    };
+                        StatusCode = Domain.StatusCode.IdNotFound
+                    });
                 }
-                else if (group.CreatedId == userId)
+                else if (group.CreaterId == idUser)
                 {
-                    var resourse = await _groupService.DeleteGroup(id);
+                    var response = await _groupService.DeleteGroup(idGroupGuid);
 
-                    return new StandartResponse<IActionResult>
-                    {
-                        Data = NoContent()
-                    };
+                    return Ok(response);
                 }
 
-                return  new StandartResponse<IActionResult> 
-                { 
-                    Data = Forbid()
-                };
-            }
-
-            return new StandartResponse<IActionResult> { 
-                Data = StatusCode(((int)Domain.StatusCode.IdNotFound)) 
-            };
+                return Ok(new StandartResponse<string> 
+                {
+                    Message = "group not found",
+                    StatusCode = Domain.StatusCode.IdNotFound
+                });
         }
+
         [HttpPost("Create")]
-        public async Task<BaseResponse<Group>> CreateGroup(GroupDTO groupDTO)
+        public async Task<IActionResult> CreateGroup([FromBody] string groupName)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var newGroup = new Group(groupDTO,userId);
-                var resourse = await _groupService.CreateGroup(newGroup);
+            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
+            var userId = Guid.Parse(id);
 
-                return resourse;
-            }
-            return new StandartResponse<Group> 
-            { 
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not фutorisation"
-            };
+            var newGroup = new Group(groupName, userId);
+            var response = await _groupService.CreateGroup(newGroup);
+
+            return Ok(response);
         }
+
         [HttpPut("Update")]
-        public async Task<BaseResponse<Group>> UpdateGroup(GroupDTO groupDTO)
+        public async Task<BaseResponse<GroupDTO>> UpdateGroup([FromBody] GroupDTO groupDTO)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var newGroup = new Group(groupDTO, userId);
-                var resourse = await _groupService.UpdateGroup(newGroup);
+            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
+            var userId = Guid.Parse(id);
 
-                return resourse;
-            }
-            return new StandartResponse<Group>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not outorisation"
-            };
+            var newGroup = new Group(groupDTO, userId);
+
+            var response = await _groupService.UpdateGroup(newGroup);
+
+            return response;
         }
-        [HttpGet("OData/Get")]
+
+        [HttpGet("OData/GetMyGroups")]
         [EnableQuery]
-        public IQueryable<Group> GetGroups()
+        public async Task<BaseResponse<GroupDTO[]>> GetMyGroups()
         {
-            return _groupService.GetGroupOData().Data;
+            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
+            var userId = Guid.Parse(id);
+            var listGroupDTO = (await _groupService.GetGroupOData().Data.Where(x => x.CreaterId == userId).Select(x => new GroupDTO(x)).ToArrayAsync()) ?? new GroupDTO[] { };
+
+            return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
         }
     }
 }

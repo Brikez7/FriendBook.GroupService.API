@@ -31,6 +31,13 @@ namespace FriendBook.GroupService.API
                 app.UseSwaggerUI();
             }
 
+            app.UseCors(builder => builder
+               .WithOrigins("http://localhost:3000")
+               .AllowAnyHeader()
+               .AllowAnyMethod());
+
+            app.UseCors();
+            app.UseRouting();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

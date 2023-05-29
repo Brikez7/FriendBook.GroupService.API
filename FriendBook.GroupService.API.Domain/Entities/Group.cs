@@ -1,25 +1,31 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO;
+using System;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class Group
     {
         public Guid? Id { get; set; }
-        public Guid CreatedId { get; set; }
+        public Guid CreaterId { get; set; }
         public string Name { get; set; } = null!;
         public DateTime CreatedDate { get; set; }
 
         public Group()
         {
-            List<Group> groups = new List<Group>();
+        }
+
+        public Group(string nameGroup, Guid accountId)
+        {
+            Name = nameGroup;
+            CreaterId = accountId;
+            CreatedDate = DateTime.UtcNow;
         }
 
         public Group(GroupDTO groupDTO, Guid accountId)
         {
-            Id = groupDTO.GroupId;
             Name = groupDTO.Name;
-            CreatedId = accountId;
-            CreatedDate = DateTime.Now;
+            Id = groupDTO.GroupId;
+            CreaterId = accountId;
         }
 
         public Group(Guid? id)

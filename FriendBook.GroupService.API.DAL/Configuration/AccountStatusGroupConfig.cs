@@ -35,7 +35,8 @@ namespace FriendBook.GroupService.API.DAL.Configuration
             builder.HasOne(d => d.Group)
                    .WithMany(p => p.AccountStatusGroups)
                    .HasPrincipalKey(p => p.Id)
-                   .HasForeignKey(d => d.IdGroup);
+                   .HasForeignKey(d => d.IdGroup)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

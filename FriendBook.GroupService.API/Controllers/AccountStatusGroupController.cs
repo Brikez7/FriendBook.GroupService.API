@@ -1,17 +1,21 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.CustomClaims;
+using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/AccountStatusGroup[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class AccountStatusGroupController : ODataController
@@ -25,74 +29,218 @@ namespace FriendBook.GroupService.API.Controllers
             _groupService = groupService;
         }
 
-        [HttpDelete("AccountStatusGroup")]
-        public async Task<IActionResult> DeleteAccountStatusGroup([FromQuery] Guid id)
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> DeleteAccountStatusGroup([FromQuery] string idGroup, [FromQuery] string idUser)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
+            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid createrId))
             {
-                var accountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupOData().Data
-                ?.Where(x => x.Id == id)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-                if (accountStatusGroup == null)
+                Guid idGroupDeleted;
+                if (!Guid.TryParse(idGroup, out idGroupDeleted))
                 {
-                    return NotFound();
+                    return Ok(new StandartResponse<ProfileDTO[]>()
+                    {
+                        Message = "Id group not valid",
+                        StatusCode = Domain.StatusCode.InternalServerError
+                    });
                 }
-                else if (await _groupService.GetGroupOData().Data.AnyAsync(x=> x.CreatedId == userId))
+                Guid idUserGuid;
+                if (!Guid.TryParse(idUser, out idUserGuid))
                 {
-                    var resourse = await _accountStatusGroupService.DeleteAccountStatusGroup(id);
-
-                    return NoContent();
+                    return Ok(new StandartResponse<ProfileDTO[]>()
+                    {
+                        Message = "Id user not valid",
+                        StatusCode = Domain.StatusCode.InternalServerError
+                    });
                 }
 
-                return Forbid();
+                var response = await _accountStatusGroupService.DeleteAccountStatusGroup(idUserGuid,createrId, idGroupDeleted);
+
+                return Ok(new StandartResponse<bool>
+                {
+                    Data = response.Data
+                });
             }
 
-            return StatusCode(((int)Domain.StatusCode.IdNotFound));
+            return Ok(new StandartResponse<bool>
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
 
-        [HttpPost("AccountStatusGroup")]
-        public async Task<BaseResponse<AccountStatusGroup>> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
+            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroup = new AccountStatusGroup(accountStatusGroupDTO);
-                var resourse = await _accountStatusGroupService.CreateAccountStatusGroup(newGroup);
+                BaseResponse<bool> responseAnotherAPI;
+                try
+                {
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?id={userId}", null);
+                    await reg_Req.SendRequest(MyTypeRequest.GET);
+                    responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
+                }
+                catch (Exception e)
+                {
+                    return Ok(new StandartResponse<AccountStatusGroup>()
+                    {
+                        Message = "Identity server not responsing",
+                        StatusCode = Domain.StatusCode.InternalServerError,
+                    });
+                }
 
-                return resourse;
+                if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
+                {
+                    return Ok(new StandartResponse<AccountStatusGroupDTO>()
+                    {
+                        Message = "Account not been status creator",
+                        StatusCode = Domain.StatusCode.InternalServerError,
+                    });
+                }
+                if (responseAnotherAPI is not null && responseAnotherAPI.Data)
+                {
+                    var newAccountStatusGroup = new AccountStatusGroup(accountStatusGroupDTO);
+                    var response = await _accountStatusGroupService.CreateAccountStatusGroup(newAccountStatusGroup);
+
+                    return Ok(response);
+                }
+                return Ok(new StandartResponse<AccountStatusGroupDTO>()
+                {
+                    Message = "Account not exists or server not connected",
+                    StatusCode = Domain.StatusCode.InternalServerError,
+                });
             }
-            return new StandartResponse<AccountStatusGroup>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not outorisation"
-            };
+            return Ok(new StandartResponse<AccountStatusGroup>()
+            { 
+                Message = "Id not Guid",
+                StatusCode = Domain.StatusCode.InternalServerError 
+            });
         }
 
-        [HttpPost("Group")]
-        public async Task<BaseResponse<AccountStatusGroup>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value , out userId))
+            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroup = new AccountStatusGroup(accountStatusGroupDTO);
-                var resourse = await _accountStatusGroupService.UpdateAccountStatusGroup(newGroup);
+                var changingStatusGroup = new AccountStatusGroup(accountStatusGroupDTO);
+                var response = await _accountStatusGroupService.UpdateAccountStatusGroup(changingStatusGroup, userId);
 
-                return resourse;
+                return Ok(response);
             }
-            return new StandartResponse<AccountStatusGroup>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not outorisation"
-            };
+            return Ok(new StandartResponse<AccountStatusGroup>
+            { 
+                StatusCode = Domain.StatusCode.IdNotFound, 
+                Message = "Id not found or user not outorisation" 
+            });
         }
 
         [HttpGet("OData/Groups")]
         [EnableQuery]
-        public IQueryable<AccountStatusGroup> GetAccountStatusGroups()
+        public async Task<IActionResult> GetAccountStatusGroups(string idGroup)
         {
-            return _accountStatusGroupService.GetAccountStatusGroupOData().Data;
+            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                Guid groupId;
+                if (!Guid.TryParse(idGroup, out groupId))
+                {
+                    return Ok(new StandartResponse<ProfileDTO[]>()
+                    {
+                        Message = "Id group not valid",
+                        StatusCode = Domain.StatusCode.InternalServerError
+                    });
+                }
+
+                var accountsStatusGroups = await _accountStatusGroupService.GetAccountStatusGroupOData().Data
+                                           .Where(x => x.IdGroup == groupId)
+                                           .Select(x => new AccountStatusGroupDTO(x.IdGroup, x.AccountId, x.RoleAccount))
+                                           .ToArrayAsync();
+
+                if (accountsStatusGroups == null)
+                {
+                    return Ok(new StandartResponse<AccountStatusGroupDTO[]>
+                    {
+                        StatusCode = Domain.StatusCode.IdNotFound,
+                        Message = "Id not found or user not outorisation"
+                    });
+                }
+
+                return Ok(new StandartResponse<AccountStatusGroupDTO[]>
+                {
+                    Data = accountsStatusGroups
+                });
+            }
+            return Ok(new StandartResponse<AccountStatusGroupDTO[]>()
+            {
+                Message = "User not authorization or nekorrect token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
+        }
+
+        [HttpGet("GetProfilesByIdGroup")]
+        public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] string idGroup, [FromQuery] string login = "")
+        {
+            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                Guid idGroupGuid;
+                if (!Guid.TryParse(idGroup, out idGroupGuid)) 
+                {
+                    return Ok(new StandartResponse<ProfileDTO[]>()
+                    {
+                        Message = "Id group not valid",
+                        StatusCode = Domain.StatusCode.InternalServerError
+                    });
+                }
+
+                StandartResponse<ProfileDTO[]> responseAnotherAPI;
+                try
+                {
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"]);
+                    await reg_Req.SendRequest(MyTypeRequest.GET);
+                    responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<ProfileDTO[]>>(reg_Req.Response);
+                }
+                catch (Exception e)
+                {
+                    return Ok(new StandartResponse<AccountStatusGroup>()
+                    {
+                        Message = "Identity server not responsing",
+                        StatusCode = Domain.StatusCode.InternalServerError,
+                    });
+                }
+
+                if (responseAnotherAPI.Message is null && responseAnotherAPI.Data is not null)
+                {
+                    var usersInSearchedGroudId = await _accountStatusGroupService.GetAccountStatusGroupOData().Data.Where(x => x.IdGroup == idGroupGuid).Select(x =>  x.AccountId ).ToArrayAsync();
+
+                    if (usersInSearchedGroudId is null || usersInSearchedGroudId.Length == 0) 
+                    {
+                        return Ok(new StandartResponse<AccountStatusGroupDTO>()
+                        {
+                            Message = "Group not found",
+                            StatusCode = Domain.StatusCode.InternalServerError,
+                        });
+                    }
+
+                    var usersInGroup = responseAnotherAPI.Data.Join(usersInSearchedGroudId,
+                                       profile => profile.Id,
+                                       id => id,
+                                       (profile, id) => profile);
+
+                    return Ok(new StandartResponse<ProfileDTO[]>{
+                        Data = usersInGroup.ToArray(),
+                    });;
+                }
+                return Ok(new StandartResponse<AccountStatusGroupDTO>()
+                {
+                    Message = "Identity server not connected",
+                    StatusCode = Domain.StatusCode.InternalServerError,
+                });
+
+            }
+            return Ok(new StandartResponse<ProfileDTO[]>()
+            {
+                Message = "User not authorization",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
     }
 }

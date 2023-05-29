@@ -3,6 +3,7 @@ using FriendBook.GroupService.API.Domain.CustomClaims;
 using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -10,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.Controllers
 {
+    [Route("api/[controller]")]
+    [Authorize]
     public class GroupTaskController : ODataController
     {
         private readonly IGroupTaskService _groupTaskService;

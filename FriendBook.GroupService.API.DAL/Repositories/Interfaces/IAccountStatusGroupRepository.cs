@@ -5,9 +5,9 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Interfaces
     public interface IAccountStatusGroupRepository
     {
         public Task<AccountStatusGroup> AddAsync(AccountStatusGroup entity);
-        public AccountStatusGroup Update(AccountStatusGroup entity);
+        public Task<AccountStatusGroup> Update(AccountStatusGroup entity);
         public bool Delete(AccountStatusGroup entity);
-        public IQueryable<AccountStatusGroup> GetAsync();
+        public IQueryable<AccountStatusGroup> Get();
         public Task<bool> SaveAsync();
     }
 }

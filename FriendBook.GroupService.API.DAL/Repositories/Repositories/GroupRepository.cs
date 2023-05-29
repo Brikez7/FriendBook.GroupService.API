@@ -1,5 +1,6 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.DAL.Repositories
 {
@@ -38,11 +39,20 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             return true;
         }
 
-        public Group Update(Group entity)
+        public async Task<Group?> Update(Group entity)
         {
-            var updatedEntity = _db.Groups.Update(entity);
+            var existingEntity = await _db.Groups.SingleOrDefaultAsync(x => x.Id == entity.Id);
 
-            return updatedEntity.Entity;
+            if (existingEntity != null)
+            {
+                existingEntity.Name = entity.Name;
+
+                return entity;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FriendBook.GroupService.API.Domain.Entities
+﻿namespace FriendBook.GroupService.API.Domain.Entities
 {
     public enum RoleAccount
     {
-        Default = 0,
-        Admin = 1,
+        Default = 1,
+        Admin = 2,
+        Creater = 3,
     }
 }

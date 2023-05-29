@@ -1,8 +1,28 @@
-﻿namespace FriendBook.GroupService.API.Domain.DTO
+﻿using FriendBook.GroupService.API.Domain.Entities;
+
+namespace FriendBook.GroupService.API.Domain.DTO
 {
     public class GroupDTO
     {
-        public Guid GroupId { get; set; }
+        public GroupDTO()
+        {
+        }
+
+        public GroupDTO(Group createdGroup)
+        {
+            GroupId = createdGroup.Id;
+            CreatedDate = createdGroup.CreatedDate;
+            Name = createdGroup.Name;
+        }
+
+        public GroupDTO(string groupName, Guid idGroupGuid)
+        {
+            GroupId = idGroupGuid;
+            Name = groupName;
+        }
+
+        public Guid? GroupId { get; set; }
+        public DateTime? CreatedDate { get; set; }
         public string Name { get; set; } = null!;
     }
 }
