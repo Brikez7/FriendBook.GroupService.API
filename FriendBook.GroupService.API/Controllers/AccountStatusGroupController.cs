@@ -21,18 +21,16 @@ namespace FriendBook.GroupService.API.Controllers
     public class AccountStatusGroupController : ODataController
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
-        private readonly IGroupService _groupService;
 
-        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IGroupService groupService)
+        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService)
         {
             _accountStatusGroupService = accountStatusGroupService;
-            _groupService = groupService;
         }
 
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteAccountStatusGroup([FromQuery] string idGroup, [FromQuery] string idUser)
         {
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid createrId))
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid createrId))
             {
                 Guid idGroupDeleted;
                 if (!Guid.TryParse(idGroup, out idGroupDeleted))
@@ -71,12 +69,12 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
                 BaseResponse<bool> responseAnotherAPI;
                 try
                 {
-                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?id={userId}", null);
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={accountStatusGroupDTO.AccountId}", null,null);
                     await reg_Req.SendRequest(MyTypeRequest.GET);
                     responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
                 }
@@ -84,7 +82,7 @@ namespace FriendBook.GroupService.API.Controllers
                 {
                     return Ok(new StandartResponse<AccountStatusGroup>()
                     {
-                        Message = "Identity server not responsing",
+                        Message = $"Identity server not responsing {e.Message}",
                         StatusCode = Domain.StatusCode.InternalServerError,
                     });
                 }
@@ -120,7 +118,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
                 var changingStatusGroup = new AccountStatusGroup(accountStatusGroupDTO);
                 var response = await _accountStatusGroupService.UpdateAccountStatusGroup(changingStatusGroup, userId);
@@ -138,7 +136,7 @@ namespace FriendBook.GroupService.API.Controllers
         [EnableQuery]
         public async Task<IActionResult> GetAccountStatusGroups(string idGroup)
         {
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
                 Guid groupId;
                 if (!Guid.TryParse(idGroup, out groupId))
@@ -152,7 +150,7 @@ namespace FriendBook.GroupService.API.Controllers
 
                 var accountsStatusGroups = await _accountStatusGroupService.GetAccountStatusGroupOData().Data
                                            .Where(x => x.IdGroup == groupId)
-                                           .Select(x => new AccountStatusGroupDTO(x.IdGroup, x.AccountId, x.RoleAccount))
+                                           .Select(x => new AccountStatusGroupDTO((Guid)x.IdGroup, x.AccountId, x.RoleAccount))
                                            .ToArrayAsync();
 
                 if (accountsStatusGroups == null)
@@ -179,10 +177,9 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] string idGroup, [FromQuery] string login = "")
         {
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                Guid idGroupGuid;
-                if (!Guid.TryParse(idGroup, out idGroupGuid)) 
+                if (!Guid.TryParse(idGroup, out Guid idGroupGuid)) 
                 {
                     return Ok(new StandartResponse<ProfileDTO[]>()
                     {
@@ -194,7 +191,7 @@ namespace FriendBook.GroupService.API.Controllers
                 StandartResponse<ProfileDTO[]> responseAnotherAPI;
                 try
                 {
-                    var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"]);
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"],null);
                     await reg_Req.SendRequest(MyTypeRequest.GET);
                     responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<ProfileDTO[]>>(reg_Req.Response);
                 }
@@ -202,7 +199,7 @@ namespace FriendBook.GroupService.API.Controllers
                 {
                     return Ok(new StandartResponse<AccountStatusGroup>()
                     {
-                        Message = "Identity server not responsing",
+                        Message = $"Identity server not responsing {e.Message}",
                         StatusCode = Domain.StatusCode.InternalServerError,
                     });
                 }

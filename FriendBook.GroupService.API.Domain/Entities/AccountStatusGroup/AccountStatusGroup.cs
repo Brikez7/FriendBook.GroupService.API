@@ -28,6 +28,11 @@ namespace FriendBook.GroupService.API.Domain.Entities
             RoleAccount = accountStatusGroupDTO.RoleAccount;
         }
 
-        public Group? Group { get; set; }
+        public AccountStatusGroup()
+        {
+        }
+
+        public Group Group { get; set; }
+/*        public GroupTask? GroupTask { get; set; }*/
     }
 }

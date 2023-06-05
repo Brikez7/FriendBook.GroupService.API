@@ -17,7 +17,8 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasIndex(e => e.CreaterId);
 
-            builder.HasIndex(e => e.Name).IsUnique();
+            builder.HasIndex(e => e.Name)
+                   .IsUnique();
 
             builder.Property(e => e.Id)
                    .HasColumnType(EntityDataTypes.Guid)

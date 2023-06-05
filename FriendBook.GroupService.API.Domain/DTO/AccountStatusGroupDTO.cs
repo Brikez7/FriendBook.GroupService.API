@@ -22,7 +22,7 @@ namespace FriendBook.GroupService.API.Domain
 
         public AccountStatusGroupDTO(AccountStatusGroup createdAccountaStatusGroup)
         {
-            GroupId = createdAccountaStatusGroup.IdGroup;
+            GroupId = (Guid)createdAccountaStatusGroup.IdGroup;
             AccountId= createdAccountaStatusGroup.AccountId;
             RoleAccount = createdAccountaStatusGroup.RoleAccount;
         }

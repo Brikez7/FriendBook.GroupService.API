@@ -16,6 +16,9 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasIndex(e => e.GroupId);
 
+            builder.HasIndex(e => new { e.Name,e.GroupId })
+                   .IsUnique();
+
             builder.Property(e => e.Id)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("pk_group_task_id");
@@ -24,7 +27,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("group_id");
 
-            builder.Property(e => e.AccountId)
+            builder.Property(e => e.CreaterId)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("creater_id");
 
@@ -46,8 +49,9 @@ namespace FriendBook.GroupService.API.DAL.Configuration
             builder.Property(e => e.DateEndWork)
                    .HasColumnName("date_end_work");
 
-            builder.Property(e => e.AccountsId)
-                   .HasColumnName("accounts_id");
+            builder.Property(e => e.Team)
+                   .HasColumnName("users_id_in_tasks")
+                   .HasColumnType(EntityDataTypes.ArrayGuid);
 
             builder.HasOne(d => d.Group)
                    .WithMany(p => p.GroupTasks)

@@ -27,7 +27,7 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             return true;
         }
 
-        public IQueryable<AccountStatusGroup> Get()
+        public IQueryable<AccountStatusGroup> getAll()
         {
             return _dbContext.AccountsStatusGroups;
         }

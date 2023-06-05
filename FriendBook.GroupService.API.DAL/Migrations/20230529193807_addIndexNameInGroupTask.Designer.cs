@@ -3,6 +3,7 @@ using System;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
     [DbContext(typeof(GroupAppDBContext))]
-    partial class GroupAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230529193807_addIndexNameInGroupTask")]
+    partial class addIndexNameInGroupTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnName("pk_group_id");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("create_date");
 
                     b.Property<Guid>("CreaterId")
@@ -93,11 +96,11 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnName("creater_id");
 
                     b.Property<DateTime>("DateEndWork")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_end_work");
 
                     b.Property<DateTime>("DateStartWork")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_start_work");
 
                     b.Property<string>("Description")
@@ -117,11 +120,6 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status_task");
-
-                    b.Property<Guid[]>("Team")
-                        .IsRequired()
-                        .HasColumnType("uuid[]")
-                        .HasColumnName("users_id_in_tasks");
 
                     b.HasKey("Id");
 

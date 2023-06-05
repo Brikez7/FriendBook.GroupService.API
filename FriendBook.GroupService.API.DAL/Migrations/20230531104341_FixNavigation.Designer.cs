@@ -3,6 +3,7 @@ using System;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
     [DbContext(typeof(GroupAppDBContext))]
-    partial class GroupAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230531104341_FixNavigation")]
+    partial class FixNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,6 +138,12 @@ namespace FriendBook.GroupService.API.DAL.Migrations
 
             modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.AccountStatusGroup", b =>
                 {
+                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.GroupTask", "GroupTask")
+                        .WithMany("AccountsStatusGroup")
+                        .HasForeignKey("IdGroup")
+                        .HasPrincipalKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("FriendBook.GroupService.API.Domain.Entities.Group", "Group")
                         .WithMany("AccountStatusGroups")
                         .HasForeignKey("IdGroup")
@@ -142,6 +151,8 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Group");
+
+                    b.Navigation("GroupTask");
                 });
 
             modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
@@ -160,6 +171,11 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.Navigation("AccountStatusGroups");
 
                     b.Navigation("GroupTasks");
+                });
+
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
+                {
+                    b.Navigation("AccountsStatusGroup");
                 });
 #pragma warning restore 612, 618
         }

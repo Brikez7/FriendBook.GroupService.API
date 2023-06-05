@@ -1,5 +1,4 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO;
-using System;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
@@ -32,8 +31,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
             Id = id;
         }
-
-        public IEnumerable<AccountStatusGroup>? AccountStatusGroups { get; set; }
-        public IEnumerable<GroupTask>? GroupTasks { get; set; }
+        public IEnumerable<AccountStatusGroup> AccountStatusGroups { get; set; } = new List<AccountStatusGroup>();
+        public IEnumerable<GroupTask>? GroupTasks { get; set; } = new List<GroupTask>();
     }
 }

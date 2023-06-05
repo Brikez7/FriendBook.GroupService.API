@@ -3,11 +3,13 @@ using FriendBook.GroupService.API.Domain.CustomClaims;
 using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace FriendBook.GroupService.API.Controllers
 {
@@ -16,80 +18,115 @@ namespace FriendBook.GroupService.API.Controllers
     public class GroupController : ODataController
     {
         private readonly IGroupService _groupService;
-        private readonly IAccountStatusGroupService _accountStatusGroupService;
-        public GroupController(IGroupService groupService, IAccountStatusGroupService accountStatusGroupService)
+        public GroupController(IGroupService groupService)
         {
-            _accountStatusGroupService = accountStatusGroupService;
             _groupService = groupService;
         }
 
         [HttpDelete("Delete/{idGroup}")]
-        public async Task<IActionResult> DeleteGroup(string idGroup)
+        public async Task<IActionResult> DeleteGroup([FromRoute] Guid idGroupGuid)
         {
-            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
-            var idUser = Guid.Parse(id);
-            var idGroupGuid = Guid.Parse(idGroup);
-            /// Get group
-            var group = await _groupService.GetGroupOData().Data
-                ?.Where(x => x.Id == idGroupGuid)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-                if (group == null)
-                {
-                    return Ok(new StandartResponse<string>
-                    {
-                        Message = "group not found",
-                        StatusCode = Domain.StatusCode.IdNotFound
-                    });
-                }
-                else if (group.CreaterId == idUser)
-                {
-                    var response = await _groupService.DeleteGroup(idGroupGuid);
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                var response = await _groupService.DeleteGroup(idGroupGuid, userId);
+                return Ok(response);
+            }
 
-                    return Ok(response);
-                }
-
-                return Ok(new StandartResponse<string> 
-                {
-                    Message = "group not found",
-                    StatusCode = Domain.StatusCode.IdNotFound
-                });
+            return Ok(new StandartResponse<GroupDTO>
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateGroup([FromBody] string groupName)
+        [HttpPost("Create/{groupName}")]
+        public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
-            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
-            var userId = Guid.Parse(id);
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                try
+                {
+                    BaseResponse<bool> responseAnotherAPI;
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={userId}", null, null);
+                    await reg_Req.SendRequest(MyTypeRequest.GET);
+                    responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
 
-            var newGroup = new Group(groupName, userId);
-            var response = await _groupService.CreateGroup(newGroup);
+                    if (responseAnotherAPI.Message != null || !responseAnotherAPI.Data) 
+                    {
+                        return Ok(new StandartResponse<GroupDTO> 
+                        { 
+                            Message = responseAnotherAPI.Message ?? "Account not exists",
+                            StatusCode = Domain.StatusCode.InternalServerError
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    return Ok(new StandartResponse<GroupDTO>()
+                    {
+                        Message = $"Identity server not responsing {e.Message}",
+                        StatusCode = Domain.StatusCode.InternalServerError,
+                    });
+                }
 
-            return Ok(response);
+                var newGroup = new Group(groupName, userId);
+                var response = await _groupService.CreateGroup(newGroup);
+
+                return Ok(response);
+            }
+            return Ok(new StandartResponse<GroupDTO> 
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
 
         [HttpPut("Update")]
-        public async Task<BaseResponse<GroupDTO>> UpdateGroup([FromBody] GroupDTO groupDTO)
+        public async Task<IActionResult> UpdateGroup([FromBody] GroupDTO groupDTO)
         {
-            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
-            var userId = Guid.Parse(id);
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                var response = await _groupService.UpdateGroup(groupDTO, userId);
 
-            var newGroup = new Group(groupDTO, userId);
-
-            var response = await _groupService.UpdateGroup(newGroup);
-
-            return response;
+                return Ok(response);
+            }
+            return Ok(new StandartResponse<GroupDTO>
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
 
         [HttpGet("OData/GetMyGroups")]
         [EnableQuery]
-        public async Task<BaseResponse<GroupDTO[]>> GetMyGroups()
+        public async Task<IActionResult> GetMyGroups()
         {
-            string? id = User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value;
-            var userId = Guid.Parse(id);
-            var listGroupDTO = (await _groupService.GetGroupOData().Data.Where(x => x.CreaterId == userId).Select(x => new GroupDTO(x)).ToArrayAsync()) ?? new GroupDTO[] { };
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+                var response = await _groupService.GeyGroupsByUserId(userId);
+                return Ok(response);
+            }
+            return Ok(new StandartResponse<GroupDTO>
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
+        }
 
-            return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
+        [HttpGet("OData/GetMyGroupsWithMyStatus")]
+        [EnableQuery]
+        public async Task<IActionResult> GetMyGroupsWithMyStatus()
+        {
+            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            {
+               var response = await _groupService.GeyGroupsWithStatusByUserId(userId);
+                return Ok(response);
+            }
+            return Ok(new StandartResponse<AccountGroupDTO>
+            {
+                Message = "Not valid token",
+                StatusCode = Domain.StatusCode.InternalServerError
+            });
         }
     }
 }

@@ -20,13 +20,12 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<GroupDTO>> CreateGroup(Group group)
         {
-            var exists = await _groupRepository.Get().AnyAsync(x => x.Name == group.Name);
-            if (exists) 
+            if (await _groupRepository.GetAll().AnyAsync(x => x.Name == group.Name)) 
             {
                 return new StandartResponse<GroupDTO>()
                 {
                     StatusCode = StatusCode.GroupExists,
-                    Message = "Group exists"
+                    Message = "Group still exists"
                 };
             }
 
@@ -36,7 +35,6 @@ namespace FriendBook.GroupService.API.BLL.Services
             var accountCreaterStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
 
             await _groupRepository.SaveAsync();
-            await _accountStatusGroupRepository.SaveAsync();
 
             return new StandartResponse<GroupDTO>()
             {
@@ -45,9 +43,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroup(Guid id)
+        public async Task<BaseResponse<bool>> DeleteGroup(Guid id, Guid userId)
         {
-            var entity = await _groupRepository.Get().SingleOrDefaultAsync( x => x.Id == id);
+            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == id && x.CreaterId == userId);
 
             if (entity is null) 
             {
@@ -58,19 +56,19 @@ namespace FriendBook.GroupService.API.BLL.Services
                 };
             }
 
-            var Result = _groupRepository.Delete(entity);
-            await _groupRepository.SaveAsync();
+            var Result1 = _groupRepository.Delete(entity);
+            var Result2 = await _groupRepository.SaveAsync();
 
             return new StandartResponse<bool>()
             {
-                Data = Result,
+                Data = Result1 && Result2,
                 StatusCode = StatusCode.GroupDelete
             };
         }
 
         public BaseResponse<IQueryable<Group>> GetGroupOData()
         {
-            var groups = _groupRepository.Get();
+            var groups = _groupRepository.GetAll();
 
             return new StandartResponse<IQueryable<Group>>()
             {
@@ -79,19 +77,63 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupDTO>> UpdateGroup(Group group)
+        public async Task<BaseResponse<GroupDTO[]>> GeyGroupsByUserId(Guid userId)
         {
-            var exists = await _groupRepository.Get().AnyAsync(x => x.Name == group.Name);
-            if (exists)
+            var listGroupDTO = await _groupRepository.GetAll()
+                                                     .Where(x => x.CreaterId == userId)
+                                                     .Select(x => new GroupDTO(x))
+                                                     .ToArrayAsync();
+
+            if(listGroupDTO is null|| listGroupDTO.Length == 0) 
+            {
+                return new StandartResponse<GroupDTO[]>
+                {
+                    Message = "Grous not founded",
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+            return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
+        }
+
+        public async Task<BaseResponse<AccountGroupDTO[]>> GeyGroupsWithStatusByUserId(Guid userId)
+        {
+
+            var accountStatusGroup = await _accountStatusGroupRepository.getAll()
+                                                                        .Where(x => x.AccountId == userId)
+                                                                        .Include(x => x.Group)
+                                                                        .ToListAsync();
+
+            AccountGroupDTO[] accountGroupDTOs = accountStatusGroup.Select(x => new AccountGroupDTO(x.Group.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
+                                                                   .ToArray();
+
+            if (accountGroupDTOs.Length == 0)
+            {
+                return new StandartResponse<AccountGroupDTO[]>
+                {
+                    Message = "No groups where you belong have been found",
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+
+            return new StandartResponse<AccountGroupDTO[]>
+            {
+                Data = accountGroupDTOs
+            };
+        }
+
+        public async Task<BaseResponse<GroupDTO>> UpdateGroup(GroupDTO group, Guid userId)
+        {
+            if (await _groupRepository.GetAll().AnyAsync(x => x.Name == group.Name))
             {
                 return new StandartResponse<GroupDTO>()
                 {
                     StatusCode = StatusCode.GroupExists,
-                    Message = "Group exists"
+                    Message = "Group with name already exists"
                 };
             }
 
-            var updatedGroup = await _groupRepository.Update(group);
+            Group? updatedGroup = new Group(group,userId);
+            updatedGroup = await _groupRepository.Update(updatedGroup);
 
             if (updatedGroup is null) 
             {

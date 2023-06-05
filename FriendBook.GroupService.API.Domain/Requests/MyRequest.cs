@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text;
+using System;
 
 namespace FriendBook.GroupService.API.Domain.Requests
 {
@@ -14,11 +16,13 @@ namespace FriendBook.GroupService.API.Domain.Requests
         public string Adress;
         public string Response { get; set; }
         public string? Token { get; set; } = null;
+        public string? JsonBody { get; set; } = null;
 
-        public MyRequest(string adress, string? token)
+        public MyRequest(string adress, string? token,string? jsonBody)
         {
             Adress = adress;
             Token = token;
+            JsonBody = jsonBody;
         }
         public async Task SendRequest(string method)
         {
@@ -28,6 +32,17 @@ namespace FriendBook.GroupService.API.Domain.Requests
             {
                 request.Headers.Add("Authorization",Token);
             }
+
+            if (JsonBody != null)
+            {
+                byte[] jsonBytes = Encoding.UTF8.GetBytes(JsonBody);
+                request.ContentType = "application/json";
+                request.ContentLength = jsonBytes.Length;
+
+                using var requestBody = await request.GetRequestStreamAsync();
+                await requestBody.WriteAsync(jsonBytes);
+            }
+
             try
             {
                 HttpWebResponse response =  (HttpWebResponse)(await request.GetResponseAsync());

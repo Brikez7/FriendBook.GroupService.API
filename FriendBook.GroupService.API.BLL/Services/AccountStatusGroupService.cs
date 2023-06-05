@@ -19,7 +19,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(AccountStatusGroup accountStatusGroup)
         {
-            if (await _accountStatusGroupRepository.Get().AnyAsync(x => x.IdGroup == accountStatusGroup.IdGroup && x.AccountId == accountStatusGroup.AccountId))
+            if (await _accountStatusGroupRepository.getAll().AnyAsync(x => x.IdGroup == accountStatusGroup.IdGroup && x.AccountId == accountStatusGroup.AccountId))
             {
                 return new StandartResponse<AccountStatusGroupDTO>()
                 {
@@ -40,9 +40,9 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid userId, Guid createrId, Guid groupId)
         {
-            if (await _groupRepository.Get().AnyAsync(x => x.CreaterId == createrId && groupId == x.Id))
+            if (await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && groupId == x.Id))
             {
-                var accountStatusGroup = await _accountStatusGroupRepository.Get().SingleOrDefaultAsync(x => x.AccountId == userId && x.IdGroup == groupId && x.AccountId != createrId);
+                var accountStatusGroup = await _accountStatusGroupRepository.getAll().SingleOrDefaultAsync(x => x.AccountId == userId && x.IdGroup == groupId && x.AccountId != createrId);
 
                 if (accountStatusGroup is null)
                 {
@@ -80,7 +80,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData()
         {
-            var accountsStatusGroups = _accountStatusGroupRepository.Get();
+            var accountsStatusGroups = _accountStatusGroupRepository.getAll();
             if (accountsStatusGroups.Count() == 0)
             {
                 return new StandartResponse<IQueryable<AccountStatusGroup>>()
@@ -98,9 +98,9 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroup accountStatusGroup, Guid idCreater)
         {
-            if (await _groupRepository.Get().AnyAsync(x => x.Id == accountStatusGroup.IdGroup && x.CreaterId == idCreater))
+            if (await _groupRepository.GetAll().AnyAsync(x => x.Id == accountStatusGroup.IdGroup && x.CreaterId == idCreater))
             {
-                var accountStatus = await _accountStatusGroupRepository.Get().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroup.IdGroup && x.AccountId == accountStatusGroup.AccountId && accountStatusGroup.AccountId != idCreater);
+                var accountStatus = await _accountStatusGroupRepository.getAll().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroup.IdGroup && x.AccountId == accountStatusGroup.AccountId && accountStatusGroup.AccountId != idCreater);
                 if (accountStatus == null) 
                 {
                     return new StandartResponse<AccountStatusGroupDTO>()

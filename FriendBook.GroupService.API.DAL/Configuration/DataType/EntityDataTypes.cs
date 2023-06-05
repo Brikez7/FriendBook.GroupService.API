@@ -6,5 +6,6 @@
         public const string Smallint = "smallint";
         public const string Text = "text";
         public const string Character_varying = "character varying";
+        public const string ArrayGuid = "uuid[]";
     }
 }

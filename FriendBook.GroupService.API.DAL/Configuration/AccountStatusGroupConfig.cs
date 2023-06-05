@@ -14,6 +14,9 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasKey(e => new { e.Id });
 
+            builder.HasIndex(e => new { e.IdGroup, e.AccountId })
+                   .IsUnique();
+
             builder.HasIndex(e => e.IdGroup);
 
             builder.Property(e => e.Id)
@@ -37,6 +40,13 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasPrincipalKey(p => p.Id)
                    .HasForeignKey(d => d.IdGroup)
                    .OnDelete(DeleteBehavior.Cascade);
+
+/*            builder.HasOne(d => d.GroupTask)
+                   .WithMany(p => p.AccountsStatusGroup)
+                   .HasForeignKey(d => d.IdGroup)
+                   .HasPrincipalKey(x => x.GroupId)
+                   .IsRequired(false)
+                   .OnDelete(DeleteBehavior.Restrict);*/
         }
     }
 }

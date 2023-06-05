@@ -1,9 +1,18 @@
-﻿using FriendBook.GroupService.API.Domain.DTO;
+﻿using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class GroupTask
     {
+        public Guid? Id { get; set; }
+        public Guid CreaterId { get; set; }
+        public Guid GroupId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Guid[] Team { get; set; } = new Guid[0];
+        public StatusTask Status { get; set; }
+        public DateTime DateStartWork { get; set; } = DateTime.Now;
+        public DateTime DateEndWork { get; set; }
         public GroupTask()
         {
         }
@@ -13,25 +22,44 @@ namespace FriendBook.GroupService.API.Domain.Entities
             Id = id;
         }
 
-        public GroupTask(GroupTaskDTO groupDTO, Guid userId)
+        public GroupTask(GroupTaskViewDTO groupDTO, Guid userId)
         {
             GroupId = groupDTO.GroupId;
             Name = groupDTO.Name;
             Description = groupDTO.Description;
-            Status = groupDTO.StatusTask;
-            DateEndWork = groupDTO.TaskEnd;
-            DateStartWork = groupDTO.TaskStart;
+            Status = groupDTO.Status;
+            DateEndWork = groupDTO.DateEndWork;
+            DateStartWork = groupDTO.DateStartWork;
+            CreaterId = userId;
         }
 
-        public Guid? Id { get; set; }
-        public Guid AccountId { get; set; }
-        public Guid GroupId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public Guid[] AccountsId { get; set; }
-        public StatusTask Status { get; set; }
-        public DateTime DateStartWork { get; set; }
-        public DateTime DateEndWork { get; set; }
+        public GroupTask(GroupTaskNewDTO groupDTO, Guid userId)
+        {
+            GroupId = groupDTO.GroupId;
+            Name = groupDTO.Name;
+            Description = groupDTO.Description;
+            DateEndWork = groupDTO.DateEndWork;
+            CreaterId = userId;
+            Team = new Guid[] { userId };
+        }
+
+        public GroupTask(GroupTaskKeyDTO groupDTO)
+        {
+            GroupId = groupDTO.GroupId;
+            Name = groupDTO.Name;
+        }
+
+        public GroupTask(GroupTaskChangedDTO groupTaskDTO)
+        {
+            GroupId = groupTaskDTO.GroupId;
+            Name = groupTaskDTO.OldName;
+            Description = groupTaskDTO.Description;
+            Status = groupTaskDTO.Status;
+            DateEndWork = groupTaskDTO.DateEndWork;
+        }
+
+
         public Group? Group { get; set; }
+/*        public IEnumerable<AccountStatusGroup>? AccountsStatusGroup { get; set; } = new List<AccountStatusGroup>();*/
     }
 }
