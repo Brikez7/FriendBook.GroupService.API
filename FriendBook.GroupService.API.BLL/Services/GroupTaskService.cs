@@ -19,7 +19,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<GroupTask>> CreateGroupTask(GroupTask groupTask)
         {
-            if (!await _accountStatusGroupRepository.getAll().AnyAsync(x => x.AccountId == groupTask.CreaterId && x.IdGroup == groupTask.GroupId && x.RoleAccount > RoleAccount.Default))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == groupTask.CreaterId && x.IdGroup == groupTask.GroupId && x.RoleAccount > RoleAccount.Default))
             {
                 return new StandartResponse<GroupTask> 
                 {
@@ -49,7 +49,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<GroupTask>> SubcsribeGroupTask(GroupTask groupTask, Guid userId)
         {
-            if (!await _accountStatusGroupRepository.getAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && userId == x.AccountId)) 
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && userId == x.AccountId)) 
             {
                 return new StandartResponse<GroupTask>
                 {
@@ -84,7 +84,7 @@ namespace FriendBook.GroupService.API.BLL.Services
         }
         public async Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(GroupTask groupTask, Guid userId)
         {
-            if (!await _accountStatusGroupRepository.getAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && userId == x.AccountId))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && userId == x.AccountId))
             {
                 return new StandartResponse<GroupTask>
                 {
@@ -97,7 +97,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                   .Where(x => x.GroupId == groupTask.GroupId && x.Name == groupTask.Name)
                                                   .FirstOrDefaultAsync();
 
-            if (task is null || task.Team.All(t => t != userId))
+            if (task is null || !task.Team.Any(t => t == userId))
             {
                 return new StandartResponse<GroupTask>
                 {
@@ -106,7 +106,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 };
             }
 
-            task.Team = task.Team.Where(x => x == userId).ToArray();
+            task.Team = task.Team.Where(x => x != userId).ToArray();
 
             var updatedGroup = _groupTaskRepository.Update(task);
             await _groupTaskRepository.SaveAsync();
@@ -139,7 +139,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<GroupTask>> UpdateGroupTask(GroupTask groupTask,string newNameTask,Guid userId)
         {
-            if (!await _accountStatusGroupRepository.getAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default)) 
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default)) 
             {
                 return new StandartResponse<GroupTask>
                 {
@@ -185,7 +185,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<bool>> DeleteGroupTask(GroupTask deletedGroupTask, Guid userId)
         {
-            if (!await _accountStatusGroupRepository.getAll().AnyAsync(x => x.IdGroup == deletedGroupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == deletedGroupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default))
             {
                 return new StandartResponse<bool>
                 {

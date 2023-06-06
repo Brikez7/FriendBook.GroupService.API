@@ -15,19 +15,19 @@ namespace FriendBook.GroupService.API.Domain
 
         public AccountStatusGroupDTO(Guid groupId, Guid accountId, RoleAccount roleAccount)
         {
-            GroupId = groupId;
+            IdGroup = groupId;
             AccountId = accountId;
             RoleAccount = roleAccount;
         }
 
         public AccountStatusGroupDTO(AccountStatusGroup createdAccountaStatusGroup)
         {
-            GroupId = (Guid)createdAccountaStatusGroup.IdGroup;
+            IdGroup = createdAccountaStatusGroup.IdGroup;
             AccountId= createdAccountaStatusGroup.AccountId;
             RoleAccount = createdAccountaStatusGroup.RoleAccount;
         }
 
-        public Guid GroupId { get; set; }
+        public Guid IdGroup { get; set; }
         public Guid AccountId { get; set; }
         public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
     }

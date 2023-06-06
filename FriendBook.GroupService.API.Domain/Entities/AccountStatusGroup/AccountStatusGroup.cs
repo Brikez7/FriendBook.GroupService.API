@@ -24,7 +24,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         public AccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
             AccountId = accountStatusGroupDTO.AccountId;
-            IdGroup = accountStatusGroupDTO.GroupId;
+            IdGroup = accountStatusGroupDTO.IdGroup;
             RoleAccount = accountStatusGroupDTO.RoleAccount;
         }
 

@@ -98,7 +98,7 @@ namespace FriendBook.GroupService.API.BLL.Services
         public async Task<BaseResponse<AccountGroupDTO[]>> GetGroupsWithStatusByUserId(Guid userId)
         {
 
-            var accountStatusGroup = await _accountStatusGroupRepository.getAll()
+            var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
                                                                         .Where(x => x.AccountId == userId)
                                                                         .Include(x => x.Group)
                                                                         .ToListAsync();

@@ -44,9 +44,9 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                try
+                try // New service
                 {
-                    BaseResponse<bool> responseAnotherAPI;
+                    BaseResponse<bool> responseAnotherAPI; 
                     var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={userId}", null, null);
                     await reg_Req.SendRequest(MyTypeRequest.GET);
                     responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
