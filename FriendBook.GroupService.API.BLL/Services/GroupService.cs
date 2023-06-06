@@ -84,7 +84,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                      .Select(x => new GroupDTO(x))
                                                      .ToArrayAsync();
 
-            if(listGroupDTO is null|| listGroupDTO.Length == 0) 
+            if(listGroupDTO.Length == 0) 
             {
                 return new StandartResponse<GroupDTO[]>
                 {
@@ -95,7 +95,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
         }
 
-        public async Task<BaseResponse<AccountGroupDTO[]>> GeyGroupsWithStatusByUserId(Guid userId)
+        public async Task<BaseResponse<AccountGroupDTO[]>> GetGroupsWithStatusByUserId(Guid userId)
         {
 
             var accountStatusGroup = await _accountStatusGroupRepository.getAll()
@@ -130,6 +130,15 @@ namespace FriendBook.GroupService.API.BLL.Services
                     StatusCode = StatusCode.GroupExists,
                     Message = "Group with name already exists"
                 };
+            }
+
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == userId && x.Id == group.GroupId)) 
+            {
+                return new StandartResponse<GroupDTO>
+                {
+                    Message = "Group not exists or you not creater",
+                    StatusCode = StatusCode.InternalServerError,
+                };   
             }
 
             Group? updatedGroup = new Group(group,userId);

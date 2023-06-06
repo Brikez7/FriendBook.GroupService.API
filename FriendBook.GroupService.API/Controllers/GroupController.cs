@@ -119,7 +119,7 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-               var response = await _groupService.GeyGroupsWithStatusByUserId(userId);
+                var response = await _groupService.GetGroupsWithStatusByUserId(userId);
                 return Ok(response);
             }
             return Ok(new StandartResponse<AccountGroupDTO>

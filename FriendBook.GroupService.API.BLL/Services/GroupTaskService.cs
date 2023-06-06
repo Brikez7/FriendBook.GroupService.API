@@ -62,7 +62,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                   .Where(x => x.GroupId == groupTask.GroupId && x.Name == groupTask.Name)
                                                   .FirstOrDefaultAsync();
 
-            if (task is null || task.Team.All(t => t != userId))
+            if (task is null || task.Team.Any(t => t == userId))
             {
                 return new StandartResponse<GroupTask>
                 {
