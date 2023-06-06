@@ -14,9 +14,9 @@ namespace FriendBook.GroupService.API.Domain.Requests
     {
         public HttpWebRequest request;
         public string Adress;
-        public string Response { get; set; }
-        public string? Token { get; set; } = null;
-        public string? JsonBody { get; set; } = null;
+        public string? Response { get; set; }
+        public string? Token { get; set; } 
+        public string? JsonBody { get; set; }
 
         public MyRequest(string adress, string? token,string? jsonBody)
         {

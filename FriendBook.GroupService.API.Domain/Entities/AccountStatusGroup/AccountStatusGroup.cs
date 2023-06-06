@@ -32,7 +32,6 @@ namespace FriendBook.GroupService.API.Domain.Entities
         {
         }
 
-        public Group Group { get; set; }
-/*        public GroupTask? GroupTask { get; set; }*/
+        public Group? Group { get; set; }
     }
 }

@@ -2,9 +2,11 @@
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.DTO;
+using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -81,6 +83,39 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
+        public async Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusGroupByIdGroupAndUserId(Guid userId, Guid groupId)
+        {
+            var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
+                                                                        .Where(x => x.AccountId == userId)
+                                                                        .Include(x => x.Group)
+                                                                        .ThenInclude(x => x.GroupTasks)
+                                                                        .Include(x => x.Group)
+                                                                        .ThenInclude(x => x.AccountStatusGroups)
+                                                                        .FirstOrDefaultAsync(x => x.Group != null && x.Group.Id == groupId);
+
+            if (accountStatusGroup == null || accountStatusGroup.Group == null)
+            {
+                return new StandartResponse<AccountStatusGroup?>
+                {
+                    Message = "Group not found or Account not found",
+                    StatusCode = Domain.StatusCode.InternalServerError
+                };
+            }
+            else if (accountStatusGroup.Group.GroupTasks is null)
+            {
+                return new StandartResponse<AccountStatusGroup?>
+                {
+                    Message = "Tasks no found",
+                    StatusCode = Domain.StatusCode.InternalServerError
+                };
+            }
+
+            return new StandartResponse<AccountStatusGroup?>
+            {
+                Data = accountStatusGroup,
+            };
+        }
+
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData()
         {
             var accountsStatusGroups = _accountStatusGroupRepository.GetAll();
@@ -107,11 +142,11 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if (usersInSearchedGroudId is null || usersInSearchedGroudId.Length == 0)
             {
-                return Ok(new StandartResponse<AccountStatusGroupDTO>()
+                return new StandartResponse<ProfileDTO[]>()
                 {
                     Message = "Group not found",
                     StatusCode = Domain.StatusCode.InternalServerError,
-                });
+                };
             }
 
             var usersInGroup = profileDTOs.Join(usersInSearchedGroudId,
@@ -123,6 +158,38 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 Data = usersInGroup.ToArray(),
             }; ;
+        }
+
+        public BaseResponse<TasksPageDTO> TasksJoinUsersLoginWithId(List<GroupTask> groupTasks, Tuple<Guid, string>[] usersLoginWithId, bool isAdmin)
+        {
+            List<GroupTaskViewDTO> tasksPages = new List<GroupTaskViewDTO>();
+            foreach (var task in groupTasks)
+            {
+                var namesUser = task.Team.Join(
+                                        usersLoginWithId,
+                                        userId => userId,
+                                        loginWithIdUser => loginWithIdUser.Item1,
+                                        (task, loginWithIdUser) => loginWithIdUser.Item2).ToArray();
+
+                GroupTaskViewDTO groupTaskViewDTO = new GroupTaskViewDTO(task, namesUser);
+                tasksPages.Add(groupTaskViewDTO);
+            }
+
+            if (tasksPages.Count == 0)
+            {
+                return new StandartResponse<TasksPageDTO>
+                {
+                    Message = "Tasks not found",
+                    StatusCode = Domain.StatusCode.InternalServerError
+                };
+            }
+
+            var tasksPageDTO = new TasksPageDTO(tasksPages.ToArray(), isAdmin);
+
+            return new StandartResponse<TasksPageDTO>
+            {
+                Data = tasksPageDTO
+            };
         }
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO, Guid idCreater)

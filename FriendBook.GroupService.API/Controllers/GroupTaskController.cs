@@ -31,19 +31,8 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var deletedGroupTask = new GroupTask(groupTaskKey);
-                var response = await _groupTaskService.DeleteGroupTask(deletedGroupTask, userId);
-
-                if (response is null)
-                {
-                    return Ok(new StandartResponse<bool>
-                    {
-                        Message = "The task was not deleted",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
-                }
+                var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, userId);
                 return Ok(response);
-
             }
             return Ok(new StandartResponse<bool>
             {
@@ -53,21 +42,11 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateGroupTask([FromBody] GroupTaskNewDTO groupTaskDTO)
+        public async Task<IActionResult> CreateGroupTask([FromBody] GroupTaskNewDTO newGroupTaskDTO)
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroupTask = new GroupTask(groupTaskDTO, userId);
-                var response = await _groupTaskService.CreateGroupTask(newGroupTask);
-
-                if (response.Data != null)
-                {
-                    return Ok(new StandartResponse<GroupTaskViewDTO>
-                    {
-                        Data = new GroupTaskViewDTO(response.Data, User.Claims.First(x => x.Type == CustomClaimType.Login).Value)
-                    });
-                }
-
+                var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId);
                 return Ok(response);
             }
             return Ok(new StandartResponse<GroupTaskViewDTO>
@@ -83,8 +62,7 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroupTask = new GroupTask(groupTaskDTO);
-                var response = await _groupTaskService.UpdateGroupTask(newGroupTask,groupTaskDTO.NewName,userId);
+                var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, userId);
 
                 if (response.Data != null)
                 {
@@ -102,36 +80,34 @@ namespace FriendBook.GroupService.API.Controllers
                 StatusCode = Domain.StatusCode.InternalServerError
             });
         }
+
         [HttpPut("SubscribeTask")]
-        public async Task<IActionResult> SubscribeTask([FromBody] GroupTaskKeyDTO groupDTO)
+        public async Task<IActionResult> SubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroupTask = new GroupTask(groupDTO);
-                var response = await _groupTaskService.SubcsribeGroupTask(newGroupTask,userId);
+                var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,userId);
 
                 return Ok(response);
             }
             return Ok(new StandartResponse<GroupTask>
             {
                 StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not autorization"
+                Message = "Not valid token",
             });
         }
         [HttpPut("UnsubscribeTask")]
-        public async Task<IActionResult> UnsubscribeTask([FromBody] GroupTaskKeyDTO groupDTO)
+        public async Task<IActionResult> UnsubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var newGroupTask = new GroupTask(groupDTO);
-                var response = await _groupTaskService.UnsubcsribeGroupTask(newGroupTask, userId);
-
+                var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, userId);
                 return Ok(response);
             }
             return Ok(new StandartResponse<GroupTask>
             {
                 StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not autorization"
+                Message = "Not valid token",
             });
         }
         [HttpGet("OData/GetTasks")]
@@ -140,52 +116,29 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var accountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupOData().Data
-                                                                         .Where(x => x.AccountId == userId)
-                                                                         .Include(x => x.Group)
-                                                                         .ThenInclude(x => x.GroupTasks)
-                                                                         .Include(x => x.Group)
-                                                                         .ThenInclude(x => x.AccountStatusGroups)
-                                                                         .FirstOrDefaultAsync(x => x.Group != null && x.Group.Id == idGroup);
+                Guid[] usersIdd;
+                List<GroupTask?> taskss;
+                bool roleUser;
+                var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(userId, idGroup);
 
-                if (accountStatusGroup == null)
+                if(responseAccountStatusGroup.Message != null) 
                 {
-                    return Ok(new StandartResponse<TasksPageDTO>
-                    {
-                        Message = "Account not found",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
-                }
-                else if (accountStatusGroup.Group == null) 
-                {
-                    return Ok(new StandartResponse<TasksPageDTO>
-                    {
-                        Message = "Group not found",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
-                }
-                else if (accountStatusGroup.Group.GroupTasks is null)
-                {
-                    return Ok(new StandartResponse<TasksPageDTO>
-                    {
-                        Message = "Tasks no found",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
+                    return Ok(responseAccountStatusGroup);
                 }
 
+                var seaarchedAccountStatusGroup = responseAccountStatusGroup.Data;
 
-                bool isAdmin = accountStatusGroup.RoleAccount > RoleAccount.Default;
+                Guid[] usersIdFromGroup = seaarchedAccountStatusGroup.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
+                var tasksFromGroup = seaarchedAccountStatusGroup.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
 
-                var usersId = accountStatusGroup.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
+                var jsonUsersId = JsonConvert.SerializeObject(usersIdFromGroup);
 
-                var jsonUsers = JsonConvert.SerializeObject(usersId);
-
-                BaseResponse<Tuple<Guid, string>[]> responseAnotherAPI;
+                BaseResponse<Tuple<Guid, string>[]> responseUsersLoginWithId;// New sservice
                 try
                 {
-                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/getLoginsUsers",null, jsonUsers);
+                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/getLoginsUsers",null, jsonUsersId);
                     await reg_Req.SendRequest(MyTypeRequest.POST);
-                    responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<Tuple<Guid, string>[]>>(reg_Req.Response);
+                    responseUsersLoginWithId = JsonConvert.DeserializeObject<StandartResponse<Tuple<Guid, string>[]>>(reg_Req.Response);
                 }
                 catch (Exception e)
                 {
@@ -196,38 +149,10 @@ namespace FriendBook.GroupService.API.Controllers
                     });
                 }
 
-                var tasks = accountStatusGroup.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
-
-                List<GroupTaskViewDTO> tasksPages = new List<GroupTaskViewDTO>();
-                foreach (var task in tasks)
-                {
-                    var namesUser = task.Team.Join(
-                                            responseAnotherAPI.Data,
-                                            userId => userId,
-                                            loginWithIdUser => loginWithIdUser.Item1,
-                                            (task, loginWithIdUser) => loginWithIdUser.Item2).ToArray();
-
-                    GroupTaskViewDTO groupTaskViewDTO = new GroupTaskViewDTO(task, namesUser);
-                    tasksPages.Add(groupTaskViewDTO);
-                }
-
-                if (tasksPages.Count == 0) 
-                {
-                    return Ok(new StandartResponse<TasksPageDTO>
-                    {
-                        Message = "Tasks not found",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
-                }
-
-                var tasksPageDTO = new TasksPageDTO(tasksPages.ToArray(), isAdmin);
-
-                return Ok(new StandartResponse<TasksPageDTO>
-                {
-                    Data = tasksPageDTO
-                });
+                var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseUsersLoginWithId.Data, seaarchedAccountStatusGroup.RoleAccount > RoleAccount.Default);
+                Ok(response);
             }
-            return Ok(new StandartResponse<GroupTask>
+            return Ok(new StandartResponse<TasksPageDTO>
             {
                 StatusCode = Domain.StatusCode.IdNotFound,
                 Message = "Id not found or user not outorisation"

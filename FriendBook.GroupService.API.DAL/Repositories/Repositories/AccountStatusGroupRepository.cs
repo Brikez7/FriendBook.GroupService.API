@@ -46,12 +46,8 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             if (existingEntity != null)
             {
                 existingEntity.RoleAccount = entity.RoleAccount;
-                return entity;
             }
-            else
-            {
-                return null;
-            }
+            return entity;
         }
     }
 }

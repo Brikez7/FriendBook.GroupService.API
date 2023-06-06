@@ -24,7 +24,7 @@ namespace FriendBook.GroupService.API.DAL.Repositories
 
             return true;
         }
-        public IQueryable<GroupTask> Get()
+        public IQueryable<GroupTask> GetAll()
         {
             return _db.GroupTasks.AsQueryable();
         }
