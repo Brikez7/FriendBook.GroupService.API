@@ -1,6 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
-
-namespace FriendBook.GroupService.API.Domain.DTO
+﻿namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
 {
     public class TasksPageDTO
     {

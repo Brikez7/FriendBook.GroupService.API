@@ -1,5 +1,6 @@
 ﻿using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.DTO;
+using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 

@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO;
 using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace FriendBook.GroupService.API.Controllers
@@ -46,7 +44,9 @@ namespace FriendBook.GroupService.API.Controllers
         {
             if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
             {
-                var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId);
+                string login = User.Claims.First(x => x.Type == CustomClaimType.Login).Value;
+
+                var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId, login);
                 return Ok(response);
             }
             return Ok(new StandartResponse<GroupTaskViewDTO>
@@ -66,9 +66,9 @@ namespace FriendBook.GroupService.API.Controllers
 
                 if (response.Data != null)
                 {
-                    return Ok(new StandartResponse<GroupTaskViewDTO>
+                    return Ok(new StandartResponse<GroupTask>
                     {
-                        Data = new GroupTaskViewDTO(response.Data)
+                        Data = response.Data
                     });
                 }
 
@@ -114,45 +114,38 @@ namespace FriendBook.GroupService.API.Controllers
         [EnableQuery]
         public async Task<IActionResult> GetTasksByNameTaskAndIdGroup([FromQuery] Guid idGroup, [FromQuery] string nameTask = "")
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(userId, idGroup);
+
+            if(responseAccountStatusGroup.Message != null) 
             {
-                var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(userId, idGroup);
-
-                if(responseAccountStatusGroup.Message != null) 
-                {
-                    return Ok(responseAccountStatusGroup);
-                }
-
-                var usersIdFromGroup = responseAccountStatusGroup.Data.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
-                var tasksFromGroup = responseAccountStatusGroup.Data.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
-                var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
-
-                var jsonUsersId = JsonConvert.SerializeObject(usersIdFromGroup);
-
-                BaseResponse<Tuple<Guid, string>[]> responseUsersLoginWithId;// New sservice
-                try
-                {
-                    var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/getLoginsUsers",null, jsonUsersId);
-                    await reg_Req.SendRequest(MyTypeRequest.POST);
-                    responseUsersLoginWithId = JsonConvert.DeserializeObject<StandartResponse<Tuple<Guid, string>[]>>(reg_Req.Response);
-                }
-                catch (Exception e)
-                {
-                    return Ok(new StandartResponse<AccountStatusGroup>()
-                    {
-                        Message = $"Identity server not responsing {e.Message}",
-                        StatusCode = Domain.StatusCode.InternalServerError,
-                    });
-                }
-
-                var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseUsersLoginWithId.Data, isAdmin);
-                Ok(response);
+                return Ok(responseAccountStatusGroup);
             }
-            return Ok(new StandartResponse<TasksPageDTO>
+
+            var usersIdFromGroup = responseAccountStatusGroup.Data.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
+            var tasksFromGroup = responseAccountStatusGroup.Data.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
+            var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
+
+            var jsonUsersId = JsonConvert.SerializeObject(usersIdFromGroup);
+
+            BaseResponse<Tuple<Guid, string>[]> responseUsersLoginWithId;// New sservice
+            try
             {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not outorisation"
-            });
+                var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/getLoginsUsers",null, jsonUsersId);
+                await reg_Req.SendRequest(MyTypeRequest.POST);
+                responseUsersLoginWithId = JsonConvert.DeserializeObject<StandartResponse<Tuple<Guid, string>[]>>(reg_Req.Response);
+            }
+            catch (Exception e)
+            {
+                return Ok(new StandartResponse<AccountStatusGroup>()
+                {
+                    Message = $"Identity server not responsing {e.Message}",
+                    StatusCode = Domain.StatusCode.InternalServerError,
+                });
+            }
+
+            var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseUsersLoginWithId.Data, isAdmin);
+            return Ok(response);
         }
     }
 }

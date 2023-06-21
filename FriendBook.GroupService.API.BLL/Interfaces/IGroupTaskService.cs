@@ -6,7 +6,7 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IGroupTaskService
     {
-        public Task<BaseResponse<GroupTask>> CreateGroupTask(GroupTaskNewDTO group, Guid userId);
+        public Task<BaseResponse<GroupTaskViewDTO>> CreateGroupTask(GroupTaskNewDTO group, Guid userId,string login);
         public Task<BaseResponse<GroupTask>> UpdateGroupTask(GroupTaskChangedDTO group, Guid userId);
         public Task<BaseResponse<bool>> DeleteGroupTask(GroupTaskKeyDTO deletedGroup, Guid userId);
         public BaseResponse<IQueryable<GroupTask>> GetGroupTaskOData();

@@ -12,7 +12,6 @@ namespace FriendBook.GroupService.API.DAL
         public DbSet<GroupTask> GroupTasks { get; set; }
         public async Task UpdateDatabase()
         {
-            await Database.EnsureDeletedAsync();
             await Database.MigrateAsync();
         }
         public GroupAppDBContext(DbContextOptions<GroupAppDBContext> options) : base(options)

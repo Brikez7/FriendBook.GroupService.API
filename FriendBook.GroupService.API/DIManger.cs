@@ -11,6 +11,7 @@ using FriendBook.GroupService.API.DAL.Repositories;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.BLL.Services;
 using GroupService = FriendBook.GroupService.API.BLL.Services.GroupService;
+using FriendBook.GroupService.API.Domain.CustomClaims;
 
 namespace FriendBook.GroupService.API
 {
@@ -60,6 +61,25 @@ namespace FriendBook.GroupService.API
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                options.Events = new JwtBearerEvents()
+                {
+                    OnTokenValidated = context =>
+                    {
+                        string? accountId = context.Principal?.Claims.FirstOrDefault(c => c.Type == CustomClaimType.AccountId)?.Value;
+                        string? login = context.Principal?.Claims.FirstOrDefault(c => c.Type == CustomClaimType.Login)?.Value;
+
+                        if (!string.IsNullOrEmpty(accountId) && Guid.TryParse(accountId, out _) || !string.IsNullOrEmpty(login))
+                        {
+                            return Task.CompletedTask;
+                        }
+                        else
+                        {
+                            context.Fail("Invalid token");
+                            return Task.CompletedTask;
+                        }
+                    }
+                };
+
                 options.RequireHttpsMetadata = true;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
