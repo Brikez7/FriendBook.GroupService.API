@@ -1,12 +1,12 @@
-﻿namespace FriendBook.GroupService.API.Domain.DTO
+﻿namespace FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs
 {
-    public class ProfileDTO
+    public class ResponseProfile
     {
-        public ProfileDTO(Guid? id, string login, string? fullName)
+        public ResponseProfile(Guid id, string login, string? fullName)
         {
             Login = login;
             FullName = fullName;
-            Id = (Guid)id;
+            Id = id;
         }
 
         public string Login { get; set; } = null!;

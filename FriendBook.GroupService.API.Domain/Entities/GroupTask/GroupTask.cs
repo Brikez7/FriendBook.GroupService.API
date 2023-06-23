@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
+﻿using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
@@ -22,7 +22,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
             Id = id;
         }
 
-        public GroupTask(GroupTaskViewDTO groupDTO, Guid userId)
+        public GroupTask(ResponseGroupTaskView groupDTO, Guid userId)
         {
             GroupId = groupDTO.GroupId;
             Name = groupDTO.Name;
@@ -33,7 +33,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
             CreaterId = userId;
         }
 
-        public GroupTask(GroupTaskNewDTO groupDTO, Guid userId)
+        public GroupTask(RequestGroupTaskNew groupDTO, Guid userId)
         {
             GroupId = groupDTO.GroupId;
             Name = groupDTO.Name;
@@ -43,13 +43,13 @@ namespace FriendBook.GroupService.API.Domain.Entities
             Team = new Guid[] { userId };
         }
 
-        public GroupTask(GroupTaskKeyDTO groupDTO)
+        public GroupTask(RequestGroupTaskKey groupDTO)
         {
             GroupId = groupDTO.GroupId;
             Name = groupDTO.Name;
         }
 
-        public GroupTask(GroupTaskChangedDTO groupTaskDTO)
+        public GroupTask(RequestGroupTaskChanged groupTaskDTO)
         {
             GroupId = groupTaskDTO.GroupId;
             Name = groupTaskDTO.OldName;
@@ -60,6 +60,6 @@ namespace FriendBook.GroupService.API.Domain.Entities
 
 
         public Group? Group { get; set; }
-/*        public IEnumerable<AccountStatusGroup>? AccountsStatusGroup { get; set; } = new List<AccountStatusGroup>();*/
+        /*        public IEnumerable<AccountStatusGroup>? AccountsStatusGroup { get; set; } = new List<AccountStatusGroup>();*/
     }
 }

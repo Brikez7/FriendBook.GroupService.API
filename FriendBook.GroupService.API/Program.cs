@@ -10,10 +10,15 @@ namespace FriendBook.GroupService.API
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddSingleton(builder.Configuration);
+
             builder.AddRepositores();
+            builder.AddValidators();
             builder.AddServices();
+
             builder.AddAuthProperty();
+
             builder.AddODataProperty();
+
             builder.AddHostedServices();
 
             builder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(

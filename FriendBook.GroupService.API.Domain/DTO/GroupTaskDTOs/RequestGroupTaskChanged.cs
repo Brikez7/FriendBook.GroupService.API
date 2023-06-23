@@ -1,8 +1,8 @@
 ﻿using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
+namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
-    public class GroupTaskChangedDTO
+    public class RequestGroupTaskChanged
     {
         public Guid GroupId { get; set; }
         public string OldName { get; set; } = null!;
@@ -10,7 +10,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
         public string Description { get; set; } = string.Empty;
         public DateTime DateEndWork { get; set; }
         public StatusTask Status { get; set; }
-        public GroupTaskChangedDTO(Guid groupId, string oldName,string newName, string description, DateTime dateEndWork, StatusTask statusTask)
+        public RequestGroupTaskChanged(Guid groupId, string oldName, string newName, string description, DateTime dateEndWork, StatusTask statusTask)
         {
             GroupId = groupId;
             OldName = oldName;
@@ -20,7 +20,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
             Status = statusTask;
         }
 
-        public GroupTaskChangedDTO()
+        public RequestGroupTaskChanged()
         {
         }
     }

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FriendBook.GroupService.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.Domain
+namespace FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs
 {
     public class AccountStatusGroupDTO
     {
@@ -23,7 +18,7 @@ namespace FriendBook.GroupService.API.Domain
         public AccountStatusGroupDTO(AccountStatusGroup createdAccountaStatusGroup)
         {
             IdGroup = createdAccountaStatusGroup.IdGroup;
-            AccountId= createdAccountaStatusGroup.AccountId;
+            AccountId = createdAccountaStatusGroup.AccountId;
             RoleAccount = createdAccountaStatusGroup.RoleAccount;
         }
 

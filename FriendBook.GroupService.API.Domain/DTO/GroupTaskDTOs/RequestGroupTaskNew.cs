@@ -1,13 +1,13 @@
-﻿namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
+﻿namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
-    public class GroupTaskNewDTO
+    public class RequestGroupTaskNew
     {
         public Guid GroupId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
         public DateTime DateEndWork { get; set; }
 
-        public GroupTaskNewDTO(Guid groupId, string name, string description, DateTime dateEndWork)
+        public RequestGroupTaskNew(Guid groupId, string name, string description, DateTime dateEndWork)
         {
             GroupId = groupId;
             Name = name;
@@ -15,7 +15,7 @@
             DateEndWork = dateEndWork;
         }
 
-        public GroupTaskNewDTO()
+        public RequestGroupTaskNew()
         {
         }
     }

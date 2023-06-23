@@ -1,7 +1,8 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain;
-using FriendBook.GroupService.API.Domain.DTO;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
+using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using Microsoft.EntityFrameworkCore;
@@ -95,7 +96,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
         }
 
-        public async Task<BaseResponse<AccountGroupDTO[]>> GetGroupsWithStatusByUserId(Guid userId)
+        public async Task<BaseResponse<ResponseAccountGroup[]>> GetGroupsWithStatusByUserId(Guid userId)
         {
 
             var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
@@ -103,19 +104,19 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                                         .Include(x => x.Group)
                                                                         .ToListAsync();
 
-            AccountGroupDTO[] accountGroupDTOs = accountStatusGroup.Select(x => new AccountGroupDTO(x.Group.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
+            ResponseAccountGroup[] accountGroupDTOs = accountStatusGroup.Select(x => new ResponseAccountGroup(x.Group.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
                                                                    .ToArray();
 
             if (accountGroupDTOs.Length == 0)
             {
-                return new StandartResponse<AccountGroupDTO[]>
+                return new StandartResponse<ResponseAccountGroup[]>
                 {
                     Message = "No groups where you belong have been found",
                     StatusCode = StatusCode.InternalServerError
                 };
             }
 
-            return new StandartResponse<AccountGroupDTO[]>
+            return new StandartResponse<ResponseAccountGroup[]>
             {
                 Data = accountGroupDTOs
             };

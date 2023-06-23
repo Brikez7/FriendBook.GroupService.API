@@ -1,10 +1,9 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain;
-using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using FriendBook.GroupService.API.Domain.Requests;
+using FriendBook.GroupService.API.Domain.UserToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -18,25 +17,28 @@ namespace FriendBook.GroupService.API.Controllers
     public class AccountStatusGroupController : ODataController
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
-
-        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService)
+        private readonly IValidationService<AccountStatusGroupDTO> _accountStatusGroupDTOValidationService;
+        public Lazy<UserTokenAuth> UserToken { get; set; }
+        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService)
         {
             _accountStatusGroupService = accountStatusGroupService;
+            _accountStatusGroupDTOValidationService = validationService;
+            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
         }
 
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteAccountStatusGroup([FromQuery] Guid idGroupDeleted, [FromQuery] Guid idUserGuid)
         {
-            Guid createrId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-
-            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(idUserGuid,createrId, idGroupDeleted);
+            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(idUserGuid,UserToken.Value.Id, idGroupDeleted);
             return Ok(response);
         }
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
 
             BaseResponse<bool> responseAnotherAPI; // New service
             try 
@@ -78,23 +80,23 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            
-            var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, userId);
+            var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-
-            StandartResponse<ProfileDTO[]> responseAnotherAPI;
+            StandartResponse<ResponseProfile[]> responseAnotherAPI;
             try
             {
                 var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"],null);
                 await reg_Req.SendRequest(MyTypeRequest.GET);
-                responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<ProfileDTO[]>>(reg_Req.Response);
+                responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<ResponseProfile[]>>(reg_Req.Response);
             }
             catch (Exception e)
             {
@@ -112,7 +114,7 @@ namespace FriendBook.GroupService.API.Controllers
             }
 
             
-            return Ok(new StandartResponse<ProfileDTO[]>()
+            return Ok(new StandartResponse<ResponseProfile[]>()
             {
                 Message = "Token not valid",
                 StatusCode = Domain.StatusCode.InternalServerError

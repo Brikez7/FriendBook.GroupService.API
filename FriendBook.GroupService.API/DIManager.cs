@@ -10,12 +10,17 @@ using FriendBook.GroupService.API.BackgroundHostedService;
 using FriendBook.GroupService.API.DAL.Repositories;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.BLL.Services;
-using GroupService = FriendBook.GroupService.API.BLL.Services.GroupService;
-using FriendBook.GroupService.API.Domain.CustomClaims;
+using FluentValidation;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
+using FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupValidators;
+using FriendBook.GroupService.API.Domain.Validators.GroupValidators;
+using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
+using FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators;
+using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 
 namespace FriendBook.GroupService.API
 {
-    public static class DIManger
+    public static class DIManager
     {
         public static void AddRepositores(this WebApplicationBuilder webApplicationBuilder)
         {
@@ -23,12 +28,29 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
         }
+        public static void AddValidators(this WebApplicationBuilder webApplicationBuilder)
+        {
+            webApplicationBuilder.Services.AddScoped<IValidator<AccountStatusGroupDTO>, ValidatorAccountStatusGroupDTO>();
 
+            webApplicationBuilder.Services.AddScoped<IValidator<GroupDTO>, ValidatorGroupDTO>();
+
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskKey>, ValidatorRequestGroupTaskKey>();
+        }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
+
+            webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
+
+            webApplicationBuilder.Services.AddScoped<IValidationService<GroupDTO>, ValidationService<GroupDTO>>();
+
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
         }
 
 
@@ -61,25 +83,6 @@ namespace FriendBook.GroupService.API
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.Events = new JwtBearerEvents()
-                {
-                    OnTokenValidated = context =>
-                    {
-                        string? accountId = context.Principal?.Claims.FirstOrDefault(c => c.Type == CustomClaimType.AccountId)?.Value;
-                        string? login = context.Principal?.Claims.FirstOrDefault(c => c.Type == CustomClaimType.Login)?.Value;
-
-                        if (!string.IsNullOrEmpty(accountId) && Guid.TryParse(accountId, out _) || !string.IsNullOrEmpty(login))
-                        {
-                            return Task.CompletedTask;
-                        }
-                        else
-                        {
-                            context.Fail("Invalid token");
-                            return Task.CompletedTask;
-                        }
-                    }
-                };
-
                 options.RequireHttpsMetadata = true;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters

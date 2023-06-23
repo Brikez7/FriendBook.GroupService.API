@@ -1,15 +1,15 @@
-﻿namespace FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO
+﻿namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
-    public class GroupTaskKeyDTO
+    public class RequestGroupTaskKey
     {
         public Guid GroupId { get; set; }
         public string Name { get; set; } = null!;
 
-        public GroupTaskKeyDTO()
+        public RequestGroupTaskKey()
         {
         }
 
-        public GroupTaskKeyDTO(Guid groupId, string name)
+        public RequestGroupTaskKey(Guid groupId, string name)
         {
             GroupId = groupId;
             Name = name;

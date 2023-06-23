@@ -1,9 +1,10 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
+using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
+using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using FriendBook.GroupService.API.Domain.Requests;
+using FriendBook.GroupService.API.Domain.UserToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -18,63 +19,83 @@ namespace FriendBook.GroupService.API.Controllers
     {
         private readonly IGroupTaskService _groupTaskService;
         private readonly IAccountStatusGroupService _accountStatusGroupService;
-        public GroupTaskController(IGroupTaskService groupTaskService, IAccountStatusGroupService accountStatusGroupService)
+        private readonly IValidationService<RequestGroupTaskNew> _requestGroupTaskNewValidationService;
+        private readonly IValidationService<RequestGroupTaskKey> _requestGroupTaskKeyValidationService;
+        private readonly IValidationService<RequestGroupTaskChanged> _requestGroupTaskChangedValidationService;
+        public Lazy<UserTokenAuth> UserToken { get; set; }
+
+        public GroupTaskController(IGroupTaskService groupTaskService, IAccountStatusGroupService accountStatusGroupService,
+            IValidationService<RequestGroupTaskNew> requestGroupTaskNewValidationService, IValidationService<RequestGroupTaskKey> requestGroupTaskKeyValidationService,
+            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService)
         {
             _groupTaskService = groupTaskService;
             _accountStatusGroupService = accountStatusGroupService;
+            _requestGroupTaskNewValidationService = requestGroupTaskNewValidationService;
+            _requestGroupTaskKeyValidationService = requestGroupTaskKeyValidationService;
+            _requestGroupTaskChangedValidationService = requestGroupTaskChangedValidationService;
+
+            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
         }
 
         [HttpDelete("Delete")]
-        public async Task<IActionResult> DeleteGroupTask([FromBody] GroupTaskKeyDTO groupTaskKey)
+        public async Task<IActionResult> DeleteGroupTask([FromBody] RequestGroupTaskKey groupTaskKey)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            
-            var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, userId);
+            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKey);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateGroupTask([FromBody] GroupTaskNewDTO newGroupTaskDTO)
+        public async Task<IActionResult> CreateGroupTask([FromBody] RequestGroupTaskNew newGroupTaskDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            string login = User.Claims.First(x => x.Type == CustomClaimType.Login).Value;
+            var responseValidation = await _requestGroupTaskNewValidationService.ValidateAsync(newGroupTaskDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
 
-            var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId, login);
+            var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,UserToken.Value.Id, UserToken.Value.Login);
             return Ok(response);
         }
 
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateGroupTask([FromBody] GroupTaskChangedDTO groupTaskDTO)
+        public async Task<IActionResult> UpdateGroupTask([FromBody] RequestGroupTaskChanged groupTaskDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            
-            var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, userId);
+            var responseValidation = await _requestGroupTaskChangedValidationService.ValidateAsync(groupTaskDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPut("SubscribeTask")]
-        public async Task<IActionResult> SubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
+        public async Task<IActionResult> SubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            
-            var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,userId);
+            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,UserToken.Value.Id);
             return Ok(response);
         }
         [HttpPut("UnsubscribeTask")]
-        public async Task<IActionResult> UnsubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
+        public async Task<IActionResult> UnsubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            
-            var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, userId);
+            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, UserToken.Value.Id);
             return Ok(response);
         }
         [HttpGet("OData/GetTasks")]
         [EnableQuery]
         public async Task<IActionResult> GetTasksByNameTaskAndIdGroup([FromQuery] Guid idGroup, [FromQuery] string nameTask = "")
         {
-            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(userId, idGroup);
+            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(UserToken.Value.Id, idGroup);
 
             if(responseAccountStatusGroup.Message != null) 
             {

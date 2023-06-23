@@ -1,6 +1,6 @@
 ﻿using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.Domain.DTO
+namespace FriendBook.GroupService.API.Domain.DTO.GroupDTOs
 {
     public class GroupDTO
     {
@@ -10,7 +10,7 @@ namespace FriendBook.GroupService.API.Domain.DTO
 
         public GroupDTO(Group createdGroup)
         {
-            GroupId = createdGroup.Id;
+            GroupId = (Guid)createdGroup.Id!;
             CreatedDate = createdGroup.CreatedDate;
             Name = createdGroup.Name;
         }
@@ -21,7 +21,7 @@ namespace FriendBook.GroupService.API.Domain.DTO
             Name = groupName;
         }
 
-        public Guid? GroupId { get; set; }
+        public Guid GroupId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string Name { get; set; } = null!;
     }

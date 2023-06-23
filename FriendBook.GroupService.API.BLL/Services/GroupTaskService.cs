@@ -1,10 +1,10 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using FriendBook.GroupService.API.Domain;
-using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
+using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.Entities;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -18,11 +18,11 @@ namespace FriendBook.GroupService.API.BLL.Services
             _accountStatusGroupRepository = accountStatusGroupRepository;
         }
 
-        public async Task<BaseResponse<GroupTaskViewDTO>> CreateGroupTask(GroupTaskNewDTO groupTask,Guid userId,string login)
+        public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew groupTask,Guid userId,string login)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && x.IdGroup == groupTask.GroupId && x.RoleAccount > RoleAccount.Default))
             {
-                return new StandartResponse<GroupTaskViewDTO> 
+                return new StandartResponse<ResponseGroupTaskView> 
                 {
                     Message = "Account in group not found",
                     StatusCode = StatusCode.InternalServerError
@@ -31,7 +31,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if (await _groupTaskRepository.GetAll().AnyAsync(x => x.Name == groupTask.Name && x.GroupId == groupTask.GroupId))
             {
-                return new StandartResponse<GroupTaskViewDTO>
+                return new StandartResponse<ResponseGroupTaskView>
                 {
                     Message = "Task in with name exists",
                     StatusCode = StatusCode.InternalServerError
@@ -42,17 +42,17 @@ namespace FriendBook.GroupService.API.BLL.Services
             var createdGroup = await _groupTaskRepository.AddAsync(newGroupTask);
             await _groupTaskRepository.SaveAsync();
 
-            var viewDTO = new GroupTaskViewDTO(createdGroup);
+            var viewDTO = new ResponseGroupTaskView(createdGroup);
             viewDTO.Users = new string[] { login };
 
-            return new StandartResponse<GroupTaskViewDTO>()
+            return new StandartResponse<ResponseGroupTaskView>()
             {
                 Data = viewDTO,
                 StatusCode = StatusCode.GroupCreate
             };
         }
 
-        public async Task<BaseResponse<GroupTask>> SubcsribeGroupTask(GroupTaskKeyDTO groupTaskKeyDTO, Guid userId)
+        public async Task<BaseResponse<GroupTask>> SubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTaskKeyDTO.GroupId && userId == x.AccountId)) 
             {
@@ -87,7 +87,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 StatusCode = StatusCode.GroupUpdate
             };
         }
-        public async Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(GroupTaskKeyDTO groupTaskKeyDTO, Guid userId)
+        public async Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTaskKeyDTO.GroupId && userId == x.AccountId))
             {
@@ -142,7 +142,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupTask>> UpdateGroupTask(GroupTaskChangedDTO groupTask,Guid userId)
+        public async Task<BaseResponse<GroupTask>> UpdateGroupTask(RequestGroupTaskChanged groupTask,Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default)) 
             {
@@ -188,7 +188,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroupTask(GroupTaskKeyDTO deletedGroupTask, Guid userId)
+        public async Task<BaseResponse<bool>> DeleteGroupTask(RequestGroupTaskKey deletedGroupTask, Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == deletedGroupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default))
             {

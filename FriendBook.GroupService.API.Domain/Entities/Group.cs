@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.DTO;
+﻿using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {

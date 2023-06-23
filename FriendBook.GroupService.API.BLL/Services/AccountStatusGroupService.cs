@@ -1,12 +1,11 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain;
-using FriendBook.GroupService.API.Domain.DTO;
-using FriendBook.GroupService.API.Domain.DTO.GroupTasksDTO;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
+using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -134,7 +133,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<ProfileDTO[]>> GetProfilesByIdGroup(Guid idGroup, ProfileDTO[] profileDTOs)
+        public async Task<BaseResponse<ResponseProfile[]>> GetProfilesByIdGroup(Guid idGroup, ResponseProfile[] profileDTOs)
         {
             var usersInSearchedGroudId = await _accountStatusGroupRepository.GetAll()
                                                                             .Where(x => x.IdGroup == idGroup).Select(x => x.AccountId)
@@ -142,7 +141,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if (usersInSearchedGroudId is null || usersInSearchedGroudId.Length == 0)
             {
-                return new StandartResponse<ProfileDTO[]>()
+                return new StandartResponse<ResponseProfile[]>()
                 {
                     Message = "Group not found",
                     StatusCode = Domain.StatusCode.InternalServerError,
@@ -154,15 +153,15 @@ namespace FriendBook.GroupService.API.BLL.Services
                                id => id,
                                (profile, id) => profile);
 
-            return new StandartResponse<ProfileDTO[]>
+            return new StandartResponse<ResponseProfile[]>
             {
                 Data = usersInGroup.ToArray(),
             }; ;
         }
 
-        public BaseResponse<TasksPageDTO> TasksJoinUsersLoginWithId(List<GroupTask> groupTasks, Tuple<Guid, string>[] usersLoginWithId, bool isAdmin)
+        public BaseResponse<ResponseTasksPage> TasksJoinUsersLoginWithId(List<GroupTask> groupTasks, Tuple<Guid, string>[] usersLoginWithId, bool isAdmin)
         {
-            List<GroupTaskViewDTO> tasksPages = new List<GroupTaskViewDTO>();
+            List<ResponseGroupTaskView> tasksPages = new List<ResponseGroupTaskView>();
             foreach (var task in groupTasks)
             {
                 var namesUser = task.Team.Join(
@@ -171,22 +170,22 @@ namespace FriendBook.GroupService.API.BLL.Services
                                         loginWithIdUser => loginWithIdUser.Item1,
                                         (task, loginWithIdUser) => loginWithIdUser.Item2).ToArray();
 
-                GroupTaskViewDTO groupTaskViewDTO = new GroupTaskViewDTO(task, namesUser);
+                ResponseGroupTaskView groupTaskViewDTO = new ResponseGroupTaskView(task, namesUser);
                 tasksPages.Add(groupTaskViewDTO);
             }
 
             if (tasksPages.Count == 0)
             {
-                return new StandartResponse<TasksPageDTO>
+                return new StandartResponse<ResponseTasksPage>
                 {
                     Message = "Tasks not found",
                     StatusCode = Domain.StatusCode.InternalServerError
                 };
             }
 
-            var tasksPageDTO = new TasksPageDTO(tasksPages.ToArray(), isAdmin);
+            var tasksPageDTO = new ResponseTasksPage(tasksPages.ToArray(), isAdmin);
 
-            return new StandartResponse<TasksPageDTO>
+            return new StandartResponse<ResponseTasksPage>
             {
                 Data = tasksPageDTO
             };
