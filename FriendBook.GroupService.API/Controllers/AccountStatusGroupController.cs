@@ -37,6 +37,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+
             BaseResponse<bool> responseAnotherAPI; // New service
             try 
             {
@@ -53,7 +54,7 @@ namespace FriendBook.GroupService.API.Controllers
                 });
             }
 
-            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater) // validation
+            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
             {
                 return Ok(new StandartResponse<AccountStatusGroupDTO>()
                 {
@@ -87,7 +88,8 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
         {
             Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
-            StandartResponse<ProfileDTO[]> responseAnotherAPI;// New service
+
+            StandartResponse<ProfileDTO[]> responseAnotherAPI;
             try
             {
                 var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"],null);

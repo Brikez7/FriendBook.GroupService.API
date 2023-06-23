@@ -27,88 +27,47 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteGroupTask([FromBody] GroupTaskKeyDTO groupTaskKey)
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
-            {
-                var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, userId);
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<bool>
-            {
-                Message = "Not valid token",
-                StatusCode = Domain.StatusCode.InternalServerError
-            });
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            
+            var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, userId);
+            return Ok(response);
         }
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateGroupTask([FromBody] GroupTaskNewDTO newGroupTaskDTO)
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
-            {
-                string login = User.Claims.First(x => x.Type == CustomClaimType.Login).Value;
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            string login = User.Claims.First(x => x.Type == CustomClaimType.Login).Value;
 
-                var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId, login);
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<GroupTaskViewDTO>
-            {
-                Message = "Not valid token",
-                StatusCode = Domain.StatusCode.InternalServerError
-            });
+            var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,userId, login);
+            return Ok(response);
         }
 
 
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateGroupTask([FromBody] GroupTaskChangedDTO groupTaskDTO)
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
-            {
-                var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, userId);
-
-                if (response.Data != null)
-                {
-                    return Ok(new StandartResponse<GroupTask>
-                    {
-                        Data = response.Data
-                    });
-                }
-
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<GroupTaskViewDTO>
-            {
-                Message = "Not valid token",
-                StatusCode = Domain.StatusCode.InternalServerError
-            });
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            
+            var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, userId);
+            return Ok(response);
         }
 
         [HttpPut("SubscribeTask")]
         public async Task<IActionResult> SubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
-            {
-                var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,userId);
-
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<GroupTask>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Not valid token",
-            });
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            
+            var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,userId);
+            return Ok(response);
         }
         [HttpPut("UnsubscribeTask")]
         public async Task<IActionResult> UnsubscribeTask([FromBody] GroupTaskKeyDTO groupTaskKeyDTO)
         {
-            if (Guid.TryParse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value, out Guid userId))
-            {
-                var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, userId);
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<GroupTask>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Not valid token",
-            });
+            Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
+            
+            var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, userId);
+            return Ok(response);
         }
         [HttpGet("OData/GetTasks")]
         [EnableQuery]

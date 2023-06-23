@@ -36,7 +36,7 @@ namespace FriendBook.GroupService.API.Controllers
         {
             Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
 
-            try // New service
+            try
             {
                 BaseResponse<bool> responseAnotherAPI; 
                 var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={userId}", null, null);
@@ -60,7 +60,6 @@ namespace FriendBook.GroupService.API.Controllers
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
             }
-
             var newGroup = new Group(groupName, userId);
             var response = await _groupService.CreateGroup(newGroup);
 
@@ -73,7 +72,6 @@ namespace FriendBook.GroupService.API.Controllers
             Guid userId = Guid.Parse(User.Claims.First(x => x.Type == CustomClaimType.AccountId).Value);
 
             var response = await _groupService.UpdateGroup(groupDTO, userId);
-
             return Ok(response);
         }
 
