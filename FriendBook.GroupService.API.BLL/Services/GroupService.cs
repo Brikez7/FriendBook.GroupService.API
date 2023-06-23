@@ -19,8 +19,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             _accountStatusGroupRepository = accountStatusGroupRepository;
         }
 
-        public async Task<BaseResponse<GroupDTO>> CreateGroup(Group group)
+        public async Task<BaseResponse<GroupDTO>> CreateGroup(string groupName, Guid createrId)
         {
+            Group group = new Group(groupName,createrId);
             if (await _groupRepository.GetAll().AnyAsync(x => x.Name == group.Name)) 
             {
                 return new StandartResponse<GroupDTO>()
@@ -105,7 +106,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                                         .ToListAsync();
 
             ResponseAccountGroup[] accountGroupDTOs = accountStatusGroup.Select(x => new ResponseAccountGroup(x.Group.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
-                                                                   .ToArray();
+                                                                        .ToArray();
 
             if (accountGroupDTOs.Length == 0)
             {

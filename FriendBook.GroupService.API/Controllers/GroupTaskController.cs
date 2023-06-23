@@ -1,5 +1,4 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
@@ -97,7 +96,7 @@ namespace FriendBook.GroupService.API.Controllers
         {
             var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(UserToken.Value.Id, idGroup);
 
-            if(responseAccountStatusGroup.Message != null) 
+            if(responseAccountStatusGroup.Data is null) 
             {
                 return Ok(responseAccountStatusGroup);
             }
@@ -107,7 +106,6 @@ namespace FriendBook.GroupService.API.Controllers
             var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
 
             var jsonUsersId = JsonConvert.SerializeObject(usersIdFromGroup);
-
             BaseResponse<Tuple<Guid, string>[]> responseUsersLoginWithId;// New sservice
             try
             {
@@ -122,7 +120,7 @@ namespace FriendBook.GroupService.API.Controllers
                     Message = $"Identity server not responsing {e.Message}",
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
-            }
+            }//
 
             var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseUsersLoginWithId.Data, isAdmin);
             return Ok(response);

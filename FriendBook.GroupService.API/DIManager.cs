@@ -74,7 +74,7 @@ namespace FriendBook.GroupService.API
             var secretKey = webApplicationBuilder.Configuration.GetSection("JWTSettings:SecretKey").Value;
             var issuer = webApplicationBuilder.Configuration.GetSection("JWTSettings:Issuer").Value;
             var audience = webApplicationBuilder.Configuration.GetSection("JWTSettings:Audience").Value;
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
 
             webApplicationBuilder.Services.AddAuthentication(options =>
             {

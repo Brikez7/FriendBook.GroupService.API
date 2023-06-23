@@ -38,7 +38,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPost("Create/{groupName}")]
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
-            try
+            try// New service
             {
                 BaseResponse<bool> responseAnotherAPI; 
                 var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={UserToken.Value.Id}", null, null);
@@ -61,10 +61,9 @@ namespace FriendBook.GroupService.API.Controllers
                     Message = $"Identity server not responsing {e.Message}",
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
-            }
-            var newGroup = new Group(groupName, UserToken.Value.Id);
-            var response = await _groupService.CreateGroup(newGroup);
+            }//
 
+            var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
             return Ok(response);
         }
 

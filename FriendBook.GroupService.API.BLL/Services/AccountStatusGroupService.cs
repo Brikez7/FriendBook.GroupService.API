@@ -21,7 +21,14 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            
+            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
+            {
+                return new StandartResponse<AccountStatusGroupDTO>()
+                {
+                    Message = "Deleted account not been status creator",
+                    StatusCode = StatusCode.InternalServerError,
+                };
+            }
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == accountStatusGroupDTO.IdGroup && x.AccountId == accountStatusGroupDTO.AccountId))
             {
                 return new StandartResponse<AccountStatusGroupDTO>()
@@ -87,9 +94,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
                                                                         .Where(x => x.AccountId == userId)
                                                                         .Include(x => x.Group)
-                                                                        .ThenInclude(x => x.GroupTasks)
+                                                                            .ThenInclude(x => x.GroupTasks)
                                                                         .Include(x => x.Group)
-                                                                        .ThenInclude(x => x.AccountStatusGroups)
+                                                                            .ThenInclude(x => x.AccountStatusGroups)
                                                                         .FirstOrDefaultAsync(x => x.Group != null && x.Group.Id == groupId);
 
             if (accountStatusGroup == null || accountStatusGroup.Group == null)

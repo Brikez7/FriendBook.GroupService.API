@@ -55,26 +55,17 @@ namespace FriendBook.GroupService.API.Controllers
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
             }
-
-            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
+            if (!responseAnotherAPI.Data)
             {
                 return Ok(new StandartResponse<AccountStatusGroupDTO>()
                 {
-                    Message = "Account not been status creator",
+                    Message = "Account not exists or server not connected",
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
-            }
-            if (responseAnotherAPI is not null && responseAnotherAPI.Data)
-            {
-                var response = await _accountStatusGroupService.CreateAccountStatusGroup(accountStatusGroupDTO);
-                return Ok(response);
-            }
-            return Ok(new StandartResponse<AccountStatusGroupDTO>()
-            {
-                Message = "Account not exists or server not connected",
-                StatusCode = Domain.StatusCode.InternalServerError,
-            });
-            
+            } // Service
+
+            var response = await _accountStatusGroupService.CreateAccountStatusGroup(accountStatusGroupDTO);
+            return Ok(response);
         }
 
         [HttpPut("Update")]
@@ -91,7 +82,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
         {
-            StandartResponse<ResponseProfile[]> responseAnotherAPI;
+            StandartResponse<ResponseProfile[]> responseAnotherAPI;// New service
             try
             {
                 var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"],null);
@@ -106,19 +97,17 @@ namespace FriendBook.GroupService.API.Controllers
                     StatusCode = Domain.StatusCode.InternalServerError,
                 });
             }
-
-            if (responseAnotherAPI.Message is null && responseAnotherAPI.Data is not null)
+            if (responseAnotherAPI.Data is null)
             {
-                var response = await _accountStatusGroupService.GetProfilesByIdGroup(idGroup, responseAnotherAPI.Data);
-                return Ok(response);
-            }
+                return Ok(new StandartResponse<ResponseProfile[]>()
+                {
+                    Message = $"Identity server error: {responseAnotherAPI.Message}",
+                    StatusCode = Domain.StatusCode.InternalServerError
+                });
+            } //
 
-            
-            return Ok(new StandartResponse<ResponseProfile[]>()
-            {
-                Message = "Token not valid",
-                StatusCode = Domain.StatusCode.InternalServerError
-            });
+            var response = await _accountStatusGroupService.GetProfilesByIdGroup(idGroup, responseAnotherAPI.Data);
+            return Ok(response);
         }
     }
 }
