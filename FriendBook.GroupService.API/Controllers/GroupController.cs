@@ -1,4 +1,5 @@
-﻿using FriendBook.GroupService.API.BLL.Interfaces;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
+using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.CustomClaims;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
@@ -18,14 +19,16 @@ namespace FriendBook.GroupService.API.Controllers
     [Authorize]
     public class GroupController : ODataController
     {
-        private readonly IGroupService _groupService;
+        private readonly IContactGroupService _groupService;
         private readonly IValidationService<GroupDTO> _groupDTOValidationService;
+        private readonly IGrpcService _grpcService;
         public Lazy<UserTokenAuth> UserToken { get; set; }
-        public GroupController(IGroupService groupService, IValidationService<GroupDTO> validationService)
+        public GroupController(IContactGroupService groupService, IValidationService<GroupDTO> validationService, IGrpcService grpcService)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
             UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
+            _grpcService = grpcService;
         }
 
         [HttpDelete("Delete/{idGroupGuid}")]
@@ -38,30 +41,12 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPost("Create/{groupName}")]
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
-            try// New service
-            {
-                BaseResponse<bool> responseAnotherAPI; 
-                var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={UserToken.Value.Id}", null, null);
-                await reg_Req.SendRequest(MyTypeRequest.GET);
-                responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
+            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(UserToken.Value.Id);
 
-                if (responseAnotherAPI.Message != null || !responseAnotherAPI.Data) 
-                {
-                    return Ok(new StandartResponse<GroupDTO> 
-                    { 
-                        Message = responseAnotherAPI.Message ?? "Account not exists",
-                        StatusCode = Domain.StatusCode.InternalServerError
-                    });
-                }
-            }
-            catch (Exception e)
+            if (!responseAnotherAPI.Data.Exists)
             {
-                return Ok(new StandartResponse<GroupDTO>()
-                {
-                    Message = $"Identity server not responsing {e.Message}",
-                    StatusCode = Domain.StatusCode.InternalServerError,
-                });
-            }//
+                return Ok(responseAnotherAPI);
+            }
 
             var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
             return Ok(response);

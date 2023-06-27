@@ -1,4 +1,5 @@
-﻿using FriendBook.GroupService.API.BLL.Interfaces;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
+using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
@@ -18,12 +19,15 @@ namespace FriendBook.GroupService.API.Controllers
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
         private readonly IValidationService<AccountStatusGroupDTO> _accountStatusGroupDTOValidationService;
+        private readonly IGrpcService _grpcService;
         public Lazy<UserTokenAuth> UserToken { get; set; }
-        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService)
+        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService,
+            IGrpcService grpcService, IHttpContextAccessor httpContextAccessor)
         {
             _accountStatusGroupService = accountStatusGroupService;
             _accountStatusGroupDTOValidationService = validationService;
-            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
+            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(httpContextAccessor.HttpContext.User.Claims));
+            _grpcService = grpcService;
         }
 
         [HttpDelete("Delete")]
@@ -40,29 +44,12 @@ namespace FriendBook.GroupService.API.Controllers
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
-            BaseResponse<bool> responseAnotherAPI; // New service
-            try 
+            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
+
+            if (!responseAnotherAPI.Data.Exists) 
             {
-                var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/checkUserExists?userId={accountStatusGroupDTO.AccountId}", null,null);
-                await reg_Req.SendRequest(MyTypeRequest.GET);
-                responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<bool>>(reg_Req.Response);
+                return Ok(responseAnotherAPI);
             }
-            catch (Exception e)
-            {
-                return Ok(new StandartResponse<AccountStatusGroup>()
-                {
-                    Message = $"Identity server not responsing {e.Message}",
-                    StatusCode = Domain.StatusCode.InternalServerError,
-                });
-            }
-            if (!responseAnotherAPI.Data)
-            {
-                return Ok(new StandartResponse<AccountStatusGroupDTO>()
-                {
-                    Message = "Account not exists or server not connected",
-                    StatusCode = Domain.StatusCode.InternalServerError,
-                });
-            } // Service
 
             var response = await _accountStatusGroupService.CreateAccountStatusGroup(accountStatusGroupDTO);
             return Ok(response);
@@ -82,31 +69,13 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
         {
-            StandartResponse<ResponseProfile[]> responseAnotherAPI;// New service
-            try
+            var responseAnotherApi = await _grpcService.GetProfiles(login, Request.Headers["Authorization"]);
+            if (responseAnotherApi.Message is not null)
             {
-                var reg_Req = new MyRequest($"https://localhost:7227/api/Contact/GetProfiles/{login}?", Request.Headers["Authorization"],null);
-                await reg_Req.SendRequest(MyTypeRequest.GET);
-                responseAnotherAPI = JsonConvert.DeserializeObject<StandartResponse<ResponseProfile[]>>(reg_Req.Response);
+                return Ok(responseAnotherApi);
             }
-            catch (Exception e)
-            {
-                return Ok(new StandartResponse<AccountStatusGroup>()
-                {
-                    Message = $"Identity server not responsing {e.Message}",
-                    StatusCode = Domain.StatusCode.InternalServerError,
-                });
-            }
-            if (responseAnotherAPI.Data is null)
-            {
-                return Ok(new StandartResponse<ResponseProfile[]>()
-                {
-                    Message = $"Identity server error: {responseAnotherAPI.Message}",
-                    StatusCode = Domain.StatusCode.InternalServerError
-                });
-            } //
 
-            var response = await _accountStatusGroupService.GetProfilesByIdGroup(idGroup, responseAnotherAPI.Data);
+            var response = await _accountStatusGroupService.GetProfilesByIdGroup(idGroup, responseAnotherApi.Data);
             return Ok(response);
         }
     }

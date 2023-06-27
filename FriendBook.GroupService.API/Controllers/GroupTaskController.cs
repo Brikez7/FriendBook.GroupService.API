@@ -1,14 +1,11 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
-using FriendBook.GroupService.API.Domain.Requests;
 using FriendBook.GroupService.API.Domain.UserToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Newtonsoft.Json;
 
 namespace FriendBook.GroupService.API.Controllers
 {
@@ -18,28 +15,28 @@ namespace FriendBook.GroupService.API.Controllers
     {
         private readonly IGroupTaskService _groupTaskService;
         private readonly IAccountStatusGroupService _accountStatusGroupService;
-        private readonly IValidationService<RequestGroupTaskNew> _requestGroupTaskNewValidationService;
-        private readonly IValidationService<RequestGroupTaskKey> _requestGroupTaskKeyValidationService;
-        private readonly IValidationService<RequestGroupTaskChanged> _requestGroupTaskChangedValidationService;
+        private readonly IValidationService<RequestGroupTaskNew> _groupTaskNewValidationService;
+        private readonly IValidationService<RequestGroupTaskKey> _groupTaskKeyValidationService;
+        private readonly IValidationService<RequestGroupTaskChanged> _groupTaskChangedValidationService;
+        private readonly IGrpcService _grpcService;
         public Lazy<UserTokenAuth> UserToken { get; set; }
-
         public GroupTaskController(IGroupTaskService groupTaskService, IAccountStatusGroupService accountStatusGroupService,
             IValidationService<RequestGroupTaskNew> requestGroupTaskNewValidationService, IValidationService<RequestGroupTaskKey> requestGroupTaskKeyValidationService,
-            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService)
+            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService, IGrpcService grpcService, IHttpContextAccessor httpContextAccessor)
         {
             _groupTaskService = groupTaskService;
             _accountStatusGroupService = accountStatusGroupService;
-            _requestGroupTaskNewValidationService = requestGroupTaskNewValidationService;
-            _requestGroupTaskKeyValidationService = requestGroupTaskKeyValidationService;
-            _requestGroupTaskChangedValidationService = requestGroupTaskChangedValidationService;
-
-            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
+            _groupTaskNewValidationService = requestGroupTaskNewValidationService;
+            _groupTaskKeyValidationService = requestGroupTaskKeyValidationService;
+            _groupTaskChangedValidationService = requestGroupTaskChangedValidationService;
+            _grpcService = grpcService;
+            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(httpContextAccessor.HttpContext.User.Claims));
         }
 
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteGroupTask([FromBody] RequestGroupTaskKey groupTaskKey)
         {
-            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKey);
+            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKey);
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
@@ -50,7 +47,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateGroupTask([FromBody] RequestGroupTaskNew newGroupTaskDTO)
         {
-            var responseValidation = await _requestGroupTaskNewValidationService.ValidateAsync(newGroupTaskDTO);
+            var responseValidation = await _groupTaskNewValidationService.ValidateAsync(newGroupTaskDTO);
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
@@ -62,7 +59,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateGroupTask([FromBody] RequestGroupTaskChanged groupTaskDTO)
         {
-            var responseValidation = await _requestGroupTaskChangedValidationService.ValidateAsync(groupTaskDTO);
+            var responseValidation = await _groupTaskChangedValidationService.ValidateAsync(groupTaskDTO);
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
@@ -73,7 +70,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPut("SubscribeTask")]
         public async Task<IActionResult> SubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
-            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
+            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
@@ -83,7 +80,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpPut("UnsubscribeTask")]
         public async Task<IActionResult> UnsubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
-            var responseValidation = await _requestGroupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
+            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
             if (responseValidation is not null)
                 return Ok(responseValidation);
 
@@ -105,24 +102,13 @@ namespace FriendBook.GroupService.API.Controllers
             var tasksFromGroup = responseAccountStatusGroup.Data.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
             var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
 
-            var jsonUsersId = JsonConvert.SerializeObject(usersIdFromGroup);
-            BaseResponse<Tuple<Guid, string>[]> responseUsersLoginWithId;// New sservice
-            try
+            var responseAnotherApi = await _grpcService.GetUsersLoginWithId(usersIdFromGroup);
+            if (responseAnotherApi.Message is not null) 
             {
-                var reg_Req = new MyRequest($"https://localhost:7227/api/IdentityServer/getLoginsUsers",null, jsonUsersId);
-                await reg_Req.SendRequest(MyTypeRequest.POST);
-                responseUsersLoginWithId = JsonConvert.DeserializeObject<StandartResponse<Tuple<Guid, string>[]>>(reg_Req.Response);
+                return Ok(responseAnotherApi);
             }
-            catch (Exception e)
-            {
-                return Ok(new StandartResponse<AccountStatusGroup>()
-                {
-                    Message = $"Identity server not responsing {e.Message}",
-                    StatusCode = Domain.StatusCode.InternalServerError,
-                });
-            }//
 
-            var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseUsersLoginWithId.Data, isAdmin);
+            var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
             return Ok(response);
         }
     }

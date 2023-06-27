@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
@@ -9,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
-    public class GroupService : IGroupService
+    public class ContactGroupService : IContactGroupService
     {
         private readonly IGroupRepository _groupRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
-        public GroupService(IGroupRepository groupRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
+        public ContactGroupService(IGroupRepository groupRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
         {
             _groupRepository = groupRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;

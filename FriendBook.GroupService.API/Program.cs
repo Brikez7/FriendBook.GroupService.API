@@ -1,4 +1,5 @@
 using FriendBook.GroupService.API.DAL;
+using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API
@@ -12,13 +13,12 @@ namespace FriendBook.GroupService.API
             builder.Services.AddSingleton(builder.Configuration);
 
             builder.AddRepositores();
+            builder.AddAuthProperty();
             builder.AddValidators();
             builder.AddServices();
-
-            builder.AddAuthProperty();
+            builder.AddGrpcProperty();
 
             builder.AddODataProperty();
-
             builder.AddHostedServices();
 
             builder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
@@ -36,14 +36,7 @@ namespace FriendBook.GroupService.API
                 app.UseSwaggerUI();
             }
 
-            app.UseCors(builder => builder
-               .WithOrigins("http://localhost:3000")
-               .AllowAnyHeader()
-               .AllowAnyMethod());
-
-            app.UseCors();
-            app.UseRouting();
-            app.UseHttpsRedirection();
+            app.AddCorsUI();
 
             app.UseAuthorization();
 

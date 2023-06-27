@@ -1,8 +1,6 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
@@ -11,12 +9,15 @@ using FriendBook.GroupService.API.DAL.Repositories;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.BLL.Services;
 using FluentValidation;
-using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
-using FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupValidators;
-using FriendBook.GroupService.API.Domain.Validators.GroupValidators;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOValidators;
+using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
+using FriendBook.GroupService.API.Domain.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using FriendBook.GroupService.API.Domain.JWT;
 
 namespace FriendBook.GroupService.API
 {
@@ -27,6 +28,10 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
+        }
+        public static void AddGrpcProperty(this WebApplicationBuilder webApplicationBuilder) 
+        {
+            webApplicationBuilder.Services.Configure<GrpcSettings>(webApplicationBuilder.Configuration.GetSection(GrpcSettings.Name));
         }
         public static void AddValidators(this WebApplicationBuilder webApplicationBuilder)
         {
@@ -40,12 +45,13 @@ namespace FriendBook.GroupService.API
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
+            webApplicationBuilder.Services.AddScoped<IContactGroupService, ContactGroupService>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
-            webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
+            webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
 
+            webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<GroupDTO>, ValidationService<GroupDTO>>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
@@ -71,10 +77,13 @@ namespace FriendBook.GroupService.API
 
         public static void AddAuthProperty(this WebApplicationBuilder webApplicationBuilder)
         {
-            var secretKey = webApplicationBuilder.Configuration.GetSection("JWTSettings:SecretKey").Value;
-            var issuer = webApplicationBuilder.Configuration.GetSection("JWTSettings:Issuer").Value;
-            var audience = webApplicationBuilder.Configuration.GetSection("JWTSettings:Audience").Value;
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
+            webApplicationBuilder.Services.AddHttpContextAccessor();
+            webApplicationBuilder.Services.Configure<JWTSettings>(webApplicationBuilder.Configuration.GetSection(JWTSettings.Name));
+
+            var jwtSettings = webApplicationBuilder.Configuration.GetSection(JWTSettings.Name).Get<JWTSettings>() ??
+                throw new InvalidOperationException($"{JWTSettings.Name} not found in sercret.json");
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.AccessTokenSecretKey!));
 
             webApplicationBuilder.Services.AddAuthentication(options =>
             {
@@ -88,12 +97,12 @@ namespace FriendBook.GroupService.API
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = issuer,
+                    ValidIssuer = jwtSettings.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = audience,
+                    ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     IssuerSigningKey = signingKey,
-                    ValidateIssuerSigningKey = true,
+                    ValidateIssuerSigningKey = true
                 };
             });
         }
@@ -106,6 +115,16 @@ namespace FriendBook.GroupService.API
         public static void AddMiddleware(this WebApplication webApplication)
         {
             webApplication.UseMiddleware<ExceptionHandlingMiddleware>();
+        }
+        public static void AddCorsUI(this WebApplication webApplication)
+        {
+            var urlApp = webApplication.Configuration.GetSection(AppUISetting.Name).Get<AppUISetting>() ??
+                throw new InvalidOperationException($"{AppUISetting.Name} not found in appsettings.json");
+
+            webApplication.UseCors(builder => builder
+                          .WithOrigins(urlApp.AppURL)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
         }
     }
 }

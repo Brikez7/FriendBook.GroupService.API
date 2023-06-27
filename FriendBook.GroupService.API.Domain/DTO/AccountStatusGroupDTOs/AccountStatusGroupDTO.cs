@@ -1,6 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.Entities;
-
-namespace FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs
+﻿namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class AccountStatusGroupDTO
     {

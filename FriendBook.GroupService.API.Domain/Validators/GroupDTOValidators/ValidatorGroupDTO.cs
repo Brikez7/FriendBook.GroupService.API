@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 
-namespace FriendBook.GroupService.API.Domain.Validators.GroupValidators
+namespace FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators
 {
     public class ValidatorGroupDTO : AbstractValidator<GroupDTO>
     {

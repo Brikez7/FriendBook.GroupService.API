@@ -1,4 +1,4 @@
-﻿namespace FriendBook.GroupService.API.Domain
+﻿namespace FriendBook.GroupService.API.Domain.InnerResponse
 {
     public enum StatusCode
     {

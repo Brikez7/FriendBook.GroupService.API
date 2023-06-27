@@ -5,7 +5,7 @@ using FriendBook.GroupService.API.Domain.InnerResponse;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
-    public interface IGroupService
+    public interface IContactGroupService
     {
         public Task<BaseResponse<GroupDTO>> CreateGroup(string groupName, Guid createrId);
         public Task<BaseResponse<GroupDTO>> UpdateGroup(GroupDTO group, Guid userId);

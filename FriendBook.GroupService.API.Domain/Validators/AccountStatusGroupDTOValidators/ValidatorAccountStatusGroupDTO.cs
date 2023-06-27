@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 
-namespace FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupValidators
+namespace FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOValidators
 {
     public class ValidatorAccountStatusGroupDTO : AbstractValidator<AccountStatusGroupDTO>
     {

@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.InnerResponse;
-using FriendBook.GroupService.API.Domain;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
