@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BackgroundHostedService
 {
-    public class CheckDBHostedService : BackgroundService
+        public class CheckDBHostedService : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private IdentityContext? _appDBContext;
+        private GroupAppDBContext? _appDBContext;
 
         public CheckDBHostedService(IServiceScopeFactory serviceScopeFactory)
         {
@@ -16,7 +16,7 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            _appDBContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
+            _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
 
             if (await _appDBContext.Database.EnsureCreatedAsync(stoppingToken))
             {
