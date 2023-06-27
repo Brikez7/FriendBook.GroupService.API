@@ -1,94 +1,82 @@
-﻿using FriendBook.GroupService.API.BLL.Interfaces;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
+using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
+using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Requests;
+using FriendBook.GroupService.API.Domain.UserToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Newtonsoft.Json;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/Group[controller]")]
-    public class GroupController : Controller
+    [Route("api/[controller]")]
+    [Authorize]
+    public class GroupController : ODataController
     {
-        private readonly IGroupService _groupService;
-
-        public GroupController(IGroupService groupService)
+        private readonly IContactGroupService _groupService;
+        private readonly IValidationService<GroupDTO> _groupDTOValidationService;
+        private readonly IGrpcService _grpcService;
+        public Lazy<UserTokenAuth> UserToken { get; set; }
+        public GroupController(IContactGroupService groupService, IValidationService<GroupDTO> validationService, IGrpcService grpcService)
         {
             _groupService = groupService;
+            _groupDTOValidationService = validationService;
+            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
+            _grpcService = grpcService;
         }
 
-        [HttpDelete("Group")]
-        public async Task<BaseResponse<IActionResult>> DeleteGroup([FromQuery] Guid id)
+        [HttpDelete("Delete/{idGroupGuid}")]
+        public async Task<IActionResult> DeleteGroup([FromRoute] Guid idGroupGuid)
         {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var group = await _groupService.GetGroupOData().Data
-                ?.Where(x => x.Id == id)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-                if (group == null)
-                {
-                    return new StandartResponse<IActionResult>
-                    {
-                        Message = "group not found",
-                        Data = NotFound()
-                    };
-                }
-                else if (group.CreatedId == userId)
-                {
-                    var resourse = await _groupService.DeleteGroup(id);
-
-                    return new StandartResponse<IActionResult>
-                    {
-                        Data = NoContent()
-                    };
-                }
-
-                return  new StandartResponse<IActionResult> 
-                { 
-                    Data = Forbid()
-                };
-            }
-
-            return new StandartResponse<IActionResult> { 
-                Data = StatusCode(((int)Domain.StatusCode.IdNotFound)) 
-            };
+            var response = await _groupService.DeleteGroup(idGroupGuid, UserToken.Value.Id);
+            return Ok(response);
         }
-        [HttpPost("Create")]
-        public async Task<BaseResponse<Group>> CreateGroup(GroupDTO groupDTO)
-        {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var newGroup = new Group(groupDTO,userId);
-                var resourse = await _groupService.CreateGroup(newGroup);
 
-                return resourse;
+        [HttpPost("Create/{groupName}")]
+        public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
+        {
+            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(UserToken.Value.Id);
+
+            if (!responseAnotherAPI.Data.Exists)
+            {
+                return Ok(responseAnotherAPI);
             }
-            return new StandartResponse<Group> 
-            { 
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not фutorisation"
-            };
+
+            var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
+            return Ok(response);
         }
-        [HttpPost("Group")]
-        public async Task<BaseResponse<Group>> UpdateGroup(GroupDTO groupDTO)
-        {
-            Guid userId;
-            if (Guid.TryParse(User.Claims.FirstOrDefault(x => x.Type == CustomClaimType.AccountId).Value, out userId))
-            {
-                var newGroup = new Group(groupDTO, userId);
-                var resourse = await _groupService.UpdateGroup(newGroup);
 
-                return resourse;
-            }
-            return new StandartResponse<Group>
-            {
-                StatusCode = Domain.StatusCode.IdNotFound,
-                Message = "Id not found or user not outorisation"
-            };
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateGroup([FromBody] GroupDTO groupDTO)
+        {
+            var responseValidation = await _groupDTOValidationService.ValidateAsync(groupDTO);
+            if (responseValidation is not null)
+                return Ok(responseValidation);
+
+            var response = await _groupService.UpdateGroup(groupDTO, UserToken.Value.Id);
+            return Ok(response);
+        }
+
+        [HttpGet("OData/GetMyGroups")]
+        [EnableQuery]
+        public async Task<IActionResult> GetMyGroups()
+        {
+            var response = await _groupService.GeyGroupsByUserId(UserToken.Value.Id);
+            return Ok(response);
+        }
+
+        [HttpGet("OData/GetMyGroupsWithMyStatus")]
+        [EnableQuery]
+        public async Task<IActionResult> GetMyGroupsWithMyStatus()
+        {
+            var response = await _groupService.GetGroupsWithStatusByUserId(UserToken.Value.Id);
+            return Ok(response);
         }
     }
 }

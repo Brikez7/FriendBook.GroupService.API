@@ -1,4 +1,4 @@
-﻿namespace FriendBook.GroupService.API.Domain
+﻿namespace FriendBook.GroupService.API.Domain.InnerResponse
 {
     public enum StatusCode
     {
@@ -16,6 +16,7 @@
 
         OK = 200,
         OKNoContent = 204,
+        GroupExists = 305,
         IdNotFound = 401,
         InternalServerError = 500,
     }

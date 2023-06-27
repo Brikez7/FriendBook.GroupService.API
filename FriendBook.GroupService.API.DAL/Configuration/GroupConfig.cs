@@ -15,13 +15,16 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasKey(e => new { e.Id });
 
-            builder.HasIndex(e => e.CreatedId);
+            builder.HasIndex(e => e.CreaterId);
+
+            builder.HasIndex(e => e.Name)
+                   .IsUnique();
 
             builder.Property(e => e.Id)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("pk_group_id");
 
-            builder.Property(e => e.CreatedId)
+            builder.Property(e => e.CreaterId)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("account_id");
 

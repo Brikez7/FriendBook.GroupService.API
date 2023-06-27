@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.DTO;
+﻿using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
@@ -9,9 +9,8 @@ namespace FriendBook.GroupService.API.Domain.Entities
         public Guid IdGroup { get; set; }
         public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
 
-        public AccountStatusGroup(Guid? id, Guid accountId, Guid idGroup, RoleAccount roleAccount)
+        public AccountStatusGroup(Guid accountId, Guid idGroup, RoleAccount roleAccount)
         {
-            Id = id;
             AccountId = accountId;
             IdGroup = idGroup;
             RoleAccount = roleAccount;
@@ -25,8 +24,12 @@ namespace FriendBook.GroupService.API.Domain.Entities
         public AccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
             AccountId = accountStatusGroupDTO.AccountId;
-            IdGroup = accountStatusGroupDTO.GroupId;
+            IdGroup = accountStatusGroupDTO.IdGroup;
             RoleAccount = accountStatusGroupDTO.RoleAccount;
+        }
+
+        public AccountStatusGroup()
+        {
         }
 
         public Group? Group { get; set; }

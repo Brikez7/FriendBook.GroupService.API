@@ -4,19 +4,19 @@ using System.Reflection;
 
 namespace FriendBook.GroupService.API.DAL
 {
-    public class GroupAppDBContext : DbContext
+    public partial class GroupAppDBContext : DbContext
     {
         public const string NameConnection = "NpgConnectionString";
         public DbSet<Group> Groups { get; set; }
         public DbSet<AccountStatusGroup> AccountsStatusGroups { get; set; }
-
-        public void UpdateDatabase()
+        public DbSet<GroupTask> GroupTasks { get; set; }
+        public async Task UpdateDatabase()
         {
-            Database.EnsureDeleted();
-            Database.Migrate();
+            await Database.MigrateAsync();
         }
         public GroupAppDBContext(DbContextOptions<GroupAppDBContext> options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,6 +24,9 @@ namespace FriendBook.GroupService.API.DAL
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            OnModelCreatingPartial(modelBuilder);
         }
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

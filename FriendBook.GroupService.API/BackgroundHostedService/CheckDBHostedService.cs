@@ -1,11 +1,12 @@
 ﻿using FriendBook.GroupService.API.DAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BackgroundHostedService
 {
     public class CheckDBHostedService : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private GroupAppDBContext _appDBContext;
+        private GroupAppDBContext? _appDBContext;
 
         public CheckDBHostedService(IServiceScopeFactory serviceScopeFactory)
         {
@@ -19,9 +20,8 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
 
             if (await _appDBContext.Database.EnsureCreatedAsync())
             {
-                _appDBContext.UpdateDatabase();
+                await _appDBContext.UpdateDatabase();
             }
-
             return;
         }
     }

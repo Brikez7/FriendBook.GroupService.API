@@ -1,7 +1,8 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class GroupRepository : IGroupRepository
     {
@@ -26,7 +27,7 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
             return true;
         }
 
-        public IQueryable<Group> Get()
+        public IQueryable<Group> GetAll()
         {
             return _db.Groups.AsQueryable();
         }
@@ -38,11 +39,20 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
             return true;
         }
 
-        public Group Update(Group entity)
+        public async Task<Group?> Update(Group entity)
         {
-            var updatedEntity = _db.Groups.Update(entity);
+            var existingEntity = await _db.Groups.SingleOrDefaultAsync(x => x.Id == entity.Id);
 
-            return updatedEntity.Entity;
+            if (existingEntity != null)
+            {
+                existingEntity.Name = entity.Name;
+
+                return entity;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

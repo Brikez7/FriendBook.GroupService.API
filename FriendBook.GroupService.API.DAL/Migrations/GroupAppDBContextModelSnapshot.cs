@@ -33,10 +33,6 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
 
-                    b.Property<Guid>("CreaterId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("creater_account_id");
-
                     b.Property<Guid>("IdGroup")
                         .HasColumnType("uuid")
                         .HasColumnName("group_id");
@@ -49,6 +45,9 @@ namespace FriendBook.GroupService.API.DAL.Migrations
 
                     b.HasIndex("IdGroup");
 
+                    b.HasIndex("IdGroup", "AccountId")
+                        .IsUnique();
+
                     b.ToTable(" account_status_groups", (string)null);
                 });
 
@@ -59,13 +58,13 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("pk_group_id");
 
-                    b.Property<Guid>("AccountId")
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("create_date");
+
+                    b.Property<Guid>("CreaterId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("create_date");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -74,9 +73,64 @@ namespace FriendBook.GroupService.API.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("CreaterId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("groups", (string)null);
+                });
+
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
+                {
+                    b.Property<Guid?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("pk_group_task_id");
+
+                    b.Property<Guid>("CreaterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("creater_id");
+
+                    b.Property<DateTime>("DateEndWork")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("date_end_work");
+
+                    b.Property<DateTime>("DateStartWork")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("date_start_work");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("character varying")
+                        .HasColumnName("name");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status_task");
+
+                    b.Property<Guid[]>("Team")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("users_id_in_tasks");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("Name", "GroupId")
+                        .IsUnique();
+
+                    b.ToTable("group_tasks", (string)null);
                 });
 
             modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.AccountStatusGroup", b =>
@@ -90,9 +144,22 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.Navigation("Group");
                 });
 
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
+                {
+                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.Group", "Group")
+                        .WithMany("GroupTasks")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Group", b =>
                 {
                     b.Navigation("AccountStatusGroups");
+
+                    b.Navigation("GroupTasks");
                 });
 #pragma warning restore 612, 618
         }

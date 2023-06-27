@@ -1,4 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Configuration.DataType;
+using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +13,9 @@ namespace FriendBook.GroupService.API.DAL.Configuration
             builder.ToTable(Table_name);
 
             builder.HasKey(e => new { e.Id });
+
+            builder.HasIndex(e => new { e.IdGroup, e.AccountId })
+                   .IsUnique();
 
             builder.HasIndex(e => e.IdGroup);
 
@@ -34,7 +38,15 @@ namespace FriendBook.GroupService.API.DAL.Configuration
             builder.HasOne(d => d.Group)
                    .WithMany(p => p.AccountStatusGroups)
                    .HasPrincipalKey(p => p.Id)
-                   .HasForeignKey(d => d.IdGroup);
+                   .HasForeignKey(d => d.IdGroup)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+/*            builder.HasOne(d => d.GroupTask)
+                   .WithMany(p => p.AccountsStatusGroup)
+                   .HasForeignKey(d => d.IdGroup)
+                   .HasPrincipalKey(x => x.GroupId)
+                   .IsRequired(false)
+                   .OnDelete(DeleteBehavior.Restrict);*/
         }
     }
 }

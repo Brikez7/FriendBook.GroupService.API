@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class AccountStatusGroupRepository : IAccountStatusGroupRepository
     {
@@ -27,7 +27,7 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
             return true;
         }
 
-        public IQueryable<AccountStatusGroup> GetAsync()
+        public IQueryable<AccountStatusGroup> GetAll()
         {
             return _dbContext.AccountsStatusGroups;
         }
@@ -39,11 +39,15 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
             return true;
         }
 
-        public AccountStatusGroup Update(AccountStatusGroup entity)
+        public async Task<AccountStatusGroup> Update(AccountStatusGroup entity)
         {
-            var updatedEntity = _dbContext.AccountsStatusGroups.Update(entity);
-
-            return updatedEntity.Entity;
+            var existingEntity = await _dbContext.AccountsStatusGroups.SingleOrDefaultAsync(x => x.AccountId == entity.AccountId && x.IdGroup == entity.IdGroup);
+            
+            if (existingEntity != null)
+            {
+                existingEntity.RoleAccount = entity.RoleAccount;
+            }
+            return entity;
         }
     }
 }
