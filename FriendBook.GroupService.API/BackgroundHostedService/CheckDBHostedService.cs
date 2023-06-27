@@ -6,7 +6,7 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
     public class CheckDBHostedService : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private GroupAppDBContext? _appDBContext;
+        private IdentityContext? _appDBContext;
 
         public CheckDBHostedService(IServiceScopeFactory serviceScopeFactory)
         {
@@ -16,12 +16,19 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
+            _appDBContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
 
-            if (await _appDBContext.Database.EnsureCreatedAsync())
+            if (await _appDBContext.Database.EnsureCreatedAsync(stoppingToken))
             {
-                await _appDBContext.UpdateDatabase();
+                await _appDBContext.Database.MigrateAsync(stoppingToken);
+                return;
             }
+
+            if ((await _appDBContext.Database.GetPendingMigrationsAsync(stoppingToken)).Any())
+            {
+                await _appDBContext.Database.MigrateAsync(stoppingToken);
+            }
+
             return;
         }
     }
