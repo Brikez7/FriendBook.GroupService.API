@@ -1,14 +1,12 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
 using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.Domain.UserToken;
+using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Newtonsoft.Json;
-
 namespace FriendBook.GroupService.API.Controllers
 {
     [Route("api/[controller]")]
@@ -19,13 +17,13 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IAccountStatusGroupService _accountStatusGroupService;
         private readonly IValidationService<AccountStatusGroupDTO> _accountStatusGroupDTOValidationService;
         private readonly IGrpcService _grpcService;
-        public Lazy<UserTokenAuth> UserToken { get; set; }
+        public Lazy<TokenAuth> UserToken { get; set; }
         public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService,
-            IGrpcService grpcService, IHttpContextAccessor httpContextAccessor)
+            IGrpcService grpcService, IHttpContextAccessor httpContextAccessor, IAccessTokenService accessTokenService)
         {
             _accountStatusGroupService = accountStatusGroupService;
             _accountStatusGroupDTOValidationService = validationService;
-            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(httpContextAccessor.HttpContext.User.Claims));
+            UserToken = accessTokenService.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
             _grpcService = grpcService;
         }
 
@@ -40,17 +38,17 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation is not null)
+            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
                 return Ok(responseValidation);
 
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
 
-            if (!responseAnotherAPI.Data.Exists) 
+            if (responseAnotherAPI.StatusCode != Domain.Response.StatusCode.UserExists) 
             {
                 return Ok(responseAnotherAPI);
             }
 
-            var response = await _accountStatusGroupService.CreateAccountStatusGroup(accountStatusGroupDTO);
+            var response = await _accountStatusGroupService.CreateAccountStatusGroup(UserToken.Value.Id,accountStatusGroupDTO);
             return Ok(response);
         }
 
@@ -58,7 +56,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation is not null)
+            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
                 return Ok(responseValidation);
 
             var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
@@ -68,8 +66,10 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
         {
-            var responseAnotherApi = await _grpcService.GetProfiles(login, Request.Headers["Authorization"]);
-            if (responseAnotherApi.Message is not null)
+            string accessToken = (Request?.Headers["Authorization"] ?? "").ToString();
+
+            var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
+            if (responseAnotherApi.StatusCode != Domain.Response.StatusCode.GrpcProphileRead)
             {
                 return Ok(responseAnotherApi);
             }

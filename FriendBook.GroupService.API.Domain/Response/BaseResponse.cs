@@ -1,4 +1,4 @@
-﻿namespace FriendBook.GroupService.API.Domain.InnerResponse
+﻿namespace FriendBook.GroupService.API.Domain.Response
 {
     public abstract class BaseResponse<T>
     {

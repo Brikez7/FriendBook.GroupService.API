@@ -1,6 +1,6 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
 using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {

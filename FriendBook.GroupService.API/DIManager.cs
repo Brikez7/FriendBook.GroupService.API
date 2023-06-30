@@ -17,7 +17,8 @@ using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
 using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using FriendBook.GroupService.API.Domain.JWT;
+using FriendBook.IdentityServer.API.BLL.Services;
+using FriendBook.IdentityServer.API.BLL.Interfaces;
 
 namespace FriendBook.GroupService.API
 {
@@ -50,6 +51,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
             webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
+            webApplicationBuilder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<GroupDTO>, ValidationService<GroupDTO>>();

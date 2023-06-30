@@ -3,7 +3,7 @@ using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BLL.Services
@@ -32,7 +32,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             var createdGroup = await _groupRepository.AddAsync(group);
 
-            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id,RoleAccount.Creater);
+            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id!,RoleAccount.Creater);
             var accountCreaterStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
 
             await _groupRepository.SaveAsync();
@@ -44,9 +44,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroup(Guid id, Guid userId)
+        public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid userId)
         {
-            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == id && x.CreaterId == userId);
+            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreaterId == userId);
 
             if (entity is null) 
             {
@@ -85,15 +85,15 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                      .Select(x => new GroupDTO(x))
                                                      .ToArrayAsync();
 
-            if(listGroupDTO.Length == 0) 
+            if(listGroupDTO?.Length > 0) 
             {
-                return new StandartResponse<GroupDTO[]>
-                {
-                    Message = "Grous not founded",
-                    StatusCode = StatusCode.InternalServerError
-                };
+                return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO, StatusCode = StatusCode.EntityNotFound};
             }
-            return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO };
+            return new StandartResponse<GroupDTO[]>
+            {
+                Message = "Grous not founded",
+                StatusCode = StatusCode.EntityNotFound
+            };
         }
 
         public async Task<BaseResponse<ResponseAccountGroup[]>> GetGroupsWithStatusByUserId(Guid userId)
@@ -104,7 +104,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                                         .Include(x => x.Group)
                                                                         .ToListAsync();
 
-            ResponseAccountGroup[] accountGroupDTOs = accountStatusGroup.Select(x => new ResponseAccountGroup(x.Group.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
+            ResponseAccountGroup[] accountGroupDTOs = accountStatusGroup.Select(x => new ResponseAccountGroup(x.Group!.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
                                                                         .ToArray();
 
             if (accountGroupDTOs.Length == 0)
@@ -112,13 +112,14 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<ResponseAccountGroup[]>
                 {
                     Message = "No groups where you belong have been found",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
 
             return new StandartResponse<ResponseAccountGroup[]>
             {
-                Data = accountGroupDTOs
+                Data = accountGroupDTOs,
+                StatusCode = StatusCode.AccountStatusGroupRead
             };
         }
 
@@ -138,27 +139,18 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<GroupDTO>
                 {
                     Message = "Group not exists or you not creater",
-                    StatusCode = StatusCode.InternalServerError,
+                    StatusCode = StatusCode.EntityNotFound,
                 };   
             }
 
             Group? updatedGroup = new Group(group,userId);
             updatedGroup = await _groupRepository.Update(updatedGroup);
 
-            if (updatedGroup is null) 
-            {
-                return new StandartResponse<GroupDTO>()
-                {
-                    Message = "Group not found",
-                    StatusCode = StatusCode.EntityNotFound
-                };
-            }
-
             await _groupRepository.SaveAsync();
 
             return new StandartResponse<GroupDTO>()
             {
-                Data = new GroupDTO(updatedGroup),
+                Data = new GroupDTO(updatedGroup!),
                 StatusCode = StatusCode.GroupUpdate
             };
         }

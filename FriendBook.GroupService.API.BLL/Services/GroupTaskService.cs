@@ -1,5 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
@@ -23,8 +23,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<ResponseGroupTaskView> 
                 {
-                    Message = "Account in group not found",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "Account in group not found or you not access in group",
+                    StatusCode = StatusCode.UserNotAccess
                 };
             }
 
@@ -33,7 +33,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<ResponseGroupTaskView>
                 {
                     Message = "Task in with name exists",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.GroupTaskExists
                 };
             }
 
@@ -57,8 +57,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<GroupTask>
                 {
-                    Message = "Group not exists or you not been in group",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "Group not exists or you not exists in group",
+                    StatusCode = StatusCode.UserNotExists
                 };
             }
 
@@ -66,13 +66,17 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                  .Where(x => x.GroupId == groupTaskKeyDTO.GroupId && x.Name == groupTaskKeyDTO.Name)
                                                  .FirstOrDefaultAsync();
 
-            if (task is null || task.Team.Any(t => t == userId))
+            if (task is null)
             {
                 return new StandartResponse<GroupTask>
                 {
-                    Message = "You been in group or task not exists",
+                    Message = "task not exists",
                     StatusCode = StatusCode.InternalServerError
                 };
+            }
+            if (task.Team.Any(t => t == userId)) 
+            {
+                return new StandartResponse<GroupTask> { Message = "You already subscribe in group", StatusCode =  StatusCode.SubscribeErrror};
             }
 
             task.Team = task.Team.Append(userId).ToArray();
@@ -93,7 +97,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<GroupTask>
                 {
                     Message = "Group not exists or you not been in group",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.UserNotExists
                 };
             }
 
@@ -101,15 +105,22 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                  .Where(x => x.GroupId == groupTaskKeyDTO.GroupId && x.Name == groupTaskKeyDTO.Name)
                                                  .FirstOrDefaultAsync();
 
-            if (task is null || !task.Team.Any(t => t == userId))
+            if (task is null)
             {
                 return new StandartResponse<GroupTask>
                 {
-                    Message = "You been in group or task not exists",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "Task not exists",
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
-
+            if (!task.Team.Any(t => t == userId)) 
+            {
+                return new StandartResponse<GroupTask>
+                {
+                    Message = "You already unsubscribe in group",
+                    StatusCode = StatusCode.UnsubscribeError
+                };
+            }
             task.Team = task.Team.Where(x => x != userId).ToArray();
 
             var updatedGroup = _groupTaskRepository.Update(task);
@@ -147,8 +158,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<GroupTask>
                 {
-                    Message = "You are not in this group or you do not have access",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "You are not exists in this group or you do not have access",
+                    StatusCode = StatusCode.UserNotAccess
                 };
             }
 
@@ -160,7 +171,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<GroupTask>
                 {
                     Message = "Task not found",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
             else if (await tasks.AnyAsync(x => x.Name == groupTask.NewName) && groupTask.NewName != groupTask.OldName)
@@ -168,7 +179,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<GroupTask>
                 {
                     Message = "The task with name already exists",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.GroupTaskExists
                 };
             }
 
@@ -183,7 +194,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<GroupTask>()
             {
                 Data = updatedGroupTask,
-                StatusCode = StatusCode.GroupUpdate
+                StatusCode = StatusCode.GroupTaskUpdate
             };
         }
 
@@ -193,8 +204,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<bool>
                 {
-                    Message = "You are not in this group or you do not have access that delete task",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "You are not in this group or you do not have access",
+                    StatusCode = StatusCode.UserNotAccess
                 };
             }
 
@@ -203,7 +214,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<bool>
                 {
-                    Message = "This task not exit",
+                    Message = "This task not exists",
                     StatusCode = StatusCode.InternalServerError
                 };
             }
