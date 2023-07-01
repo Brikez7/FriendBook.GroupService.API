@@ -12,5 +12,6 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
         public BaseResponse<IQueryable<GroupTask>> GetGroupTaskOData();
         public Task<BaseResponse<GroupTask>> SubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
         public Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
+        public Task<BaseResponse<int>> UpdateStatusInGroupTasks();
     }
 }

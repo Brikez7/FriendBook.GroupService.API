@@ -29,7 +29,8 @@
         GroupTaskUpdate = 32,
         GroupTaskDelete = 33,
         GroupTaskRead = 34,
-        GroupTaskExists = 36,
+        GroupTaskExists = 35,
+        GroupTaskNotUpdated = 36,
 
         SubscribeErrror = 41,
         UnsubscribeError = 42,
@@ -38,6 +39,9 @@
 
         EntityIsValid = 54,
         ErrorValidation = 55,
+
+        HangfireUpdated = 61, 
+        HangfireUpdatedError = 62,
 
         OK = 200,
         OKNoContent = 204,

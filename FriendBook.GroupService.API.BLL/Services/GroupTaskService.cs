@@ -228,5 +228,16 @@ namespace FriendBook.GroupService.API.BLL.Services
                 StatusCode = StatusCode.GroupDelete
             };
         }
+
+        public async Task<BaseResponse<int>> UpdateStatusInGroupTasks()
+        {
+            DateTime nowDate = DateTime.Now.Date;
+            int countUpdatedTask = await _groupTaskRepository.GetAll().Where(x => x.DateEndWork < nowDate && x.Status == StatusTask.Process).ExecuteUpdateAsync(x => x.SetProperty(prop => prop.Status, StatusTask.MissedDate));
+
+            if (countUpdatedTask == 0)
+                return new StandartResponse<int> { Data = countUpdatedTask, StatusCode = StatusCode.GroupTaskNotUpdated, Message = "Count group task updated was equal to zero" };
+
+            return new StandartResponse<int> { Data = countUpdatedTask, StatusCode = StatusCode.GroupTaskUpdate };
+        }
     }
 }
