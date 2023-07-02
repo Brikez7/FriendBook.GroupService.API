@@ -1,5 +1,6 @@
 using FriendBook.GroupService.API.DAL;
 using FriendBook.GroupService.API.Domain.Settings;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API
@@ -19,6 +20,7 @@ namespace FriendBook.GroupService.API
             builder.AddGrpcProperty();
 
             builder.AddODataProperty();
+            builder.AddHangfire();
             builder.AddHostedServices();
 
             builder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
@@ -27,7 +29,7 @@ namespace FriendBook.GroupService.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+        
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -39,9 +41,8 @@ namespace FriendBook.GroupService.API
             app.AddCorsUI();
 
             app.UseAuthorization();
-
             app.MapControllers();
-
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions());
             app.Run();
         }
     }

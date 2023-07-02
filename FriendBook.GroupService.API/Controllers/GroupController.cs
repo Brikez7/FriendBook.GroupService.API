@@ -1,16 +1,14 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
 using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.CustomClaims;
-using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.Domain.UserToken;
+using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Newtonsoft.Json;
+using StatusCode = FriendBook.GroupService.API.Domain.Response.StatusCode;
 
 namespace FriendBook.GroupService.API.Controllers
 {
@@ -21,12 +19,12 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IContactGroupService _groupService;
         private readonly IValidationService<GroupDTO> _groupDTOValidationService;
         private readonly IGrpcService _grpcService;
-        public Lazy<UserTokenAuth> UserToken { get; set; }
-        public GroupController(IContactGroupService groupService, IValidationService<GroupDTO> validationService, IGrpcService grpcService)
+        public Lazy<TokenAuth> UserToken { get; set; }
+        public GroupController(IContactGroupService groupService, IValidationService<GroupDTO> validationService, IGrpcService grpcService, IAccessTokenService accessTokenService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
-            UserToken = new Lazy<UserTokenAuth>(() => UserTokenAuth.CreateUserToken(User.Claims));
+            UserToken = accessTokenService.CreateUser(httpContext.HttpContext!.User.Claims);
             _grpcService = grpcService;
         }
 
@@ -41,8 +39,8 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(UserToken.Value.Id);
-
-            if (!responseAnotherAPI.Data.Exists)
+         
+            if (responseAnotherAPI.StatusCode != Domain.Response.StatusCode.UserExists)
             {
                 return Ok(responseAnotherAPI);
             }
@@ -55,7 +53,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateGroup([FromBody] GroupDTO groupDTO)
         {
             var responseValidation = await _groupDTOValidationService.ValidateAsync(groupDTO);
-            if (responseValidation is not null)
+            if (responseValidation.StatusCode == Domain.Response.StatusCode.ErrorValidation)
                 return Ok(responseValidation);
 
             var response = await _groupService.UpdateGroup(groupDTO, UserToken.Value.Id);

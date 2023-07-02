@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BackgroundHostedService
 {
-        public class CheckDBHostedService : BackgroundService
+    public class CheckDBHostedService : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private GroupAppDBContext? _appDBContext;
@@ -18,17 +18,12 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             using var scope = _serviceScopeFactory.CreateScope();
             _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
 
-            if (await _appDBContext.Database.EnsureCreatedAsync(stoppingToken))
+            if (!await _appDBContext.Database.CanConnectAsync() || (await _appDBContext.Database.GetPendingMigrationsAsync(stoppingToken)).Any())
             {
                 await _appDBContext.Database.MigrateAsync(stoppingToken);
                 return;
             }
-
-            if ((await _appDBContext.Database.GetPendingMigrationsAsync(stoppingToken)).Any())
-            {
-                await _appDBContext.Database.MigrateAsync(stoppingToken);
-            }
-
+            
             return;
         }
     }

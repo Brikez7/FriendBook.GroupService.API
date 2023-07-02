@@ -8,5 +8,6 @@
         Process = 0,
         Succsess = 1,
         Denied = 2,
+        MissedDate = 3,
     }
 }

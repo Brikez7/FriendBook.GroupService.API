@@ -1,10 +1,10 @@
-﻿using FriendBook.GroupService.API.Domain.InnerResponse;
+﻿using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IValidationService<T>
     {
-        public Task<BaseResponse<List<Tuple<string, string>>>?> ValidateAsync(T dto);
-        public BaseResponse<List<Tuple<string, string>>>? Validate(T dto);
+        public Task<BaseResponse<List<Tuple<string, string>>?>> ValidateAsync(T dto);
+        public BaseResponse<List<Tuple<string, string>>?> Validate(T dto);
     }
 }

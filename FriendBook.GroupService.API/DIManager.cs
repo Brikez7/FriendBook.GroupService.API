@@ -17,7 +17,13 @@ using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
 using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using FriendBook.GroupService.API.Domain.JWT;
+using FriendBook.IdentityServer.API.BLL.Services;
+using FriendBook.IdentityServer.API.BLL.Interfaces;
+using Hangfire;
+using Hangfire.PostgreSql;
+using FriendBook.GroupService.API.DAL;
+using Microsoft.EntityFrameworkCore;
+using FriendBook.GroupService.API.HostedService;
 
 namespace FriendBook.GroupService.API
 {
@@ -50,6 +56,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
             webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
+            webApplicationBuilder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<GroupDTO>, ValidationService<GroupDTO>>();
@@ -58,8 +65,19 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
         }
+        public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
+        {
+            
 
-
+            webApplicationBuilder.Services.AddHangfire(configuration =>
+            {
+                configuration.UseSimpleAssemblyNameTypeSerializer()
+                             .UseRecommendedSerializerSettings()
+                             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                             .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString(HangfireContext.NameConnection));
+            });
+            webApplicationBuilder.Services.AddHangfireServer();
+        }
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {
             var odataBuilder = new ODataConventionModelBuilder();
@@ -110,6 +128,7 @@ namespace FriendBook.GroupService.API
         public static void AddHostedServices(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddHostedService<CheckDBHostedService>();
+            webApplicationBuilder.Services.AddHostedService<HangfireRecurringHostJob>();
         }
 
         public static void AddMiddleware(this WebApplication webApplication)

@@ -1,7 +1,7 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {

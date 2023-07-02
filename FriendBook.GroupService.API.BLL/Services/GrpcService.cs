@@ -2,12 +2,12 @@
 using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
 using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
 using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.Domain.Settings;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
-using StatusCode = FriendBook.GroupService.API.Domain.InnerResponse.StatusCode;
+using StatusCode = FriendBook.GroupService.API.Domain.Response.StatusCode;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -31,16 +31,15 @@ namespace FriendBook.GroupService.API.BLL.Services
                 response = await client.CheckUserExistsAsync(new RequestUserId { AccountId = userId.ToString() });
             }
 
-            if (!response.Exists)
+            if (response.Exists)
             {
-                return new StandartResponse<ResponseUserExists>()
-                {
-                    Message = "Account not exists or server not connected",
-                    StatusCode = StatusCode.InternalServerError,
-                };
+                return new StandartResponse<ResponseUserExists> { Data = response, StatusCode = StatusCode.UserExists };
             }
-
-            return new StandartResponse<ResponseUserExists> { Data = response};
+            return new StandartResponse<ResponseUserExists>()
+            {
+                Message = "Account not exists or server not connected",
+                StatusCode = StatusCode.UserNotExists,
+            };
         }
 
         public async Task<BaseResponse<ResponseProfiles>> GetProfiles(string login, string accessToken)
@@ -49,22 +48,24 @@ namespace FriendBook.GroupService.API.BLL.Services
             httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
             ResponseProfiles response;
-            using (var channel = GrpcChannel.ForAddress("http://localhost:5001", new GrpcChannelOptions()
+            using (var channel = GrpcChannel.ForAddress(_identityGrpcSettings.HostGrpcService, new GrpcChannelOptions()
             { HttpHandler = httpClientHandler }))
             {
                 var requestUserLogin = new RequestUserLogin() {Login = login };
 
-                var headers = new Metadata();
-                headers.Add("Authorization",  accessToken);
+                var headers = new Metadata
+                {
+                    { "Authorization", accessToken }
+                };
 
                 var client = new PublicContact.PublicContactClient(channel);
                 response = await client.GetProfilesAsync(requestUserLogin, headers);
             }
             if (response.Profiles is null) 
             {
-                return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = StatusCode.InternalServerError };
+                return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = StatusCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseProfiles> { Data = response };
+            return new StandartResponse<ResponseProfiles> { Data = response, StatusCode = StatusCode.GrpcProphileRead };
         }
 
         public async Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId)
@@ -83,9 +84,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
             if (response.Users is null) 
             {
-                return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = StatusCode.InternalServerError };
+                return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = StatusCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseUsers> { Data = response };
+            return new StandartResponse<ResponseUsers> { Data = response, StatusCode = StatusCode.GrpcUsersRead };
         }
     }
 }

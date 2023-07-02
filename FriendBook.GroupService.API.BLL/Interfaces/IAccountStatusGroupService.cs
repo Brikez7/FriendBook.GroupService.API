@@ -3,13 +3,13 @@ using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.InnerResponse;
+using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IAccountStatusGroupService
     {
-        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup);
+        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid userId, AccountStatusGroupDTO accountStatusGroup);
         public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid id, Guid createrId, Guid groupId);
         public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid idCreater);
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData();
