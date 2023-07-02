@@ -3,7 +3,7 @@ using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -41,8 +41,10 @@ namespace FriendBook.GroupService.API.BLL.Services
             var createdGroup = await _groupTaskRepository.AddAsync(newGroupTask);
             await _groupTaskRepository.SaveAsync();
 
-            var viewDTO = new ResponseGroupTaskView(createdGroup);
-            viewDTO.Users = new string[] { login };
+            var viewDTO = new ResponseGroupTaskView(createdGroup)
+            {
+                Users = new string[] { login }
+            };
 
             return new StandartResponse<ResponseGroupTaskView>()
             {
@@ -136,7 +138,7 @@ namespace FriendBook.GroupService.API.BLL.Services
         public BaseResponse<IQueryable<GroupTask>> GetGroupTaskOData()
         {
             var groupTasks = _groupTaskRepository.GetAll();
-            if (groupTasks.Count() == 0)
+            if (groupTasks.Any())
             {
                 return new StandartResponse<IQueryable<GroupTask>>()
                 {

@@ -1,6 +1,6 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 
-namespace FriendBook.GroupService.API.Domain.Entities
+namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
     public class GroupTask
     {
@@ -61,5 +61,12 @@ namespace FriendBook.GroupService.API.Domain.Entities
 
         public Group? Group { get; set; }
         /*        public IEnumerable<AccountStatusGroup>? AccountsStatusGroup { get; set; } = new List<AccountStatusGroup>();*/
+    }
+    public enum StatusTask
+    {
+        Process = 0,
+        Succsess = 1,
+        Denied = 2,
+        MissedDate = 3,
     }
 }

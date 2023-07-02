@@ -1,5 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 
 namespace FriendBook.GroupService.API.DAL.Repositories
 {

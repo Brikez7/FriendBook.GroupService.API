@@ -24,6 +24,7 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.HostedService;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 
 namespace FriendBook.GroupService.API
 {
@@ -67,8 +68,6 @@ namespace FriendBook.GroupService.API
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {
-            
-
             webApplicationBuilder.Services.AddHangfire(configuration =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
@@ -77,6 +76,16 @@ namespace FriendBook.GroupService.API
                              .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString(HangfireContext.NameConnection));
             });
             webApplicationBuilder.Services.AddHangfireServer();
+        }
+        public static void AddMongoDB(this WebApplicationBuilder webApplicationBuilder) 
+        {
+            webApplicationBuilder.Services.Configure<MongoDBSettings>(
+                webApplicationBuilder.Configuration.GetSection(MongoDBSettings.Name));
+        }
+        public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
+        {
+            webApplicationBuilder.Services.Configure<GroupAppDBContext>(
+                webApplicationBuilder.Configuration.GetSection(GroupAppDBContext.NameConnection));
         }
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {

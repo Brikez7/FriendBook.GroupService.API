@@ -1,7 +1,4 @@
-using FriendBook.GroupService.API.DAL;
-using FriendBook.GroupService.API.Domain.Settings;
 using Hangfire;
-using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API
 {
@@ -13,18 +10,19 @@ namespace FriendBook.GroupService.API
 
             builder.Services.AddSingleton(builder.Configuration);
 
+            builder.AddMongoDB();
+            builder.AddPostgresDB();
+
             builder.AddRepositores();
-            builder.AddAuthProperty();
             builder.AddValidators();
             builder.AddServices();
-            builder.AddGrpcProperty();
 
+            builder.AddGrpcProperty();
+            builder.AddAuthProperty();
             builder.AddODataProperty();
+
             builder.AddHangfire();
             builder.AddHostedServices();
-
-            builder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
-                builder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

@@ -1,4 +1,7 @@
-﻿namespace FriendBook.GroupService.API.Domain.Entities
+﻿using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using FriendBook.GroupService.API.Domain.Entities.Postgres.AccountStatusGroup;
+
+namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class AccountStatusGroupDTO
     {

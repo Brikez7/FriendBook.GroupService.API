@@ -1,6 +1,6 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 
-namespace FriendBook.GroupService.API.Domain.Entities
+namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
     public class Group
     {

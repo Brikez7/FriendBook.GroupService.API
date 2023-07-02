@@ -1,5 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Configuration.DataType;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres.AccountStatusGroup;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
