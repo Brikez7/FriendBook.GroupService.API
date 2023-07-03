@@ -25,6 +25,9 @@ using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.HostedService;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using MongoDB.Driver;
+using FriendBook.GroupService.API.Domain.Entities.MongoDB;
+using Microsoft.Extensions.Options;
 
 namespace FriendBook.GroupService.API
 {
@@ -81,11 +84,28 @@ namespace FriendBook.GroupService.API
         {
             webApplicationBuilder.Services.Configure<MongoDBSettings>(
                 webApplicationBuilder.Configuration.GetSection(MongoDBSettings.Name));
+
+            webApplicationBuilder.Services.AddSingleton<IMongoClient>(provider => 
+                new MongoClient(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.MongoDBConnectionString)
+            );
+
+            webApplicationBuilder.Services.AddSingleton(provider =>
+            {
+                var mongoClient = provider.GetRequiredService<IMongoClient>();
+                return mongoClient.GetDatabase(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.Database);
+            });
+
+            webApplicationBuilder.Services.AddScoped(provider =>
+            {
+                var database = provider.GetRequiredService<IMongoDatabase>();
+                return database.GetCollection<StageGroupTask>(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.Collection);
+            });
+
         }
         public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.Configure<GroupAppDBContext>(
-                webApplicationBuilder.Configuration.GetSection(GroupAppDBContext.NameConnection));
+            webApplicationBuilder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
+                 webApplicationBuilder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
         }
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {

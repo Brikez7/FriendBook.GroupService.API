@@ -1,10 +1,12 @@
 ﻿using FriendBook.GroupService.API.Domain.Entities.Postgres;
-using FriendBook.GroupService.API.Domain.Entities.Postgres.AccountStatusGroup;
 
 namespace FriendBook.GroupService.API.Domain.Entities
 {
     public class AccountStatusGroupDTO
     {
+        public Guid IdGroup { get; set; }
+        public Guid AccountId { get; set; }
+        public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
         public AccountStatusGroupDTO()
         {
         }
@@ -22,9 +24,5 @@ namespace FriendBook.GroupService.API.Domain.Entities
             AccountId = createdAccountaStatusGroup.AccountId;
             RoleAccount = createdAccountaStatusGroup.RoleAccount;
         }
-
-        public Guid IdGroup { get; set; }
-        public Guid AccountId { get; set; }
-        public RoleAccount RoleAccount { get; set; } = RoleAccount.Default;
     }
 }
