@@ -22,7 +22,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid userId,AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == userId && x.Id == accountStatusGroupDTO.IdGroup))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == userId && x.Id == accountStatusGroupDTO.GroupId))
                 return new StandartResponse<AccountStatusGroupDTO> { Message = "User not availble", StatusCode = StatusCode.UserNotAccess };
 
             if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
@@ -33,7 +33,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                     StatusCode = StatusCode.UserNotAccess,
                 };
             }
-            if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == accountStatusGroupDTO.IdGroup && x.AccountId == accountStatusGroupDTO.AccountId))
+            if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == accountStatusGroupDTO.GroupId && x.AccountId == accountStatusGroupDTO.AccountId))
             {
                 return new StandartResponse<AccountStatusGroupDTO>()
                 {
@@ -85,7 +85,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusGroupByIdGroupAndUserId(Guid userId, Guid groupId)
+        public async Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusesGroupFromUserGroup(Guid userId, Guid groupId)
         {
             var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
                                                                         .Where(x => x.AccountId == userId)
@@ -197,9 +197,9 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO, Guid idCreater)
         {
-            if (await _groupRepository.GetAll().AnyAsync(x => x.Id == accountStatusGroupDTO.IdGroup && x.CreaterId == idCreater))
+            if (await _groupRepository.GetAll().AnyAsync(x => x.Id == accountStatusGroupDTO.GroupId && x.CreaterId == idCreater))
             {
-                var accountStatus = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroupDTO.IdGroup && x.AccountId == accountStatusGroupDTO.AccountId);
+                var accountStatus = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroupDTO.GroupId && x.AccountId == accountStatusGroupDTO.AccountId);
                 if (accountStatus == null || accountStatusGroupDTO.AccountId == idCreater) 
                 {
                     return new StandartResponse<AccountStatusGroupDTO>()

@@ -21,7 +21,6 @@ namespace FriendBook.GroupService.API.HostedService
 
             _groupTaskService = scope.ServiceProvider.GetRequiredService<IGroupTaskService>();
 
-            RecurringJob.AddOrUpdate("Test", () => Console.WriteLine("LOL"), Cron.Minutely);
             RecurringJob.AddOrUpdate("UpdateStatusTask", () => UpdateStatusInGroupTasksAsync(), Cron.Daily);
 
             return;

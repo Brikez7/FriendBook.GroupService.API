@@ -22,7 +22,7 @@
         public AccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
             AccountId = accountStatusGroupDTO.AccountId;
-            IdGroup = accountStatusGroupDTO.IdGroup;
+            IdGroup = accountStatusGroupDTO.GroupId;
             RoleAccount = accountStatusGroupDTO.RoleAccount;
         }
 

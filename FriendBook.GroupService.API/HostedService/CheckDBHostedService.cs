@@ -20,7 +20,16 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             _mongoDatabase = mongoDatabase;
             _settings = options.Value;
         }
+        public static void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
+        {
+            var indexKeys = Builders<StageGroupTask>.IndexKeys.Combine(
+                Builders<StageGroupTask>.IndexKeys.Ascending(x => x.IdGroupTask),
+                Builders<StageGroupTask>.IndexKeys.Ascending(x => x.Name));
 
+            var indexModel = new CreateIndexModel<StageGroupTask>(indexKeys, new CreateIndexOptions { Unique = true });
+
+            collection.Indexes.CreateOne(indexModel);
+        }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             bool collectionExists = await (await _mongoDatabase.ListCollectionNamesAsync()).AnyAsync();
@@ -28,6 +37,9 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             {
                 await _mongoDatabase.CreateCollectionAsync(_settings.Collection);
             }
+
+            var collection = _mongoDatabase.GetCollection<StageGroupTask>(_settings.Collection);
+            CreateUniqueIndex(collection);
 
             using var scope = _serviceScopeFactory.CreateScope();
             _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();

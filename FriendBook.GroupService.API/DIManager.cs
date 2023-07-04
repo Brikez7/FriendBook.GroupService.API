@@ -38,6 +38,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
+            webApplicationBuilder.Services.AddScoped<IStageGroupTaskRepository, StageGroupTaskRepository>();
         }
         public static void AddGrpcProperty(this WebApplicationBuilder webApplicationBuilder) 
         {

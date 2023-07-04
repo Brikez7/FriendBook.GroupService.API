@@ -4,6 +4,8 @@ using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using MongoDB.Driver;
+using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -11,10 +13,12 @@ namespace FriendBook.GroupService.API.BLL.Services
     {
         private readonly IGroupTaskRepository _groupTaskRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
-        public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
+        private readonly IStageGroupTaskRepository _repositoryStageTask;
+        public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository, IStageGroupTaskRepository stageGroupTask)
         {
             _groupTaskRepository = groupTaskRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;
+            _repositoryStageTask = stageGroupTask;
         }
 
         public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew groupTask,Guid userId,string login)
@@ -40,6 +44,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             var newGroupTask = new GroupTask(groupTask, userId);
             var createdGroup = await _groupTaskRepository.AddAsync(newGroupTask);
             await _groupTaskRepository.SaveAsync();
+
+            var stageGroupTask = new StageGroupTask(MongoDB.Bson.ObjectId.GenerateNewId(), (Guid)createdGroup.Id!, $"Start task: {createdGroup.Name}", "", DateTime.UtcNow);
+            var result = await _repositoryStageTask.AddAsync(stageGroupTask);
 
             var viewDTO = new ResponseGroupTaskView(createdGroup)
             {
@@ -217,7 +224,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "This task not exists",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
 

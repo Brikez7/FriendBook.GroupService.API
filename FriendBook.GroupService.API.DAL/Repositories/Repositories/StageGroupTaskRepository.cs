@@ -3,9 +3,9 @@ using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
-namespace FriendBook.GroupService.API.DAL.Repositories.Repositories
+namespace FriendBook.GroupService.API.DAL.Repositories
 {
-    internal class StageGroupTaskRepository : IStageGroupTaskRepository
+    public class StageGroupTaskRepository : IStageGroupTaskRepository
     {
         private readonly IMongoCollection<StageGroupTask> _collection;
 

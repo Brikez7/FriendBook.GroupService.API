@@ -43,6 +43,13 @@
         HangfireUpdated = 61, 
         HangfireUpdatedError = 62,
 
+        StageGroupTaskCreate = 71,
+        StageGroupTaskUpdate = 72,
+        StageGroupTaskDelete = 73,
+        StageGroupTaskRead = 74,
+        StageGroupTaskExists = 75,
+        StageGroupTaskNotUpdated = 76,
+
         OK = 200,
         OKNoContent = 204,
         IdNotFound = 401,

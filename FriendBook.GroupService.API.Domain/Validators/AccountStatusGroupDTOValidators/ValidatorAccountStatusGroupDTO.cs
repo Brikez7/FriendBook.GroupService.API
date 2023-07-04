@@ -8,7 +8,7 @@ namespace FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOVal
     {
         public ValidatorAccountStatusGroupDTO()
         {
-            RuleFor(dto => dto.IdGroup)
+            RuleFor(dto => dto.GroupId)
                 .NotEmpty().WithMessage("IdGroup is required.");
 
             RuleFor(dto => dto.AccountId)

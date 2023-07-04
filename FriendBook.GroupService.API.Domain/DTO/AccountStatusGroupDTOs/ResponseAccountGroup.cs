@@ -2,6 +2,9 @@
 {
     public class ResponseAccountGroup
     {
+        public bool IsAdmin { get; set; }
+        public Guid GroupId { get; set; }
+        public string Name { get; set; } = null!;
         public ResponseAccountGroup()
         {
         }
@@ -13,8 +16,5 @@
             Name = groupName;
             IsAdmin = isAdmin;
         }
-        public bool IsAdmin { get; set; }
-        public Guid GroupId { get; set; }
-        public string Name { get; set; } = null!;
     }
 }
