@@ -13,8 +13,4 @@
     <PackageReference Include="MongoDB.Bson" Version="2.20.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validators\StageGroupTaskDTOValidators\" />
-  </ItemGroup>
-
 </Project>

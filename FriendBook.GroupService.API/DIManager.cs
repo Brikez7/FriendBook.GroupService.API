@@ -58,7 +58,6 @@ namespace FriendBook.GroupService.API
 
             webApplicationBuilder.Services.AddScoped<IValidator<RequestStageGroupTasNew>, ValidatorRequestStageGroupTasNew>();
             webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskDTO>, ValidatorStageGroupTaskDTO>();
-            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskIconDTO>, ValidatorStageGroupTaskIconDTO>();
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
@@ -75,6 +74,9 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
+
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestStageGroupTasNew>, ValidationService<RequestStageGroupTasNew>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<StageGroupTaskDTO>, ValidationService<StageGroupTaskDTO>>();
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {

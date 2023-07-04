@@ -20,15 +20,22 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             _mongoDatabase = mongoDatabase;
             _settings = options.Value;
         }
-        public static void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
+        public static async void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
         {
             var indexKeys = Builders<StageGroupTask>.IndexKeys.Combine(
                 Builders<StageGroupTask>.IndexKeys.Ascending(x => x.IdGroupTask),
                 Builders<StageGroupTask>.IndexKeys.Ascending(x => x.Name));
 
-            var indexModel = new CreateIndexModel<StageGroupTask>(indexKeys, new CreateIndexOptions { Unique = true });
+            var indexModel = new CreateIndexModel<StageGroupTask>(indexKeys, new CreateIndexOptions { Name = "Index_StageName_TaskId", Unique = true });
 
-            collection.Indexes.CreateOne(indexModel);
+            var existingIndexes = (await collection.Indexes.ListAsync()).ToList();
+
+            bool indexExists = existingIndexes.Any(i => i["name"] == indexModel.Options.Name);
+
+            if (!indexExists)
+            {
+                await collection.Indexes.CreateOneAsync(indexModel);
+            }
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

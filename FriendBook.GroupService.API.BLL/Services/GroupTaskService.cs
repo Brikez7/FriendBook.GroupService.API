@@ -49,7 +49,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             var stageGroupTask = new StageGroupTask(MongoDB.Bson.ObjectId.GenerateNewId(), (Guid)createdGroup.Id!, $"Start task: {createdGroup.Name}", "", DateTime.UtcNow);
             var result = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
 
-            var listStage = new List<StageGroupTaskIconDTO>() { new StageGroupTaskIconDTO(result.Id, result.Name, result.IdGroupTask) };
+            var listStage = new List<ResponseStageGroupTaskIcon>() { new ResponseStageGroupTaskIcon(result.Id, result.Name, result.IdGroupTask) };
             var viewDTO = new ResponseGroupTaskView(createdGroup, listStage)
             {
                 Users = new string[] { loginAdmin }

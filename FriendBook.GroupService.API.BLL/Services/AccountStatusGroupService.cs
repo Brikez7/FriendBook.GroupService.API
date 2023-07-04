@@ -156,11 +156,11 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
         { 
-            List<StageGroupTaskIconDTO> stageGroupTask = new List<StageGroupTaskIconDTO>();
+            List<ResponseStageGroupTaskIcon> stageGroupTask = new List<ResponseStageGroupTaskIcon>();
             List<ResponseGroupTaskView> tasksPages = new List<ResponseGroupTaskView>();
             foreach (var task in groupTasks)
             {
-                stageGroupTask = await _stageGroupTaskRepository.GetAll().Where(x => x.IdGroupTask == task.Id).Select(x => new StageGroupTaskIconDTO(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
+                stageGroupTask = await _stageGroupTaskRepository.GetAll().Where(x => x.IdGroupTask == task.Id).Select(x => new ResponseStageGroupTaskIcon(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
 
                 var namesUser = task.Team.Join(
                                         usersLoginWithId,

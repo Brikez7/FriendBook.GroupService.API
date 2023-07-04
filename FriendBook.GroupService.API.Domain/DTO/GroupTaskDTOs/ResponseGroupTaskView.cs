@@ -12,9 +12,9 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         public DateTime DateEndWork { get; set; }
         public DateTime DateStartWork { get; set; } = DateTime.UtcNow;
         public string[]? Users { get; set; }
-        public List<StageGroupTaskIconDTO> StagesGroupTask { get; set; } = new List<StageGroupTaskIconDTO>();
+        public List<ResponseStageGroupTaskIcon> StagesGroupTask { get; set; } = new List<ResponseStageGroupTaskIcon>();
 
-        public ResponseGroupTaskView(GroupTask groupTask, string[] users, List<StageGroupTaskIconDTO> stagesGroupTask)
+        public ResponseGroupTaskView(GroupTask groupTask, string[] users, List<ResponseStageGroupTaskIcon> stagesGroupTask)
         {
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
@@ -26,7 +26,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
             StagesGroupTask = stagesGroupTask;
         }
 
-        public ResponseGroupTaskView(GroupTask groupTask, List<StageGroupTaskIconDTO> stagesGroupTask)
+        public ResponseGroupTaskView(GroupTask groupTask, List<ResponseStageGroupTaskIcon> stagesGroupTask)
         {
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;

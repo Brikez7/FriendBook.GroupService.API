@@ -20,21 +20,21 @@ namespace FriendBook.GroupService.API.BLL.Services
             _accountStatusGroupRepository = accountStatusGroupRepository;
         }
 
-        public async Task<BaseResponse<StageGroupTaskIconDTO>> Create(RequestStageGroupTasNew entity, Guid userId, Guid groupId)
+        public async Task<BaseResponse<ResponseStageGroupTaskIcon>> Create(RequestStageGroupTasNew entity, Guid userId, Guid groupId)
         {
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && groupId == x.IdGroup && x.RoleAccount > RoleAccount.Default)) 
-                return new StandartResponse<StageGroupTaskIconDTO> { Message = "User not exist in this group", StatusCode = StatusCode.UserNotExists };
+                return new StandartResponse<ResponseStageGroupTaskIcon> { Message = "User not exist in this group", StatusCode = StatusCode.UserNotExists };
 
 
             if (await _stageGroupTaskRepository.GetAll().AnyAsync(x => x.IdGroupTask == entity.IdGroupTask && x.Name == entity.Name)) 
-                return new StandartResponse<StageGroupTaskIconDTO> { Message = "Stage with name exists in this group", StatusCode = StatusCode.StageGroupTaskExists };
+                return new StandartResponse<ResponseStageGroupTaskIcon> { Message = "Stage with name exists in this group", StatusCode = StatusCode.StageGroupTaskExists };
 
             DateTime now = DateTime.UtcNow;
             StageGroupTask stageGroupTask = new StageGroupTask(entity.IdGroupTask,entity.Name,"", now, now);
             var newEntity = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
 
-            StageGroupTaskIconDTO stageGroupTaskIcon = new StageGroupTaskIconDTO(newEntity.Id,newEntity.Name,newEntity.IdGroupTask);
-            return new StandartResponse<StageGroupTaskIconDTO> { Data = stageGroupTaskIcon, StatusCode = StatusCode.StageGroupTaskCreate };
+            ResponseStageGroupTaskIcon stageGroupTaskIcon = new ResponseStageGroupTaskIcon(newEntity.Id,newEntity.Name,newEntity.IdGroupTask);
+            return new StandartResponse<ResponseStageGroupTaskIcon> { Data = stageGroupTaskIcon, StatusCode = StatusCode.StageGroupTaskCreate };
         }
 
         public async Task<BaseResponse<bool>> Delete(ObjectId stageGroupTaskId, Guid userId, Guid groupId)
@@ -64,14 +64,14 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<StageGroupTaskDTO> { Data = stageGroupTaskDTO, StatusCode = StatusCode.StageGroupTaskRead}!; 
         }
 
-        public async Task<BaseResponse<List<StageGroupTaskIconDTO>>> GetStagesGroupTaskIconByGroupId(Guid groupId, Guid userId)
+        public async Task<BaseResponse<List<ResponseStageGroupTaskIcon>>> GetStagesGroupTaskIconByGroupId(Guid groupId, Guid userId)
         {
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && groupId == x.IdGroup))
-                return new StandartResponse<List<StageGroupTaskIconDTO>> { Message = "User not exist in this group", StatusCode = StatusCode.UserNotExists };
+                return new StandartResponse<List<ResponseStageGroupTaskIcon>> { Message = "User not exist in this group", StatusCode = StatusCode.UserNotExists };
 
-            var list = await _stageGroupTaskRepository.GetAll().Select(x => new StageGroupTaskIconDTO(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
+            var list = await _stageGroupTaskRepository.GetAll().Select(x => new ResponseStageGroupTaskIcon(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
 
-            return new StandartResponse<List<StageGroupTaskIconDTO>> { Data = list, StatusCode = StatusCode.StageGroupTaskRead};
+            return new StandartResponse<List<ResponseStageGroupTaskIcon>> { Data = list, StatusCode = StatusCode.StageGroupTaskRead};
         }
 
         public async Task<BaseResponse<StageGroupTaskDTO>> Update(StageGroupTaskDTO stageGroupTaskDTO, Guid userId, Guid groupId)
