@@ -28,6 +28,8 @@ using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using MongoDB.Driver;
 using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using Microsoft.Extensions.Options;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 
 namespace FriendBook.GroupService.API
 {
@@ -53,6 +55,10 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskKey>, ValidatorRequestGroupTaskKey>();
+
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestStageGroupTasNew>, ValidatorRequestStageGroupTasNew>();
+            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskDTO>, ValidatorStageGroupTaskDTO>();
+            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskIconDTO>, ValidatorStageGroupTaskIconDTO>();
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {

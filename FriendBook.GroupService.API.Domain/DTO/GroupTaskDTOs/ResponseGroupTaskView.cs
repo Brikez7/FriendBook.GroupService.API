@@ -1,4 +1,5 @@
-﻿using FriendBook.GroupService.API.Domain.Entities.Postgres;
+﻿using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 
 namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
@@ -11,18 +12,9 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         public DateTime DateEndWork { get; set; }
         public DateTime DateStartWork { get; set; } = DateTime.UtcNow;
         public string[]? Users { get; set; }
-        public ResponseGroupTaskView(GroupTask groupTask, string user)
-        {
-            GroupId = groupTask.GroupId;
-            Name = groupTask.Name;
-            Description = groupTask.Description;
-            Status = groupTask.Status;
-            DateEndWork = groupTask.DateEndWork;
-            DateStartWork = groupTask.DateStartWork;
-            Users = new string[] { user };
-        }
+        public List<StageGroupTaskIconDTO> StagesGroupTask { get; set; } = new List<StageGroupTaskIconDTO>();
 
-        public ResponseGroupTaskView(GroupTask groupTask, string[] users)
+        public ResponseGroupTaskView(GroupTask groupTask, string[] users, List<StageGroupTaskIconDTO> stagesGroupTask)
         {
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
@@ -31,9 +23,10 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
             DateEndWork = groupTask.DateEndWork;
             DateStartWork = groupTask.DateStartWork;
             Users = users;
+            StagesGroupTask = stagesGroupTask;
         }
 
-        public ResponseGroupTaskView(GroupTask groupTask)
+        public ResponseGroupTaskView(GroupTask groupTask, List<StageGroupTaskIconDTO> stagesGroupTask)
         {
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
@@ -41,6 +34,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
             Status = groupTask.Status;
             DateEndWork = groupTask.DateEndWork;
             DateStartWork = groupTask.DateStartWork;
+            StagesGroupTask = stagesGroupTask;
         }
 
         public ResponseGroupTaskView()

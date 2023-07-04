@@ -6,6 +6,7 @@ using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using MongoDB.Driver;
 using FriendBook.GroupService.API.Domain.Entities.MongoDB;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -13,12 +14,12 @@ namespace FriendBook.GroupService.API.BLL.Services
     {
         private readonly IGroupTaskRepository _groupTaskRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
-        private readonly IStageGroupTaskRepository _repositoryStageTask;
+        private readonly IStageGroupTaskRepository _stageGroupTaskRepository;
         public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository, IStageGroupTaskRepository stageGroupTask)
         {
             _groupTaskRepository = groupTaskRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;
-            _repositoryStageTask = stageGroupTask;
+            _stageGroupTaskRepository = stageGroupTask;
         }
 
         public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew requestGroupTaskNew, Guid adminId, string loginAdmin)
@@ -46,9 +47,10 @@ namespace FriendBook.GroupService.API.BLL.Services
             await _groupTaskRepository.SaveAsync();
 
             var stageGroupTask = new StageGroupTask(MongoDB.Bson.ObjectId.GenerateNewId(), (Guid)createdGroup.Id!, $"Start task: {createdGroup.Name}", "", DateTime.UtcNow);
-            var result = await _repositoryStageTask.AddAsync(stageGroupTask);
+            var result = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
 
-            var viewDTO = new ResponseGroupTaskView(createdGroup)
+            var listStage = new List<StageGroupTaskIconDTO>() { new StageGroupTaskIconDTO(result.Id, result.Name, result.IdGroupTask) };
+            var viewDTO = new ResponseGroupTaskView(createdGroup, listStage)
             {
                 Users = new string[] { loginAdmin }
             };

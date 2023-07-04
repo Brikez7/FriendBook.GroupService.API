@@ -1,0 +1,65 @@
+﻿using FluentValidation;
+using FriendBook.GroupService.API.BLL.Interfaces;
+using FriendBook.GroupService.API.BLL.Services;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.UserToken;
+using FriendBook.IdentityServer.API.BLL.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+using MongoDB.Bson;
+
+namespace FriendBook.GroupService.API.Controllers
+{
+    [Route("api/[controller]")]
+    [Authorize]
+    public class StageGroupTaskController : ODataController
+    {
+        private readonly IStageGroupTaskService _stageGroupTaskService;
+        private readonly IValidationService<RequestStageGroupTasNew> _requestStageGroupTasNewValidationService;
+        private readonly IValidationService<StageGroupTaskDTO> _stageGroupTaskDTOValidationService;
+        public Lazy<TokenAuth> UserToken { get; set; }
+        public StageGroupTaskController(IStageGroupTaskService stageGroupTaskService, IHttpContextAccessor httpContextAccessor,
+            IAccessTokenService accessTokenService, IValidationService<RequestStageGroupTasNew> validatorStageGroupTasNew, 
+            IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
+        {
+            _stageGroupTaskService = stageGroupTaskService;
+            UserToken = accessTokenService.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
+            _requestStageGroupTasNewValidationService = validatorStageGroupTasNew;
+            _stageGroupTaskDTOValidationService = validatorStageGroupTaskDTO;
+        }
+
+        [HttpPost("CreateStageGroupTask")]
+        public async Task<IActionResult> CreateStageGroupTask([FromQuery] Guid groupId, [FromBody] RequestStageGroupTasNew requestStageGroupTasNew) 
+        {
+            var responseValidation = await _requestStageGroupTasNewValidationService.ValidateAsync(requestStageGroupTasNew);
+            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+                return Ok(responseValidation);
+
+            var stageGroupTaskIconDTO = await _stageGroupTaskService.Create(requestStageGroupTasNew, UserToken.Value.Id, groupId);
+            return Ok(stageGroupTaskIconDTO);
+        }
+        [HttpPut("UpdateStageGroupTask")]
+        public async Task<IActionResult> UpdateStageGroupTask([FromQuery] Guid groupId, [FromBody] StageGroupTaskDTO stageGroupTaskDTO)
+        {
+            var responseValidation = await _stageGroupTaskDTOValidationService.ValidateAsync(stageGroupTaskDTO);
+            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+                return Ok(responseValidation);
+
+            var stageGroupTaskIconDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);
+            return Ok(stageGroupTaskIconDTO);
+        }
+        [HttpDelete("DeleteStageGroupTask")]
+        public async Task<IActionResult> DeleteStageGroupTask([FromQuery] Guid groupId, [FromQuery] ObjectId stageGroupTaskId)
+        {
+            var result = await _stageGroupTaskService.Delete(stageGroupTaskId, UserToken.Value.Id, groupId);
+            return Ok(stageGroupTaskId);
+        }
+        [HttpGet("GetStageGroupTask")]
+        public async Task<IActionResult> GetStageGroupTask([FromQuery] Guid groupId, [FromQuery] ObjectId stageGroupTaskId)
+        {
+            var stageGroupTaskIconDTO = await _stageGroupTaskService.GetStageGroupTaskById(stageGroupTaskId, UserToken.Value.Id, groupId);
+            return Ok(stageGroupTaskIconDTO);
+        }
+    }
+}

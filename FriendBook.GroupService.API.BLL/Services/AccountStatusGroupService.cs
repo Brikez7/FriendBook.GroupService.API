@@ -2,6 +2,7 @@
 using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
@@ -14,10 +15,12 @@ namespace FriendBook.GroupService.API.BLL.Services
     {
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
         private readonly IGroupRepository _groupRepository;
-        public AccountStatusGroupService(IAccountStatusGroupRepository accountStatusGroupRepository, IGroupRepository groupRepository)
+        private readonly IStageGroupTaskRepository _stageGroupTaskRepository;
+        public AccountStatusGroupService(IAccountStatusGroupRepository accountStatusGroupRepository, IGroupRepository groupRepository, IStageGroupTaskRepository stageGroupTaskRepository)
         {
             _accountStatusGroupRepository = accountStatusGroupRepository;
             _groupRepository = groupRepository;
+            _stageGroupTaskRepository = stageGroupTaskRepository;
         }
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid createrId,AccountStatusGroupDTO accountStatusGroupDTO)
@@ -151,18 +154,21 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public BaseResponse<ResponseTasksPage> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
-        {
+        public async Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
+        { 
+            List<StageGroupTaskIconDTO> stageGroupTask = new List<StageGroupTaskIconDTO>();
             List<ResponseGroupTaskView> tasksPages = new List<ResponseGroupTaskView>();
             foreach (var task in groupTasks)
             {
+                stageGroupTask = await _stageGroupTaskRepository.GetAll().Where(x => x.IdGroupTask == task.Id).Select(x => new StageGroupTaskIconDTO(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
+
                 var namesUser = task.Team.Join(
                                         usersLoginWithId,
                                         userId => userId,
                                         loginWithIdUser => Guid.Parse(loginWithIdUser.Id),
                                         (task, loginWithIdUser) => loginWithIdUser.Login).ToArray();
 
-                ResponseGroupTaskView groupTaskViewDTO = new ResponseGroupTaskView(task, namesUser);
+                ResponseGroupTaskView groupTaskViewDTO = new ResponseGroupTaskView(task, namesUser, stageGroupTask);
                 tasksPages.Add(groupTaskViewDTO);
             }
 

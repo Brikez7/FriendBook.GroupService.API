@@ -16,6 +16,6 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData();
         public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid groupId, ResponseProfiles responseProfiles);
         public Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusesGroupFromUserGroup(Guid userId, Guid groupId);
-        public BaseResponse<ResponseTasksPage> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] users, bool isAdmin);
+        public Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] users, bool isAdmin);
     }
 }

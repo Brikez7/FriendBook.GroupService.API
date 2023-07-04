@@ -1,4 +1,5 @@
-﻿using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
+﻿using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
