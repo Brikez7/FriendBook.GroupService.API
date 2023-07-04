@@ -3,7 +3,10 @@ using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using MongoDB.Driver;
+using FriendBook.GroupService.API.Domain.Entities.MongoDB;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -11,38 +14,46 @@ namespace FriendBook.GroupService.API.BLL.Services
     {
         private readonly IGroupTaskRepository _groupTaskRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
-        public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
+        private readonly IStageGroupTaskRepository _stageGroupTaskRepository;
+        public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository, IStageGroupTaskRepository stageGroupTask)
         {
             _groupTaskRepository = groupTaskRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;
+            _stageGroupTaskRepository = stageGroupTask;
         }
 
-        public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew groupTask,Guid userId,string login)
+        public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew requestGroupTaskNew, Guid adminId, string loginAdmin)
         {
-            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && x.IdGroup == groupTask.GroupId && x.RoleAccount > RoleAccount.Default))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == adminId && x.IdGroup == requestGroupTaskNew.GroupId && x.RoleAccount > RoleAccount.Default))
             {
                 return new StandartResponse<ResponseGroupTaskView> 
                 {
-                    Message = "Account in group not found or you not access in group",
+                    Message = "Account not found or you not access create new group task",
                     StatusCode = StatusCode.UserNotAccess
                 };
             }
 
-            if (await _groupTaskRepository.GetAll().AnyAsync(x => x.Name == groupTask.Name && x.GroupId == groupTask.GroupId))
+            if (await _groupTaskRepository.GetAll().AnyAsync(x => x.Name == requestGroupTaskNew.Name && x.GroupId == requestGroupTaskNew.GroupId))
             {
                 return new StandartResponse<ResponseGroupTaskView>
                 {
-                    Message = "Task in with name exists",
-                    StatusCode = StatusCode.GroupTaskExists
+                    Message = "Task with name already exists",
+                    StatusCode = StatusCode.GroupTaskAlreadyExists
                 };
             }
 
-            var newGroupTask = new GroupTask(groupTask, userId);
+            var newGroupTask = new GroupTask(requestGroupTaskNew, adminId);
             var createdGroup = await _groupTaskRepository.AddAsync(newGroupTask);
             await _groupTaskRepository.SaveAsync();
 
-            var viewDTO = new ResponseGroupTaskView(createdGroup);
-            viewDTO.Users = new string[] { login };
+            var stageGroupTask = new StageGroupTask(MongoDB.Bson.ObjectId.GenerateNewId(), (Guid)createdGroup.Id!, $"Start task: {createdGroup.Name}", "", DateTime.UtcNow);
+            var result = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
+
+            var listStage = new List<ResponseStageGroupTaskIcon>() { new ResponseStageGroupTaskIcon(result.Id, result.Name, result.IdGroupTask) };
+            var viewDTO = new ResponseGroupTaskView(createdGroup, listStage)
+            {
+                Users = new string[] { loginAdmin }
+            };
 
             return new StandartResponse<ResponseGroupTaskView>()
             {
@@ -51,9 +62,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupTask>> SubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId)
+        public async Task<BaseResponse<GroupTask>> SubcsribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
         {
-            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTaskKeyDTO.GroupId && userId == x.AccountId)) 
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == requestGroupTaskKey.GroupId && userId == x.AccountId)) 
             {
                 return new StandartResponse<GroupTask>
                 {
@@ -63,7 +74,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
 
             var task = await _groupTaskRepository.GetAll()
-                                                 .Where(x => x.GroupId == groupTaskKeyDTO.GroupId && x.Name == groupTaskKeyDTO.Name)
+                                                 .Where(x => x.GroupId == requestGroupTaskKey.GroupId && x.Name == requestGroupTaskKey.Name)
                                                  .FirstOrDefaultAsync();
 
             if (task is null)
@@ -71,12 +82,16 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<GroupTask>
                 {
                     Message = "task not exists",
-                    StatusCode = StatusCode.InternalServerError
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
-            if (task.Team.Any(t => t == userId)) 
+            if (task.Team.Any(t => t == userId))
             {
-                return new StandartResponse<GroupTask> { Message = "You already subscribe in group", StatusCode =  StatusCode.SubscribeErrror};
+                return new StandartResponse<GroupTask>
+                {
+                    Message = "You already subscribe in group", 
+                    StatusCode = StatusCode.SubscribeErrror
+                };
             }
 
             task.Team = task.Team.Append(userId).ToArray();
@@ -90,19 +105,19 @@ namespace FriendBook.GroupService.API.BLL.Services
                 StatusCode = StatusCode.GroupUpdate
             };
         }
-        public async Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId)
+        public async Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
         {
-            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTaskKeyDTO.GroupId && userId == x.AccountId))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == requestGroupTaskKey.GroupId && userId == x.AccountId))
             {
                 return new StandartResponse<GroupTask>
                 {
                     Message = "Group not exists or you not been in group",
-                    StatusCode = StatusCode.UserNotExists
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
 
             var task = await _groupTaskRepository.GetAll()
-                                                 .Where(x => x.GroupId == groupTaskKeyDTO.GroupId && x.Name == groupTaskKeyDTO.Name)
+                                                 .Where(x => x.GroupId == requestGroupTaskKey.GroupId && x.Name == requestGroupTaskKey.Name)
                                                  .FirstOrDefaultAsync();
 
             if (task is null)
@@ -121,6 +136,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                     StatusCode = StatusCode.UnsubscribeError
                 };
             }
+
             task.Team = task.Team.Where(x => x != userId).ToArray();
 
             var updatedGroup = _groupTaskRepository.Update(task);
@@ -136,14 +152,6 @@ namespace FriendBook.GroupService.API.BLL.Services
         public BaseResponse<IQueryable<GroupTask>> GetGroupTaskOData()
         {
             var groupTasks = _groupTaskRepository.GetAll();
-            if (groupTasks.Count() == 0)
-            {
-                return new StandartResponse<IQueryable<GroupTask>>()
-                {
-                    Message = "entity not found",
-                    StatusCode = StatusCode.InternalServerError
-                };
-            }
 
             return new StandartResponse<IQueryable<GroupTask>>()
             {
@@ -152,19 +160,17 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupTask>> UpdateGroupTask(RequestGroupTaskChanged groupTask,Guid userId)
+        public async Task<BaseResponse<GroupTask>> UpdateGroupTask(RequestGroupTaskChanged requestGroupTaskChanged,Guid adminId)
         {
-            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == groupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default)) 
-            {
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == requestGroupTaskChanged.GroupId && x.AccountId == adminId && x.RoleAccount > RoleAccount.Default)) 
                 return new StandartResponse<GroupTask>
                 {
-                    Message = "You are not exists in this group or you do not have access",
+                    Message = "You not exists in this group or you not have access update group task",
                     StatusCode = StatusCode.UserNotAccess
                 };
-            }
 
-            var tasks = _groupTaskRepository.GetAll().Where(x => x.GroupId == groupTask.GroupId).AsQueryable();
-            var task = await tasks.FirstOrDefaultAsync(x => groupTask.OldName == x.Name);
+            var tasks = _groupTaskRepository.GetAll().Where(x => x.GroupId == requestGroupTaskChanged.GroupId).AsQueryable();
+            var task = await tasks.FirstOrDefaultAsync(x => requestGroupTaskChanged.OldName == x.Name);
 
             if (task is null)
             {
@@ -174,19 +180,19 @@ namespace FriendBook.GroupService.API.BLL.Services
                     StatusCode = StatusCode.EntityNotFound
                 };
             }
-            else if (await tasks.AnyAsync(x => x.Name == groupTask.NewName) && groupTask.NewName != groupTask.OldName)
+            else if (await tasks.AnyAsync(x => x.Name == requestGroupTaskChanged.NewName) && requestGroupTaskChanged.NewName != requestGroupTaskChanged.OldName)
             {
                 return new StandartResponse<GroupTask>
                 {
                     Message = "The task with name already exists",
-                    StatusCode = StatusCode.GroupTaskExists
+                    StatusCode = StatusCode.GroupTaskAlreadyExists
                 };
             }
 
-            task.Status = groupTask.Status;
-            task.DateEndWork = groupTask.DateEndWork;
-            task.Description = groupTask.Description;
-            task.Name = groupTask.NewName;
+            task.Status = requestGroupTaskChanged.Status;
+            task.DateEndWork = requestGroupTaskChanged.DateEndWork;
+            task.Description = requestGroupTaskChanged.Description;
+            task.Name = requestGroupTaskChanged.NewName;
 
             var updatedGroupTask = _groupTaskRepository.Update(task);
             await _groupTaskRepository.SaveAsync();
@@ -198,9 +204,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroupTask(RequestGroupTaskKey deletedGroupTask, Guid userId)
+        public async Task<BaseResponse<bool>> DeleteGroupTask(RequestGroupTaskKey deletedGroupTask, Guid adminId)
         {
-            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == deletedGroupTask.GroupId && x.AccountId == userId && x.RoleAccount > RoleAccount.Default))
+            if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == deletedGroupTask.GroupId && x.AccountId == adminId && x.RoleAccount > RoleAccount.Default))
             {
                 return new StandartResponse<bool>
                 {
@@ -214,8 +220,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<bool>
                 {
-                    Message = "This task not exists",
-                    StatusCode = StatusCode.InternalServerError
+                    Message = "Task not exists",
+                    StatusCode = StatusCode.EntityNotFound
                 };
             }
 

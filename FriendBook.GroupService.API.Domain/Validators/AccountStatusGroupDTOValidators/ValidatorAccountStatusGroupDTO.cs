@@ -8,15 +8,12 @@ namespace FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOVal
     {
         public ValidatorAccountStatusGroupDTO()
         {
-            RuleFor(dto => dto.IdGroup)
-                .NotEmpty().WithMessage("IdGroup is required.");
+            RuleFor(dto => dto.GroupId).NotEmpty();
 
-            RuleFor(dto => dto.AccountId)
-                .NotEmpty().WithMessage("AccountId is required.");
+            RuleFor(dto => dto.AccountId).NotEmpty();
 
-            RuleFor(dto => dto.RoleAccount)
-                .NotEmpty().WithMessage("RoleAccount is required.")
-                .IsInEnum().WithMessage("RoleAccount must be greater than or equal to Default and must be less than or equal to Admin.");
+            RuleFor(dto => dto.RoleAccount).NotEmpty()
+                                           .IsInEnum();
         }
     }
 }

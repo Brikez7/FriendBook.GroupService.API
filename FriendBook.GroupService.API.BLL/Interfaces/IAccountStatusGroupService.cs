@@ -3,18 +3,19 @@ using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IAccountStatusGroupService
     {
-        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid userId, AccountStatusGroupDTO accountStatusGroup);
-        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid id, Guid createrId, Guid groupId);
-        public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid idCreater);
+        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid createrId, AccountStatusGroupDTO accountStatusGroupDTO);
+        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid accountStatusGroupId, Guid createrId, Guid groupId);
+        public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid createrId);
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData();
-        public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid idGroup, ResponseProfiles profileDTOs);
-        public Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusGroupByIdGroupAndUserId(Guid userId, Guid groupId);
-        public BaseResponse<ResponseTasksPage> TasksJoinUsersLoginWithId(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin);
+        public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid groupId, ResponseProfiles responseProfiles);
+        public Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusesGroupFromUserGroup(Guid userId, Guid groupId);
+        public Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] users, bool isAdmin);
     }
 }

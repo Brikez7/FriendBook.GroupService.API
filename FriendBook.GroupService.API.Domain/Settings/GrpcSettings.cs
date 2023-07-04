@@ -3,6 +3,6 @@
     public class GrpcSettings
     {
         public const string Name = "GrpcSettings";
-        public string HostGrpcService { get; set; }
+        public string HostGrpcService { get; set; } = null!;
     }
 }

@@ -24,6 +24,12 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.HostedService;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using MongoDB.Driver;
+using FriendBook.GroupService.API.Domain.Entities.MongoDB;
+using Microsoft.Extensions.Options;
+using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 
 namespace FriendBook.GroupService.API
 {
@@ -34,6 +40,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupRepository, GroupRepository>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupRepository, AccountStatusGroupRepository>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
+            webApplicationBuilder.Services.AddScoped<IStageGroupTaskRepository, StageGroupTaskRepository>();
         }
         public static void AddGrpcProperty(this WebApplicationBuilder webApplicationBuilder) 
         {
@@ -48,6 +55,9 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskKey>, ValidatorRequestGroupTaskKey>();
+
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestStageGroupTasNew>, ValidatorRequestStageGroupTasNew>();
+            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskDTO>, ValidatorStageGroupTaskDTO>();
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
@@ -64,11 +74,12 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
+
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestStageGroupTasNew>, ValidationService<RequestStageGroupTasNew>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<StageGroupTaskDTO>, ValidationService<StageGroupTaskDTO>>();
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {
-            
-
             webApplicationBuilder.Services.AddHangfire(configuration =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
@@ -77,6 +88,33 @@ namespace FriendBook.GroupService.API
                              .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString(HangfireContext.NameConnection));
             });
             webApplicationBuilder.Services.AddHangfireServer();
+        }
+        public static void AddMongoDB(this WebApplicationBuilder webApplicationBuilder) 
+        {
+            webApplicationBuilder.Services.Configure<MongoDBSettings>(
+                webApplicationBuilder.Configuration.GetSection(MongoDBSettings.Name));
+
+            webApplicationBuilder.Services.AddSingleton<IMongoClient>(provider => 
+                new MongoClient(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.MongoDBConnectionString)
+            );
+
+            webApplicationBuilder.Services.AddSingleton(provider =>
+            {
+                var mongoClient = provider.GetRequiredService<IMongoClient>();
+                return mongoClient.GetDatabase(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.Database);
+            });
+
+            webApplicationBuilder.Services.AddScoped(provider =>
+            {
+                var database = provider.GetRequiredService<IMongoDatabase>();
+                return database.GetCollection<StageGroupTask>(provider.GetRequiredService<IOptions<MongoDBSettings>>().Value.Collection);
+            });
+
+        }
+        public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
+        {
+            webApplicationBuilder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
+                 webApplicationBuilder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
         }
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {

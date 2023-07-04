@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.Entities;
+﻿using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

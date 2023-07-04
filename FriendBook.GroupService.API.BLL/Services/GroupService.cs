@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,16 +20,16 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<GroupDTO>> CreateGroup(string groupName, Guid createrId)
         {
-            Group group = new Group(groupName,createrId);
-            if (await _groupRepository.GetAll().AnyAsync(x => x.Name == group.Name)) 
+            if (await _groupRepository.GetAll().AnyAsync(x => x.Name == groupName)) 
             {
                 return new StandartResponse<GroupDTO>()
                 {
-                    StatusCode = StatusCode.GroupExists,
-                    Message = "Group still exists"
+                    StatusCode = StatusCode.GroupAlreadyExists,
+                    Message = "Group with name already exists"
                 };
             }
 
+            Group group = new Group(groupName, createrId);
             var createdGroup = await _groupRepository.AddAsync(group);
 
             var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id!,RoleAccount.Creater);
@@ -44,9 +44,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid userId)
+        public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid createrId)
         {
-            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreaterId == userId);
+            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreaterId == createrId);
 
             if (entity is null) 
             {
@@ -57,12 +57,12 @@ namespace FriendBook.GroupService.API.BLL.Services
                 };
             }
 
-            var Result1 = _groupRepository.Delete(entity);
-            var Result2 = await _groupRepository.SaveAsync();
+            var result = _groupRepository.Delete(entity);
+            await _groupRepository.SaveAsync();
 
             return new StandartResponse<bool>()
             {
-                Data = Result1 && Result2,
+                Data = result,
                 StatusCode = StatusCode.GroupDelete
             };
         }
@@ -78,7 +78,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupDTO[]>> GeyGroupsByUserId(Guid userId)
+        public async Task<BaseResponse<GroupDTO[]>> GetGroupsByUserId(Guid userId)
         {
             var listGroupDTO = await _groupRepository.GetAll()
                                                      .Where(x => x.CreaterId == userId)
@@ -87,11 +87,11 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if(listGroupDTO?.Length > 0) 
             {
-                return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO, StatusCode = StatusCode.EntityNotFound};
+                return new StandartResponse<GroupDTO[]>() { Data = listGroupDTO, StatusCode = StatusCode.GroupRead};
             }
             return new StandartResponse<GroupDTO[]>
             {
-                Message = "Grous not founded",
+                Message = "Grous not found",
                 StatusCode = StatusCode.EntityNotFound
             };
         }
@@ -111,7 +111,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             {
                 return new StandartResponse<ResponseAccountGroup[]>
                 {
-                    Message = "No groups where you belong have been found",
+                    Message = "Groups not found",
                     StatusCode = StatusCode.EntityNotFound
                 };
             }
@@ -123,28 +123,13 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<GroupDTO>> UpdateGroup(GroupDTO group, Guid userId)
+        public async Task<BaseResponse<GroupDTO>> UpdateGroup(GroupDTO groupDTO, Guid createrId)
         {
-            if (await _groupRepository.GetAll().AnyAsync(x => x.Name == group.Name))
-            {
-                return new StandartResponse<GroupDTO>()
-                {
-                    StatusCode = StatusCode.GroupExists,
-                    Message = "Group with name already exists"
-                };
-            }
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == groupDTO.GroupId))
+                return new StandartResponse<GroupDTO> { Message = "Group not found or you not access update group", StatusCode = StatusCode.UserNotAccess };
 
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == userId && x.Id == group.GroupId)) 
-            {
-                return new StandartResponse<GroupDTO>
-                {
-                    Message = "Group not exists or you not creater",
-                    StatusCode = StatusCode.EntityNotFound,
-                };   
-            }
-
-            Group? updatedGroup = new Group(group,userId);
-            updatedGroup = await _groupRepository.Update(updatedGroup);
+            Group? updatedGroup = new Group(groupDTO,createrId);
+            updatedGroup = _groupRepository.Update(updatedGroup);
 
             await _groupRepository.SaveAsync();
 

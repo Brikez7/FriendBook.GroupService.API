@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 
 namespace FriendBook.GroupService.API.DAL.Repositories
 {
@@ -22,9 +21,9 @@ namespace FriendBook.GroupService.API.DAL.Repositories
 
         public bool Delete(Group entity)
         {
-            _db.Groups.Remove(entity);
+            var result = _db.Groups.Remove(entity);
 
-            return true;
+            return result != null;
         }
 
         public IQueryable<Group> GetAll()
@@ -32,27 +31,18 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             return _db.Groups.AsQueryable();
         }
 
-        public async Task<bool> SaveAsync()
+        public async Task<int> SaveAsync()
         {
-            await _db.SaveChangesAsync();
+            var countEntriers = await _db.SaveChangesAsync();
 
-            return true;
+            return countEntriers;
         }
 
-        public async Task<Group?> Update(Group entity)
+        public Group Update(Group entity)
         {
-            var existingEntity = await _db.Groups.SingleOrDefaultAsync(x => x.Id == entity.Id);
+            var existingEntity = _db.Groups.Update(entity);
 
-            if (existingEntity != null)
-            {
-                existingEntity.Name = entity.Name;
-
-                return entity;
-            }
-            else
-            {
-                return null;
-            }
+            return existingEntity.Entity;
         }
     }
 }

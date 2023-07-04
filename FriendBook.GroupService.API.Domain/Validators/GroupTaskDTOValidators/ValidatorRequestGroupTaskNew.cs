@@ -12,20 +12,16 @@ namespace FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators
     {
         public ValidatorRequestGroupTaskNew()
         {
-            RuleFor(dto => dto.GroupId)
-                .NotEmpty().WithMessage("GroupId is required.");
+            RuleFor(dto => dto.GroupId).NotEmpty();
 
-            RuleFor(dto => dto.Name)
-                .NotEmpty().WithMessage("Name is required.")
-                .Length(2, 50).WithMessage("Name must be between 2 and 50 characters.");
+            RuleFor(dto => dto.Name).NotEmpty()
+                                    .Length(2, 50);
 
-            RuleFor(dto => dto.Description)
-                .Length(0, 100).WithMessage("Description must be between 0 and 100 characters.");
+            RuleFor(dto => dto.Description).Length(0, 100);
 
             var date = DateTime.Now.AddDays(-1);
-            RuleFor(dto => dto.DateEndWork)
-                .NotEmpty().WithMessage("DateEndWork is required.")
-                .GreaterThan(date).WithMessage("DateEndWork must be a future date.");
+            RuleFor(dto => dto.DateEndWork).NotEmpty()
+                                           .GreaterThan(date);
         }
     }
 }

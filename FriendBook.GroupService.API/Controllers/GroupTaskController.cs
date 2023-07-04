@@ -1,6 +1,6 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using FriendBook.GroupService.API.Domain.UserToken;
 using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -93,7 +93,7 @@ namespace FriendBook.GroupService.API.Controllers
         [EnableQuery]
         public async Task<IActionResult> GetTasksByNameTaskAndIdGroup([FromQuery] Guid idGroup, [FromQuery] string nameTask = "")
         {
-            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusGroupByIdGroupAndUserId(UserToken.Value.Id, idGroup);
+            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, idGroup);
             if(responseAccountStatusGroup.StatusCode != Domain.Response.StatusCode.AccountStatusGroupRead) 
                 return Ok(responseAccountStatusGroup);
 
@@ -105,7 +105,7 @@ namespace FriendBook.GroupService.API.Controllers
             if (responseAnotherApi.StatusCode != Domain.Response.StatusCode.GrpcUsersRead) 
                 return Ok(responseAnotherApi);
 
-            var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
+            var response = _accountStatusGroupService.TasksAddSubscribedUserLogins(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
             return Ok(response);
         }
     }

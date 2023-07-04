@@ -1,6 +1,4 @@
-﻿using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
-
-namespace FriendBook.GroupService.API.Domain.Entities
+﻿namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
     public class AccountStatusGroup
     {
@@ -24,7 +22,7 @@ namespace FriendBook.GroupService.API.Domain.Entities
         public AccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO)
         {
             AccountId = accountStatusGroupDTO.AccountId;
-            IdGroup = accountStatusGroupDTO.IdGroup;
+            IdGroup = accountStatusGroupDTO.GroupId;
             RoleAccount = accountStatusGroupDTO.RoleAccount;
         }
 
@@ -33,5 +31,11 @@ namespace FriendBook.GroupService.API.Domain.Entities
         }
 
         public Group? Group { get; set; }
+    }
+    public enum RoleAccount
+    {
+        Default = 1,
+        Admin = 2,
+        Creater = 3,
     }
 }

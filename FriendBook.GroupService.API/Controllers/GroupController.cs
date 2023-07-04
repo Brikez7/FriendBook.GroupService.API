@@ -64,7 +64,7 @@ namespace FriendBook.GroupService.API.Controllers
         [EnableQuery]
         public async Task<IActionResult> GetMyGroups()
         {
-            var response = await _groupService.GeyGroupsByUserId(UserToken.Value.Id);
+            var response = await _groupService.GetGroupsByUserId(UserToken.Value.Id);
             return Ok(response);
         }
 
