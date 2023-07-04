@@ -12,7 +12,7 @@
         GroupUpdate = 12,
         GroupDelete = 13,
         GroupRead = 14,
-        GroupExists = 15,
+        GroupAlreadyExists = 15,
 
         GrpcProphileRead = 17,
         GrpcUsersRead= 18,
@@ -21,7 +21,7 @@
         AccountStatusGroupUpdate = 22,
         AccountStatusGroupDelete = 23,
         AccountStatusGroupRead = 24,
-        AccountStatusGroupExists = 25,
+        AccountStatusGroupAlreadyExists = 25,
 
         ProphileMapped = 28,
 
@@ -29,8 +29,9 @@
         GroupTaskUpdate = 32,
         GroupTaskDelete = 33,
         GroupTaskRead = 34,
-        GroupTaskExists = 35,
+        GroupTaskAlreadyExists = 35,
         GroupTaskNotUpdated = 36,
+        GroupTaskMapped = 37,
 
         SubscribeErrror = 41,
         UnsubscribeError = 42,
@@ -42,6 +43,7 @@
 
         HangfireUpdated = 61, 
         HangfireUpdatedError = 62,
+        HangfireUpdatedZero = 63,
 
         StageGroupTaskCreate = 71,
         StageGroupTaskUpdate = 72,

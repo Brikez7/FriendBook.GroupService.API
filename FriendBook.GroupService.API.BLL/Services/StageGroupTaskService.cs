@@ -103,6 +103,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             var filter = Builders<StageGroupTask>.Filter.Where(x => x.Id == stageGroupTaskDTO.StageGroupTaskId);
             var updater = Builders<StageGroupTask>.Update.Set(x =>  x.DateUpdate ,now)
                                                          .Set(x => x.Text, stageGroupTaskDTO.Text);
+
             var result = await _stageGroupTaskRepository.Update(filter, updater);
 
             if(result)

@@ -105,7 +105,7 @@ namespace FriendBook.GroupService.API.Controllers
             if (responseAnotherApi.StatusCode != Domain.Response.StatusCode.GrpcUsersRead) 
                 return Ok(responseAnotherApi);
 
-            var response = _accountStatusGroupService.TasksJoinUsersLoginWithId(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
+            var response = _accountStatusGroupService.TasksAddSubscribedUserLogins(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
             return Ok(response);
         }
     }

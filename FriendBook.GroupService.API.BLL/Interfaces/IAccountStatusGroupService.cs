@@ -10,12 +10,12 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IAccountStatusGroupService
     {
-        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid userId, AccountStatusGroupDTO accountStatusGroup);
-        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid id, Guid createrId, Guid groupId);
-        public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid idCreater);
+        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid createrId, AccountStatusGroupDTO accountStatusGroupDTO);
+        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid accountStatusGroupId, Guid createrId, Guid groupId);
+        public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid createrId);
         public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData();
-        public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid idGroup, ResponseProfiles profileDTOs);
+        public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid groupId, ResponseProfiles responseProfiles);
         public Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusesGroupFromUserGroup(Guid userId, Guid groupId);
-        public BaseResponse<ResponseTasksPage> TasksJoinUsersLoginWithId(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin);
+        public BaseResponse<ResponseTasksPage> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] users, bool isAdmin);
     }
 }

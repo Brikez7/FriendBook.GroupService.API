@@ -29,7 +29,7 @@ namespace FriendBook.IdentityServer.API.BLL.Services
             var stringId = claims.FirstOrDefault(c => c.Type == CustomClaimType.AccountId)?.Value;
 
             if (stringId == null || login == null)
-                return new StandartResponse<TokenAuth> { Message = "Access token not validated", StatusCode = StatusCode.TokenNotValid };
+                return new StandartResponse<TokenAuth> { Message = "Access token not validated", StatusCode = StatusCode.TokenNotValid }!;
 
             var id = stringId is not null ? Guid.Parse(stringId) : Guid.Empty;
 
