@@ -70,7 +70,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 }
 
                 var Result = _accountStatusGroupRepository.Delete(accountStatusGroup);
-                Result = await _accountStatusGroupRepository.SaveAsync();
+                Result = (await _accountStatusGroupRepository.SaveAsync()) == 1;
 
                 return new StandartResponse<bool>()
                 {
@@ -209,9 +209,8 @@ namespace FriendBook.GroupService.API.BLL.Services
                     };
                 }
 
-                var accountStatusGroup = new AccountStatusGroup(accountStatusGroupDTO);
-
-                var updatedAccountaStatusGroup = await _accountStatusGroupRepository.Update(accountStatusGroup);
+                accountStatus.RoleAccount = accountStatusGroupDTO.RoleAccount;
+                var updatedAccountaStatusGroup = _accountStatusGroupRepository.Update(accountStatus);
                 var result = await _accountStatusGroupRepository.SaveAsync();
 
                 return new StandartResponse<AccountStatusGroupDTO>()

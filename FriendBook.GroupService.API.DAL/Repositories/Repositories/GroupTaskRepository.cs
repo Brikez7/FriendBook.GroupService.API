@@ -20,19 +20,19 @@ namespace FriendBook.GroupService.API.DAL.Repositories
 
         public bool Delete(GroupTask entity)
         {
-            _db.GroupTasks.Remove(entity);
+            var result = _db.GroupTasks.Remove(entity);
 
-            return true;
+            return result != null;
         }
         public IQueryable<GroupTask> GetAll()
         {
             return _db.GroupTasks.AsQueryable();
         }
-        public async Task<bool> SaveAsync()
+        public async Task<int> SaveAsync()
         {
-            await _db.SaveChangesAsync();
+            var result = await _db.SaveChangesAsync();
 
-            return true;
+            return result;
         }
         public GroupTask Update(GroupTask entity)
         {

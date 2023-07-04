@@ -8,6 +8,6 @@ namespace FriendBook.GroupService.API.DAL.Repositories.Interfaces
         public GroupTask Update(GroupTask entity);
         public bool Delete(GroupTask entity);
         public IQueryable<GroupTask> GetAll();
-        public Task<bool> SaveAsync();
+        public Task<int> SaveAsync();
     }
 }

@@ -14,10 +14,10 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             _collection = collection;
         }
 
-        public async Task<StageGroupTask> AddAsync(StageGroupTask newStageGroupTask)
+        public async Task<StageGroupTask> AddAsync(StageGroupTask entity)
         {
-            await _collection.InsertOneAsync(newStageGroupTask);
-            return newStageGroupTask;
+            await _collection.InsertOneAsync(entity);
+            return entity;
         }
 
         public async Task<bool> Delete( Expression<Func<StageGroupTask, bool>> predicate)

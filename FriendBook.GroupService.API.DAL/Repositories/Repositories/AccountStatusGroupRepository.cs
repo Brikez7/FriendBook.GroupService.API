@@ -22,9 +22,9 @@ namespace FriendBook.GroupService.API.DAL.Repositories
 
         public bool Delete(AccountStatusGroup entity)
         {
-            var deletedEntity = _dbContext.AccountsStatusGroups.Remove(entity);
+            var result = _dbContext.AccountsStatusGroups.Remove(entity);
 
-            return true;
+            return result != null;
         }
 
         public IQueryable<AccountStatusGroup> GetAll()
@@ -32,22 +32,18 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             return _dbContext.AccountsStatusGroups;
         }
 
-        public async Task<bool> SaveAsync()
+        public async Task<int> SaveAsync()
         {
-            await _dbContext.SaveChangesAsync();
+            var result = await _dbContext.SaveChangesAsync();
 
-            return true;
+            return result;
         }
 
-        public async Task<AccountStatusGroup> Update(AccountStatusGroup entity)
+        public AccountStatusGroup Update(AccountStatusGroup entity)
         {
-            var existingEntity = await _dbContext.AccountsStatusGroups.SingleOrDefaultAsync(x => x.AccountId == entity.AccountId && x.IdGroup == entity.IdGroup);
+            var updatedEntity = _dbContext.AccountsStatusGroups.Update(entity);
             
-            if (existingEntity != null)
-            {
-                existingEntity.RoleAccount = entity.RoleAccount;
-            }
-            return entity;
+            return updatedEntity.Entity;
         }
     }
 }

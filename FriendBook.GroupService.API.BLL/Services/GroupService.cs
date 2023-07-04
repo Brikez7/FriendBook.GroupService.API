@@ -62,7 +62,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             return new StandartResponse<bool>()
             {
-                Data = Result1 && Result2,
+                Data = Result1 && Result2 == 1,
                 StatusCode = StatusCode.GroupDelete
             };
         }
@@ -144,7 +144,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
 
             Group? updatedGroup = new Group(group,userId);
-            updatedGroup = await _groupRepository.Update(updatedGroup);
+            updatedGroup = _groupRepository.Update(updatedGroup);
 
             await _groupRepository.SaveAsync();
 
