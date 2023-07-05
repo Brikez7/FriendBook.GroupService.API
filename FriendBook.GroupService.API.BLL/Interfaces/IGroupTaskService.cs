@@ -7,11 +7,11 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
     public interface IGroupTaskService
     {
         public Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew requestGroupTaskNew, Guid adminId,string adminLogin);
-        public Task<BaseResponse<GroupTask>> UpdateGroupTask(RequestGroupTaskChanged requestGroupTaskChanged, Guid adminId);
+        public Task<BaseResponse<RequestGroupTaskChanged>> UpdateGroupTask(RequestGroupTaskChanged requestGroupTaskChanged, Guid adminId);
         public Task<BaseResponse<bool>> DeleteGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid adminId);
         public BaseResponse<IQueryable<GroupTask>> GetGroupTaskOData();
-        public Task<BaseResponse<GroupTask>> SubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
-        public Task<BaseResponse<GroupTask>> UnsubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
+        public Task<BaseResponse<bool>> SubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
+        public Task<BaseResponse<bool>> UnsubcsribeGroupTask(RequestGroupTaskKey groupTaskKeyDTO, Guid userId);
         public Task<BaseResponse<int>> UpdateStatusInGroupTasks();
     }
 }

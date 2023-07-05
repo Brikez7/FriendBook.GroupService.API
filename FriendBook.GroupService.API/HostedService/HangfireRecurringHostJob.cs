@@ -1,5 +1,6 @@
 ﻿using FriendBook.GroupService.API.BLL.Interfaces;
 using Hangfire;
+
 namespace FriendBook.GroupService.API.HostedService
 {
     public class HangfireRecurringHostJob : BackgroundService
