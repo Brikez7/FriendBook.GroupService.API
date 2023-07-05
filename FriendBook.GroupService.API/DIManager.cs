@@ -50,7 +50,7 @@ namespace FriendBook.GroupService.API
         {
             webApplicationBuilder.Services.AddScoped<IValidator<AccountStatusGroupDTO>, ValidatorAccountStatusGroupDTO>();
 
-            webApplicationBuilder.Services.AddScoped<IValidator<GroupDTO>, ValidatorGroupDTO>();
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupUpdate>, ValidatorRequestGroupUpdate>();
 
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
@@ -69,7 +69,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<GroupDTO>, ValidationService<GroupDTO>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupUpdate>, ValidationService<RequestGroupUpdate>>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();

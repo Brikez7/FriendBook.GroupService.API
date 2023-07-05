@@ -20,7 +20,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             CreatedDate = DateTime.UtcNow;
         }
 
-        public Group(GroupDTO groupDTO, Guid accountId)
+        public Group(ResponseGroupView groupDTO, Guid accountId)
         {
             Name = groupDTO.Name;
             Id = groupDTO.GroupId;

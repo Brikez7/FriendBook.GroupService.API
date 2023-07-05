@@ -89,11 +89,11 @@ namespace FriendBook.GroupService.API.Controllers
             var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, UserToken.Value.Id);
             return Ok(response);
         }
-        [HttpGet("OData/GetTasks")]
+        [HttpGet("OData/GetTasks/{groupId}")]
         [EnableQuery]
-        public async Task<IActionResult> GetTasksByNameTaskAndIdGroup([FromQuery] Guid idGroup, [FromQuery] string nameTask = "")
+        public async Task<IActionResult> GetTasksByNameTaskAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
         {
-            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, idGroup);
+            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, groupId);
             if(responseAccountStatusGroup.StatusCode != Domain.Response.StatusCode.AccountStatusGroupRead) 
                 return Ok(responseAccountStatusGroup);
 

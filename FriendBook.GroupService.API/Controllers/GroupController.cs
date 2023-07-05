@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using StatusCode = FriendBook.GroupService.API.Domain.Response.StatusCode;
 
 namespace FriendBook.GroupService.API.Controllers
 {
@@ -17,54 +16,51 @@ namespace FriendBook.GroupService.API.Controllers
     public class GroupController : ODataController
     {
         private readonly IContactGroupService _groupService;
-        private readonly IValidationService<GroupDTO> _groupDTOValidationService;
-        private readonly IGrpcService _grpcService;
+        private readonly IValidationService<RequestGroupUpdate> _groupDTOValidationService;
+        private readonly IGrpcService _grpcIdentityService;
         public Lazy<TokenAuth> UserToken { get; set; }
-        public GroupController(IContactGroupService groupService, IValidationService<GroupDTO> validationService, IGrpcService grpcService, IAccessTokenService accessTokenService, IHttpContextAccessor httpContext)
+        public GroupController(IContactGroupService groupService, IValidationService<RequestGroupUpdate> validationService, IGrpcService grpcService, IAccessTokenService accessTokenService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
             UserToken = accessTokenService.CreateUser(httpContext.HttpContext!.User.Claims);
-            _grpcService = grpcService;
+            _grpcIdentityService = grpcService;
         }
 
-        [HttpDelete("Delete/{idGroupGuid}")]
-        public async Task<IActionResult> DeleteGroup([FromRoute] Guid idGroupGuid)
+        [HttpDelete("Delete/{groupId}")]
+        public async Task<IActionResult> DeleteGroup([FromRoute] Guid groupId)
         {
-            var response = await _groupService.DeleteGroup(idGroupGuid, UserToken.Value.Id);
+            var response = await _groupService.DeleteGroup(groupId, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPost("Create/{groupName}")]
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
-            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(UserToken.Value.Id);
-         
+            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcIdentityService.CheckUserExists(UserToken.Value.Id);
             if (responseAnotherAPI.StatusCode != Domain.Response.StatusCode.UserExists)
-            {
                 return Ok(responseAnotherAPI);
-            }
 
             var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateGroup([FromBody] GroupDTO groupDTO)
+        public async Task<IActionResult> UpdateGroup([FromBody] RequestGroupUpdate requestGroupUpdate)
         {
-            var responseValidation = await _groupDTOValidationService.ValidateAsync(groupDTO);
+            var responseValidation = await _groupDTOValidationService.ValidateAsync(requestGroupUpdate);
             if (responseValidation.StatusCode == Domain.Response.StatusCode.ErrorValidation)
                 return Ok(responseValidation);
 
-            var response = await _groupService.UpdateGroup(groupDTO, UserToken.Value.Id);
+            var response = await _groupService.UpdateGroup(requestGroupUpdate, UserToken.Value.Id);
             return Ok(response);
         }
 
-        [HttpGet("OData/GetMyGroups")]
+        [HttpGet("OData/Get")]
         [EnableQuery]
         public async Task<IActionResult> GetMyGroups()
         {
-            var response = await _groupService.GetGroupsByUserId(UserToken.Value.Id);
+            var response = await _groupService.GetGroupsByCreaterId(UserToken.Value.Id);
             return Ok(response);
         }
 

@@ -2,27 +2,19 @@
 
 namespace FriendBook.GroupService.API.Domain.DTO.GroupDTOs
 {
-    public class GroupDTO
+    public class RequestGroupUpdate
     {
         public Guid GroupId { get; set; }
-        public DateTime? CreatedDate { get; set; }
         public string Name { get; set; } = null!;
 
-        public GroupDTO()
+        public RequestGroupUpdate()
         {
         }
 
-        public GroupDTO(Group createdGroup)
+        public RequestGroupUpdate(Group createdGroup)
         {
             GroupId = (Guid)createdGroup.Id!;
-            CreatedDate = createdGroup.CreatedDate;
             Name = createdGroup.Name;
-        }
-
-        public GroupDTO(string groupName, Guid idGroupGuid)
-        {
-            GroupId = idGroupGuid;
-            Name = groupName;
         }
     }
 }
