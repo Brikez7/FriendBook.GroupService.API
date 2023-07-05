@@ -44,12 +44,6 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             Team = new Guid[] { userId };
         }
 
-        public GroupTask(RequestGroupTaskKey groupDTO)
-        {
-            GroupId = groupDTO.GroupId;
-            Name = groupDTO.Name;
-        }
-
         public GroupTask(RequestGroupTaskChanged groupTaskDTO)
         {
             GroupId = groupTaskDTO.GroupId;

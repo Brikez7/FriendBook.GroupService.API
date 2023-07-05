@@ -3,16 +3,16 @@
     public class RequestGroupTaskKey
     {
         public Guid GroupId { get; set; }
-        public string Name { get; set; } = null!;
+        public Guid GroupTaskId { get; set; }
 
         public RequestGroupTaskKey()
         {
         }
 
-        public RequestGroupTaskKey(Guid groupId, string name)
+        public RequestGroupTaskKey(Guid groupId, Guid groupTaskId)
         {
             GroupId = groupId;
-            Name = name;
+            GroupTaskId = groupTaskId;
         }
     }
 }

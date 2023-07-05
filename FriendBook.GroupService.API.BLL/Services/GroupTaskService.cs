@@ -74,7 +74,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
 
             var task = await _groupTaskRepository.GetAll()
-                                                 .Where(x => x.GroupId == requestGroupTaskKey.GroupId && x.Name == requestGroupTaskKey.Name)
+                                                 .Where(x => x.Id == requestGroupTaskKey.GroupTaskId)
                                                  .FirstOrDefaultAsync();
 
             if (task is null)
@@ -117,7 +117,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
 
             var task = await _groupTaskRepository.GetAll()
-                                                 .Where(x => x.GroupId == requestGroupTaskKey.GroupId && x.Name == requestGroupTaskKey.Name)
+                                                 .Where(x => x.Id == requestGroupTaskKey.GroupTaskId)
                                                  .FirstOrDefaultAsync();
 
             if (task is null)
@@ -215,7 +215,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 };
             }
 
-            var deletedTask = await _groupTaskRepository.GetAll().FirstOrDefaultAsync(x => x.GroupId == deletedGroupTask.GroupId && x.Name == deletedGroupTask.Name && x.Status > StatusTask.Process);
+            var deletedTask = await _groupTaskRepository.GetAll().FirstOrDefaultAsync(x => x.Id == deletedGroupTask.GroupTaskId && x.Status > StatusTask.Process);
             if(deletedTask is null)
             {
                 return new StandartResponse<bool>

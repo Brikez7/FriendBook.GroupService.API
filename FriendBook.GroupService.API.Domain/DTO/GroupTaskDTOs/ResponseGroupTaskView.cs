@@ -5,6 +5,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
     public class ResponseGroupTaskView
     {
+        public Guid GroupTaskId { get; set; }
         public Guid GroupId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
@@ -16,6 +17,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 
         public ResponseGroupTaskView(GroupTask groupTask, string[] users, List<ResponseStageGroupTaskIcon> stagesGroupTask)
         {
+            GroupTaskId = (Guid)groupTask.Id!;
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
             Description = groupTask.Description;
@@ -28,6 +30,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 
         public ResponseGroupTaskView(GroupTask groupTask, List<ResponseStageGroupTaskIcon> stagesGroupTask)
         {
+            GroupTaskId = (Guid)groupTask.Id!;
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
             Description = groupTask.Description;

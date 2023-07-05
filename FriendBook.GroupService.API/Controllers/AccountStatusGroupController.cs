@@ -7,6 +7,7 @@ using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+
 namespace FriendBook.GroupService.API.Controllers
 {
     [Route("api/[controller]")]
@@ -27,10 +28,10 @@ namespace FriendBook.GroupService.API.Controllers
             _grpcService = grpcService;
         }
 
-        [HttpDelete("Delete")]
-        public async Task<IActionResult> DeleteAccountStatusGroup([FromQuery] Guid idGroupDeleted, [FromQuery] Guid idUserGuid)
+        [HttpDelete("Delete/{groupId}")]
+        public async Task<IActionResult> DeleteAccountStatusGroup([FromRoute] Guid groupId, [FromQuery] Guid userId)
         {
-            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(idUserGuid,UserToken.Value.Id, idGroupDeleted);
+            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(userId,UserToken.Value.Id, groupId);
             return Ok(response);
         }
 
@@ -64,9 +65,9 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpGet("GetProfilesByIdGroup")]
-        public async Task<IActionResult> GetProfilesByIdGroup([FromQuery] Guid idGroup, [FromQuery] string login = "")
+        public async Task<IActionResult> GetProfilesByGroupId([FromQuery] Guid groupId, [FromQuery] string login = "")
         {
-            string accessToken = (Request?.Headers["Authorization"] ?? "").ToString();
+            string accessToken = Request.Headers["Authorization"].ToString();
 
             var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
             if (responseAnotherApi.StatusCode != Domain.Response.StatusCode.GrpcProphileRead)
@@ -74,7 +75,7 @@ namespace FriendBook.GroupService.API.Controllers
                 return Ok(responseAnotherApi);
             }
 
-            var response = await _accountStatusGroupService.GetProfilesByIdGroup(idGroup, responseAnotherApi.Data);
+            var response = await _accountStatusGroupService.GetProfilesByIdGroup(groupId, responseAnotherApi.Data);
             return Ok(response);
         }
     }

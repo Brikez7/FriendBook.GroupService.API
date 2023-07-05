@@ -9,8 +9,7 @@ namespace FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators
         {
             RuleFor(dto => dto.GroupId).NotEmpty();
 
-            RuleFor(dto => dto.Name).NotEmpty()
-                                    .Length(2, 50);
+            RuleFor(dto => dto.GroupTaskId).NotEmpty();
         }
     }
 }
