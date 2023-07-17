@@ -12,9 +12,9 @@ namespace FriendBook.GroupService.API.HostedService
         {
             _serviceScopeFactory = serviceScopeFactory;
         }
-        public async Task UpdateStatusInGroupTasksAsync()
+        public void UpdateStatusInGroupTasksAsync()
         {
-            await _groupTaskService!.UpdateStatusInGroupTasks();
+            _groupTaskService!.UpdateStatusInGroupTasks();
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

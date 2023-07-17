@@ -1,8 +1,9 @@
-﻿using FriendBook.GroupService.API.BLL.Interfaces;
+﻿using FriendBook.GroupService.API.BLL.GrpcServices;
+using FriendBook.GroupService.API.BLL.Helpers;
+using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
-using FriendBook.GroupService.API.Domain.UserToken;
-using FriendBook.IdentityServer.API.BLL.Interfaces;
+using FriendBook.GroupService.API.Domain.JWT;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -20,11 +21,10 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IValidationService<RequestGroupTaskKey> _groupTaskKeyValidationService;
         private readonly IValidationService<RequestGroupTaskChanged> _groupTaskChangedValidationService;
         private readonly IGrpcService _grpcService;
-        public Lazy<TokenAuth> UserToken { get; set; }
+        public Lazy<DataAccessToken> UserToken { get; set; }
         public GroupTaskController(IGroupTaskService groupTaskService, IAccountStatusGroupService accountStatusGroupService,
             IValidationService<RequestGroupTaskNew> requestGroupTaskNewValidationService, IValidationService<RequestGroupTaskKey> requestGroupTaskKeyValidationService,
-            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService, IGrpcService grpcService, IHttpContextAccessor httpContextAccessor,
-            IAccessTokenService accessTokenService)
+            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService, IGrpcService grpcService, IHttpContextAccessor httpContextAccessor)
         {
             _groupTaskService = groupTaskService;
             _accountStatusGroupService = accountStatusGroupService;
@@ -32,7 +32,7 @@ namespace FriendBook.GroupService.API.Controllers
             _groupTaskKeyValidationService = requestGroupTaskKeyValidationService;
             _groupTaskChangedValidationService = requestGroupTaskChangedValidationService;
             _grpcService = grpcService;
-            UserToken = accessTokenService.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
+            UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
         }
 
         [HttpDelete("Delete")]

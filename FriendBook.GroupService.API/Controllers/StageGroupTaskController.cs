@@ -1,7 +1,7 @@
-﻿using FriendBook.GroupService.API.BLL.Interfaces;
+﻿using FriendBook.GroupService.API.BLL.Helpers;
+using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.UserToken;
-using FriendBook.IdentityServer.API.BLL.Interfaces;
+using FriendBook.GroupService.API.Domain.JWT;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -16,13 +16,12 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IStageGroupTaskService _stageGroupTaskService;
         private readonly IValidationService<RequestStageGroupTasNew> _requestStageGroupTasNewValidationService;
         private readonly IValidationService<StageGroupTaskDTO> _stageGroupTaskDTOValidationService;
-        public Lazy<TokenAuth> UserToken { get; set; }
+        public Lazy<DataAccessToken> UserToken { get; set; }
         public StageGroupTaskController(IStageGroupTaskService stageGroupTaskService, IHttpContextAccessor httpContextAccessor,
-            IAccessTokenService accessTokenService, IValidationService<RequestStageGroupTasNew> validatorStageGroupTasNew, 
-            IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
+            IValidationService<RequestStageGroupTasNew> validatorStageGroupTasNew, IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
         {
             _stageGroupTaskService = stageGroupTaskService;
-            UserToken = accessTokenService.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
+            UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
             _requestStageGroupTasNewValidationService = validatorStageGroupTasNew;
             _stageGroupTaskDTOValidationService = validatorStageGroupTaskDTO;
         }

@@ -1,9 +1,10 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
+using FriendBook.GroupService.API.BLL.GrpcServices;
+using FriendBook.GroupService.API.BLL.Helpers;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
+using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
-using FriendBook.GroupService.API.Domain.UserToken;
-using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -18,12 +19,12 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IContactGroupService _groupService;
         private readonly IValidationService<RequestGroupUpdate> _groupDTOValidationService;
         private readonly IGrpcService _grpcIdentityService;
-        public Lazy<TokenAuth> UserToken { get; set; }
-        public GroupController(IContactGroupService groupService, IValidationService<RequestGroupUpdate> validationService, IGrpcService grpcService, IAccessTokenService accessTokenService, IHttpContextAccessor httpContext)
+        public Lazy<DataAccessToken> UserToken { get; set; }
+        public GroupController(IContactGroupService groupService, IValidationService<RequestGroupUpdate> validationService, IGrpcService grpcService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
-            UserToken = accessTokenService.CreateUser(httpContext.HttpContext!.User.Claims);
+            UserToken = AccessTokenHelper.CreateUser(httpContext.HttpContext!.User.Claims);
             _grpcIdentityService = grpcService;
         }
 

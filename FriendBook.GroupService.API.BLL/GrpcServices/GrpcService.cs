@@ -1,7 +1,6 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients;
 using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
 using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
-using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.Domain.Settings;
 using Grpc.Core;
@@ -9,7 +8,7 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
 using StatusCode = FriendBook.GroupService.API.Domain.Response.StatusCode;
 
-namespace FriendBook.GroupService.API.BLL.Services
+namespace FriendBook.GroupService.API.BLL.GrpcServices
 {
     public class GrpcService : IGrpcService
     {
@@ -51,7 +50,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             using (var channel = GrpcChannel.ForAddress(_identityGrpcSettings.HostGrpcService, new GrpcChannelOptions()
             { HttpHandler = httpClientHandler }))
             {
-                var requestUserLogin = new RequestUserLogin() {Login = login };
+                var requestUserLogin = new RequestUserLogin() { Login = login };
 
                 var headers = new Metadata
                 {
@@ -61,7 +60,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 var client = new PublicContact.PublicContactClient(channel);
                 response = await client.GetProfilesAsync(requestUserLogin, headers);
             }
-            if (response.Profiles is null) 
+            if (response.Profiles is null)
             {
                 return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = StatusCode.EntityNotFound };
             }
@@ -82,7 +81,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 var client = new PublicAccount.PublicAccountClient(channel);
                 response = await client.GetUsersLoginWithIdAsync(requestUsersId);
             }
-            if (response.Users is null) 
+            if (response.Users is null)
             {
                 return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = StatusCode.EntityNotFound };
             }

@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
 using FriendBook.GroupService.API.Domain.Response;
 
-namespace FriendBook.GroupService.API.BLL.Interfaces
+namespace FriendBook.GroupService.API.BLL.GrpcServices
 {
     public interface IGrpcService
     {

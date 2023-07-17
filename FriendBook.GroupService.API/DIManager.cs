@@ -17,8 +17,6 @@ using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
 using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using FriendBook.IdentityServer.API.BLL.Services;
-using FriendBook.IdentityServer.API.BLL.Interfaces;
 using Hangfire;
 using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL;
@@ -30,6 +28,7 @@ using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using Microsoft.Extensions.Options;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
+using FriendBook.GroupService.API.BLL.GrpcServices;
 
 namespace FriendBook.GroupService.API
 {
@@ -66,7 +65,6 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
             webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
-            webApplicationBuilder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupUpdate>, ValidationService<RequestGroupUpdate>>();
@@ -85,7 +83,7 @@ namespace FriendBook.GroupService.API
                 configuration.UseSimpleAssemblyNameTypeSerializer()
                              .UseRecommendedSerializerSettings()
                              .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                             .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString(HangfireContext.NameConnection));
+                             .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString("HangfireNpgConnectionString"));
             });
             webApplicationBuilder.Services.AddHangfireServer();
         }
