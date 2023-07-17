@@ -30,7 +30,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateStageGroupTask([FromRoute] Guid groupId, [FromBody] RequestStageGroupTasNew requestStageGroupTasNew) 
         {
             var responseValidation = await _requestStageGroupTasNewValidationService.ValidateAsync(requestStageGroupTasNew);
-            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
                 return Ok(responseValidation);
 
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Create(requestStageGroupTasNew, UserToken.Value.Id, groupId);
@@ -40,7 +40,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateStageGroupTask([FromRoute] Guid groupId, [FromBody] StageGroupTaskDTO stageGroupTaskDTO)
         {
             var responseValidation = await _stageGroupTaskDTOValidationService.ValidateAsync(stageGroupTaskDTO);
-            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
                 return Ok(responseValidation);
 
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);

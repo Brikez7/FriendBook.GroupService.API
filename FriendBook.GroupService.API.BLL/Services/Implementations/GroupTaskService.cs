@@ -29,7 +29,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<ResponseGroupTaskView> 
                 {
                     Message = "Account not found or you not access create new group task",
-                    StatusCode = StatusCode.UserNotAccess
+                    StatusCode = Code.UserNotAccess
                 };
             }
 
@@ -38,7 +38,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<ResponseGroupTaskView>
                 {
                     Message = "Task with name already exists",
-                    StatusCode = StatusCode.GroupTaskAlreadyExists
+                    StatusCode = Code.GroupTaskAlreadyExists
                 };
             }
 
@@ -58,7 +58,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<ResponseGroupTaskView>()
             {
                 Data = viewDTO,
-                StatusCode = StatusCode.GroupCreate
+                StatusCode = Code.GroupCreate
             };
         }
 
@@ -69,7 +69,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "Group not exists or you not exists in group",
-                    StatusCode = StatusCode.UserNotExists
+                    StatusCode = Code.UserNotExists
                 };
             }
 
@@ -82,7 +82,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "task not exists",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
             if (task.Team.Any(t => t == userId))
@@ -90,7 +90,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "You already subscribe in group", 
-                    StatusCode = StatusCode.SubscribeErrror
+                    StatusCode = Code.SubscribeTaskError
                 };
             }
 
@@ -102,7 +102,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<bool>()
             {
                 Data = updatedTask != null,
-                StatusCode = StatusCode.GroupUpdate
+                StatusCode = Code.GroupUpdate
             };
         }
         public async Task<BaseResponse<bool>> UnsubcsribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
@@ -112,7 +112,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "Group not exists or you not been in group",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
@@ -125,7 +125,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "Task not exists",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
             if (!task.Team.Any(t => t == userId)) 
@@ -133,7 +133,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "You already unsubscribe in group",
-                    StatusCode = StatusCode.UnsubscribeError
+                    StatusCode = Code.UnsubscribeTaskError
                 };
             }
 
@@ -145,7 +145,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<bool>()
             {
                 Data = updatedGroup != null,
-                StatusCode = StatusCode.GroupUpdate
+                StatusCode = Code.GroupUpdate
             };
         }
 
@@ -156,7 +156,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<IQueryable<GroupTask>>()
             {
                 Data = groupTasks,
-                StatusCode = StatusCode.GroupRead
+                StatusCode = Code.GroupRead
             };
         }
 
@@ -166,7 +166,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<RequestGroupTaskChanged>
                 {
                     Message = "You not exists in this group or you not have access update group task",
-                    StatusCode = StatusCode.UserNotAccess
+                    StatusCode = Code.UserNotAccess
                 };
 
             var tasks = _groupTaskRepository.GetAll().Where(x => x.GroupId == requestGroupTaskChanged.GroupId).AsQueryable();
@@ -177,7 +177,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<RequestGroupTaskChanged>
                 {
                     Message = "Task not found",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
             else if (await tasks.AnyAsync(x => x.Name == requestGroupTaskChanged.NewName) && requestGroupTaskChanged.NewName != requestGroupTaskChanged.OldName)
@@ -185,7 +185,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<RequestGroupTaskChanged>
                 {
                     Message = "The task with name already exists",
-                    StatusCode = StatusCode.GroupTaskAlreadyExists
+                    StatusCode = Code.GroupTaskAlreadyExists
                 };
             }
 
@@ -200,7 +200,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<RequestGroupTaskChanged>()
             {
                 Data = requestGroupTaskChanged,
-                StatusCode = StatusCode.GroupTaskUpdate
+                StatusCode = Code.GroupTaskUpdate
             };
         }
 
@@ -211,7 +211,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "You are not in this group or you do not have access",
-                    StatusCode = StatusCode.UserNotAccess
+                    StatusCode = Code.UserNotAccess
                 };
             }
 
@@ -221,7 +221,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>
                 {
                     Message = "Task not exists",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
@@ -231,7 +231,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<bool>()
             {
                 Data = Result,
-                StatusCode = StatusCode.GroupDelete
+                StatusCode = Code.GroupDelete
             };
         }
 
@@ -240,10 +240,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             DateTime nowDate = DateTime.Now.Date;
             int countUpdatedTask = await _groupTaskRepository.GetAll().Where(x => x.DateEndWork < nowDate && x.Status == StatusTask.Process).ExecuteUpdateAsync(x => x.SetProperty(prop => prop.Status, StatusTask.MissedDate));
 
-            if (countUpdatedTask == 0)
-                return new StandartResponse<int> { Data = countUpdatedTask, StatusCode = StatusCode.GroupTaskNotUpdated, Message = "Count group task updated was equal to zero" };
-
-            return new StandartResponse<int> { Data = countUpdatedTask, StatusCode = StatusCode.GroupTaskUpdate };
+            return new StandartResponse<int> { Data = countUpdatedTask, StatusCode = Code.GroupTaskUpdate };
         }
     }
 }

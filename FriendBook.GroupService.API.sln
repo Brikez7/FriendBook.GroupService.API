@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriendBook.GroupService.API
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriendBook.GroupService.API.Domain", "FriendBook.GroupService.API.Domain\FriendBook.GroupService.API.Domain.csproj", "{36FBE6E7-D2BE-4225-A10D-15F32D24509A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriendBook.GroupService.Tests", "FriendBook.GroupService.Tests\FriendBook.GroupService.Tests.csproj", "{6E6A039B-EE02-429C-A084-F1ECEA1CC91D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{36FBE6E7-D2BE-4225-A10D-15F32D24509A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36FBE6E7-D2BE-4225-A10D-15F32D24509A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36FBE6E7-D2BE-4225-A10D-15F32D24509A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E6A039B-EE02-429C-A084-F1ECEA1CC91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E6A039B-EE02-429C-A084-F1ECEA1CC91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E6A039B-EE02-429C-A084-F1ECEA1CC91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E6A039B-EE02-429C-A084-F1ECEA1CC91D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

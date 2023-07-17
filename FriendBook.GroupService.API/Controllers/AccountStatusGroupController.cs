@@ -40,12 +40,12 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
                 return Ok(responseValidation);
 
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
 
-            if (responseAnotherAPI.StatusCode != Domain.Response.StatusCode.UserExists) 
+            if (responseAnotherAPI.StatusCode != Code.UserExists) 
             {
                 return Ok(responseAnotherAPI);
             }
@@ -58,7 +58,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != Domain.Response.StatusCode.EntityIsValid)
+            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
@@ -71,7 +71,7 @@ namespace FriendBook.GroupService.API.Controllers
             string accessToken = Request.Headers["Authorization"].ToString();
 
             var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
-            if (responseAnotherApi.StatusCode != Domain.Response.StatusCode.GrpcProphileRead)
+            if (responseAnotherApi.StatusCode != Domain.Response.Code.GrpcProfileRead)
             {
                 return Ok(responseAnotherApi);
             }

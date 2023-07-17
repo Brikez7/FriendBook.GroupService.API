@@ -39,7 +39,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcIdentityService.CheckUserExists(UserToken.Value.Id);
-            if (responseAnotherAPI.StatusCode != Domain.Response.StatusCode.UserExists)
+            if (responseAnotherAPI.StatusCode != Domain.Response.Code.UserExists)
                 return Ok(responseAnotherAPI);
 
             var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
@@ -50,7 +50,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateGroup([FromBody] RequestGroupUpdate requestGroupUpdate)
         {
             var responseValidation = await _groupDTOValidationService.ValidateAsync(requestGroupUpdate);
-            if (responseValidation.StatusCode == Domain.Response.StatusCode.ErrorValidation)
+            if (responseValidation.StatusCode == Domain.Response.Code.EntityIsNotValidated)
                 return Ok(responseValidation);
 
             var response = await _groupService.UpdateGroup(requestGroupUpdate, UserToken.Value.Id);

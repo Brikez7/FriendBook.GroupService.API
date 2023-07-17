@@ -26,14 +26,14 @@ namespace FriendBook.GroupService.API.BLL.Services
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid createrId,AccountStatusGroupDTO accountStatusGroupDTO)
         {
             if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == accountStatusGroupDTO.GroupId))
-                return new StandartResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access add new account", StatusCode = StatusCode.UserNotAccess };
+                return new StandartResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access add new account", StatusCode = Code.UserNotAccess };
 
             if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
             {
                 return new StandartResponse<AccountStatusGroupDTO>()
                 {
                     Message = "New account with status status creator not been added from group",
-                    StatusCode = StatusCode.UserNotAccess,
+                    StatusCode = Code.UserNotAccess,
                 };
             }
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == accountStatusGroupDTO.GroupId && x.AccountId == accountStatusGroupDTO.AccountId))
@@ -41,7 +41,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<AccountStatusGroupDTO>()
                 {
                     Message = $"New account in group already exists",
-                    StatusCode = StatusCode.AccountStatusGroupAlreadyExists
+                    StatusCode = Code.AccountStatusGroupAlreadyExists
                 };
             }
 
@@ -53,14 +53,14 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<AccountStatusGroupDTO>()
             {
                 Data = new AccountStatusGroupDTO(createdAccountaStatusGroup),
-                StatusCode = StatusCode.AccountStatusGroupCreate
+                StatusCode = Code.AccountStatusGroupCreate
             };
         }
 
         public async Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid deletedStatusAccountId, Guid createrId, Guid groupId)
         {
             if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == groupId))
-                return new StandartResponse<bool> { Message = "Account not found or you not access delete account", StatusCode = StatusCode.UserNotAccess };
+                return new StandartResponse<bool> { Message = "Account not found or you not access delete account", StatusCode = Code.UserNotAccess };
 
             var accountStatusGroup = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.AccountId == deletedStatusAccountId && x.IdGroup == groupId);
 
@@ -69,7 +69,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<bool>()
                 {
                     Message = $"Account in group not exists",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
@@ -79,7 +79,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<bool>()
             {
                 Data = Result,
-                StatusCode = StatusCode.AccountStatusGroupDelete
+                StatusCode = Code.AccountStatusGroupDelete
             };
         }
 
@@ -98,7 +98,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<AccountStatusGroup?>
                 {
                     Message = "Group not found or Account not found",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
             else if (accountStatusGroup.Group.GroupTasks is null)
@@ -106,14 +106,14 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<AccountStatusGroup?>
                 {
                     Message = "Tasks not found",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
             return new StandartResponse<AccountStatusGroup?>
             {
                 Data = accountStatusGroup,
-                StatusCode = StatusCode.AccountStatusGroupRead
+                StatusCode = Code.AccountStatusGroupRead
             };
         }
 
@@ -124,7 +124,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<IQueryable<AccountStatusGroup>>()
             {
                 Data = accountsStatusGroups,
-                StatusCode = StatusCode.AccountStatusGroupRead
+                StatusCode = Code.AccountStatusGroupRead
             };
         }
 
@@ -144,17 +144,17 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<Profile[]>
                 {
                     Data = usersInGroup.ToArray(),
-                    StatusCode = StatusCode.ProphileMapped,
+                    StatusCode = Code.AccountStatusGroupRead,
                 };
             }
             return new StandartResponse<Profile[]>()
             {
                 Message = "Group not found",
-                StatusCode = StatusCode.EntityNotFound,
+                StatusCode = Code.EntityNotFound,
             };
         }
 
-        public async Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
+        public async Task<BaseResponse<ResponseTasksPage>> GetTasksPage(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
         { 
             List<ResponseStageGroupTaskIcon> stageGroupTask = new List<ResponseStageGroupTaskIcon>();
             List<ResponseGroupTaskView> tasksPages = new List<ResponseGroupTaskView>();
@@ -177,7 +177,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<ResponseTasksPage>
                 {
                     Message = "Tasks not found",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
@@ -186,14 +186,14 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<ResponseTasksPage>
             {
                 Data = tasksPageDTO,
-                StatusCode = StatusCode.GroupTaskMapped
+                StatusCode = Code.GroupTaskRead
             };
         }
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO, Guid createrId)
         {
             if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == accountStatusGroupDTO.GroupId))
-                return new StandartResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access update account", StatusCode = StatusCode.UserNotAccess };
+                return new StandartResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access update account", StatusCode = Code.UserNotAccess };
 
             var accountStatus = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroupDTO.GroupId && x.AccountId == accountStatusGroupDTO.AccountId);
             if (accountStatus == null || accountStatusGroupDTO.AccountId == createrId) 
@@ -201,7 +201,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandartResponse<AccountStatusGroupDTO>()
                 {
                     Message = "Account not found",
-                    StatusCode = StatusCode.EntityNotFound
+                    StatusCode = Code.EntityNotFound
                 };
             }
 
@@ -212,7 +212,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<AccountStatusGroupDTO>()
             {
                 Data = new AccountStatusGroupDTO(updatedAccountaStatusGroup),
-                StatusCode = StatusCode.AccountStatusGroupUpdate
+                StatusCode = Code.AccountStatusGroupUpdate
             };
             
         }

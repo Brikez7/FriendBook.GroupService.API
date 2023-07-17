@@ -18,17 +18,5 @@ namespace FriendBook.GroupService.API.BLL.Helpers
 
             return new DataAccessToken(login, id);
         }
-        public static BaseResponse<DataAccessToken?> CreateUserTokenTryEmpty(IEnumerable<Claim> claims)
-        {
-            var login = claims.FirstOrDefault(c => c.Type == CustomClaimType.Login)?.Value;
-            var stringId = claims.FirstOrDefault(c => c.Type == CustomClaimType.AccountId)?.Value;
-
-            if (stringId == null || login == null)
-                return new StandartResponse<DataAccessToken?> { Message = "Access token not validated", StatusCode = StatusCode.TokenNotValid };
-
-            var id = stringId is not null ? Guid.Parse(stringId) : Guid.Empty;
-
-            return new StandartResponse<DataAccessToken?> { Data = new DataAccessToken(login, id) };
-        }
     }
 }
