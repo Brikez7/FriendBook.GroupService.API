@@ -3,10 +3,16 @@
 option csharp_namespace = "FriendBook.GroupService.API.BLL.gRPCClients.ContactService";
 
 package ContactService;
+import "Protos/Google/API/annotations.proto";
 
 service PublicContact
 {
-  rpc GetProfiles (RequestUserLogin) returns (ResponseProfiles);
+  rpc GetProfiles (RequestUserLogin) returns (ResponseProfiles){
+  option (google.api.http) =
+   {
+    get: "/api/v1/GrpcContactService/GetProfiles"
+   };
+  }
 }
 
 message RequestUserLogin

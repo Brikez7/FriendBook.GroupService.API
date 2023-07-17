@@ -79,7 +79,7 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
                 requestUsersId.UserId.AddRange(usersId.Select(x => x.ToString()));
 
                 var client = new PublicAccount.PublicAccountClient(channel);
-                response = await client.GetUsersLoginWithIdAsync(requestUsersId);
+                response = await client.GetUsersLoginByIdAsync(requestUsersId);
             }
             if (response.Users is null)
             {
