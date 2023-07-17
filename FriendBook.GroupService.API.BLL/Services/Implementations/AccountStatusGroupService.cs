@@ -1,5 +1,5 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
-using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
+﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
+using FriendBook.GroupService.API.BLL.gRPCServices.ContactService;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;

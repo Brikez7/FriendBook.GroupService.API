@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
+﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using FriendBook.GroupService.API.BLL.Helpers;
 using FriendBook.GroupService.API.BLL.Interfaces;

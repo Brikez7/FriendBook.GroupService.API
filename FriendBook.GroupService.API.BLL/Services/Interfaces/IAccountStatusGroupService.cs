@@ -1,6 +1,5 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountService;
-using FriendBook.GroupService.API.BLL.gRPCClients.ContactService;
-using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
+﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
+using FriendBook.GroupService.API.BLL.gRPCServices.ContactService;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
