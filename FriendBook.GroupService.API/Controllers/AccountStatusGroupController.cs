@@ -71,7 +71,7 @@ namespace FriendBook.GroupService.API.Controllers
             string accessToken = Request.Headers["Authorization"].ToString();
 
             var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
-            if (responseAnotherApi.StatusCode != Domain.Response.Code.GrpcProfileRead)
+            if (responseAnotherApi.StatusCode != Code.GrpcProfileRead)
             {
                 return Ok(responseAnotherApi);
             }

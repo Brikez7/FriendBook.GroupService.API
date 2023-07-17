@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace FriendBook.GroupService.API.BackgroundHostedService
 {
-    public class CheckDBHostedService : BackgroundService
+    public class CheckDBHostedService : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private GroupAppDBContext? _appDBContext;
@@ -37,9 +37,10 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
                 await collection.Indexes.CreateOneAsync(indexModel);
             }
         }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            bool collectionExists = await (await _mongoDatabase.ListCollectionNamesAsync()).AnyAsync();
+            bool collectionExists = await(await _mongoDatabase.ListCollectionNamesAsync()).AnyAsync();
             if (!collectionExists)
             {
                 await _mongoDatabase.CreateCollectionAsync(_settings.Collection);
@@ -51,13 +52,18 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             using var scope = _serviceScopeFactory.CreateScope();
             _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
 
-            if (!await _appDBContext.Database.CanConnectAsync() || (await _appDBContext.Database.GetPendingMigrationsAsync(stoppingToken)).Any())
+            if (!await _appDBContext.Database.CanConnectAsync() || (await _appDBContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())
             {
-                await _appDBContext.Database.MigrateAsync(stoppingToken);
+                await _appDBContext.Database.MigrateAsync(cancellationToken);
                 return;
             }
-            
+
             return;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

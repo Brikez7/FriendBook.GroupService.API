@@ -3,7 +3,7 @@ using Hangfire;
 
 namespace FriendBook.GroupService.API.HostedService
 {
-    public class HangfireRecurringHostJob : BackgroundService
+    public class HangfireRecurringHostJob : IHostedService
     {
         private IGroupTaskService? _groupTaskService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -12,19 +12,20 @@ namespace FriendBook.GroupService.API.HostedService
         {
             _serviceScopeFactory = serviceScopeFactory;
         }
-        public void UpdateStatusInGroupTasksAsync()
-        {
-            _groupTaskService!.UpdateStatusInGroupTasks();
-        }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
 
             _groupTaskService = scope.ServiceProvider.GetRequiredService<IGroupTaskService>();
 
-            RecurringJob.AddOrUpdate("UpdateStatusTask", () => UpdateStatusInGroupTasksAsync(), Cron.Daily);
+            RecurringJob.AddOrUpdate("UpdateStatusTask", () => _groupTaskService!.UpdateStatusInGroupTasks(), Cron.Daily);
 
-            return;
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+             return Task.CompletedTask;
         }
     }
 }
