@@ -20,7 +20,7 @@ namespace FriendBook.GroupService.API.DAL.Repositories
             return entity;
         }
 
-        public async Task<bool> Delete( Expression<Func<StageGroupTask, bool>> predicate)
+        public async Task<bool> Delete(Expression<Func<StageGroupTask, bool>> predicate)
         {
             var result = await _collection.DeleteManyAsync(predicate);
             return result.IsAcknowledged;

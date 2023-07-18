@@ -10,7 +10,6 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
     public class CheckDBHostedService : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private GroupAppDBContext? _appDBContext;
         private readonly IMongoDatabase _mongoDatabase;
         private readonly MongoDBSettings _settings;
 
@@ -40,21 +39,21 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            bool collectionExists = await(await _mongoDatabase.ListCollectionNamesAsync()).AnyAsync();
+            bool collectionExists = await(await _mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken)).AnyAsync(cancellationToken);
             if (!collectionExists)
             {
-                await _mongoDatabase.CreateCollectionAsync(_settings.Collection);
+                await _mongoDatabase.CreateCollectionAsync(_settings.Collection, cancellationToken: cancellationToken);
             }
 
             var collection = _mongoDatabase.GetCollection<StageGroupTask>(_settings.Collection);
             CreateUniqueIndex(collection);
 
             using var scope = _serviceScopeFactory.CreateScope();
-            _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
+            var appDbContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
 
-            if (!await _appDBContext.Database.CanConnectAsync() || (await _appDBContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())
+            if (!await appDbContext.Database.CanConnectAsync(cancellationToken) || (await appDbContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())
             {
-                await _appDBContext.Database.MigrateAsync(cancellationToken);
+                await appDbContext.Database.MigrateAsync(cancellationToken);
                 return;
             }
 

@@ -9,7 +9,8 @@ using MongoDB.Bson;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiController]
+    [Route("api/v1/[controller]")]
     [Authorize]
     public class StageGroupTaskController : ODataController
     {

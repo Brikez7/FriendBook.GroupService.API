@@ -85,6 +85,7 @@ namespace FriendBook.GroupService.API
                              .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                              .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString("HangfireNpgConnectionString"));
             });
+
             webApplicationBuilder.Services.AddHangfireServer();
         }
         public static void AddMongoDB(this WebApplicationBuilder webApplicationBuilder) 

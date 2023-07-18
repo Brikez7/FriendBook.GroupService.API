@@ -1,4 +1,5 @@
-﻿using FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.ContainerBuilders;
+﻿using FriendBook.GroupService.API.Domain.Settings;
+using FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.ContainerBuilders;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -6,7 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Testcontainers.MongoDb;
 using Testcontainers.PostgreSql;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Google.Api;
+using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 
 namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
 {
@@ -14,9 +21,11 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
         where TProgram : class where TDbContext : DbContext
     {
         private readonly PostgreSqlContainer _postgresContainer;
-        public WebHostFactory()
+        private readonly MongoDbContainer _mongoDbContainer;
+        internal WebHostFactory()
         {
             _postgresContainer = ContainerBuilderPostgres.CreatePostgreSQLContainer();
+            _mongoDbContainer = ContainerBuilderMongoDB.CreateMongoDBContainer();
         }
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -28,6 +37,8 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
             builder.ConfigureTestServices(services =>
             {
                 services.ReplaceDbContext<TDbContext>(_postgresContainer.GetConnectionString());
+                services.ReplaceConnectionHangfire(_postgresContainer.GetConnectionString());
+                services.ReplaceConnectionMongoDB(_mongoDbContainer.GetConnectionString());
             });
 
             builder.UseEnvironment("Test");
@@ -35,22 +46,27 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
         internal async Task InitializeAsync()
         {
             var task1 = _postgresContainer.StartAsync();
+            var task2 = _mongoDbContainer.StartAsync();
 
-            await Task.WhenAll(task1);
+            await Task.WhenAll(task1, task2);
         }
         internal async Task ClearData()
         {
             var dbPostges = Services.GetRequiredService<TDbContext>();
+            var repStage =  Services.GetRequiredService<IStageGroupTaskRepository>();
 
             var task2 = dbPostges.Database.EnsureDeletedAsync();
 
-            await Task.WhenAll(task2);
+            var task1 = repStage.Delete(x => true);
+
+            await Task.WhenAll(task1, task2);
 
             await dbPostges.Database.MigrateAsync();
         }
         public override async ValueTask DisposeAsync()
         {
             await _postgresContainer.DisposeAsync();
+            await _mongoDbContainer.DisposeAsync();
 
             await base.DisposeAsync();
 
@@ -59,13 +75,35 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
     }
     internal static class ServiceCollectionExtensions
     {
-        public static void ReplaceDbContext<T>(this IServiceCollection services, string newConnectionPostgres) where T : DbContext
+        internal static void ReplaceDbContext<T>(this IServiceCollection services, string newConnectionPostgres) where T : DbContext
         {
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<T>));
             if (descriptor != null) services.Remove(descriptor);
 
-            Console.WriteLine(newConnectionPostgres);
-            services.AddDbContext<T>(options => { options.UseNpgsql(newConnectionPostgres); });
+            var connectionMainPostgres = newConnectionPostgres.Replace("Database=postgres", $"Database={ContainerBuilderPostgres.Database}");
+
+            services.AddDbContext<T>(options => { options.UseNpgsql(connectionMainPostgres); });
+        }
+        internal static void ReplaceConnectionMongoDB(this IServiceCollection services, string newConnectionMongoDB)
+        {
+            var existingOptions = services.BuildServiceProvider().GetRequiredService<IOptions<MongoDBSettings>>();
+            MongoDBSettings value = existingOptions.Value;
+            value.MongoDBConnectionString = newConnectionMongoDB;
+
+            var updatedOptions = Options.Create(value);
+            services.AddSingleton(updatedOptions);
+        }
+        internal static void ReplaceConnectionHangfire(this IServiceCollection services, string newConnectionPostgres)
+        {
+            var connectionHangfirePostgres = newConnectionPostgres.Replace("Database=postgres", $"Database={ContainerBuilderPostgres.DatabaseHangfire}");
+
+            services.AddHangfire(configuration =>
+            {
+                configuration.UseSimpleAssemblyNameTypeSerializer()
+                             .UseRecommendedSerializerSettings()
+                             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                             .UsePostgreSqlStorage(connectionHangfirePostgres);
+            });
         }
     }
 }

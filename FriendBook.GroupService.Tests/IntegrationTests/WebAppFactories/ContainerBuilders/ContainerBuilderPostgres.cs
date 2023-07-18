@@ -7,27 +7,29 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.Contain
     {
         public const string User = "TestPostgres";
         public const string Password = "TestPostgres54321!";
-        public const string Database = "Test_FriendBook_GroupService";
+        public const string Database = "test_friendbook_groupservice";
+        public const string DatabaseHangfire = "test_friendbook_hangfire";
         public const string ExposedPort = "5433";
         public const string PortBinding = "5432";
-        private const string ImagePostgres = "postgres:latest";
-
+        public const string Image = "postgres:latest";
         public static PostgreSqlContainer CreatePostgreSQLContainer()
         {
             var dbBuilderPostgre = new PostgreSqlBuilder();
 
             return dbBuilderPostgre
-                .WithName($"PostgresDB.Identity.{Guid.NewGuid():N}")
-                .WithImage(ImagePostgres)
-                .WithHostname($"PostgresHost.Identity.{Guid.NewGuid():N}")
+                .WithName($"PostgresDB.GroupService.{Guid.NewGuid():N}")
+                .WithImage(Image)
+                .WithHostname($"PostgresHost.GroupService.{Guid.NewGuid():N}")
                 .WithExposedPort(ExposedPort)
                 .WithPortBinding(PortBinding, true)
                 .WithUsername(User)
                 .WithPassword(Password)
-                .WithDatabase(Database)
                 .WithTmpfsMount("/pgdata")
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted($"export PGPASSWORD='{Password}';psql -U {User} -d '{Database}' -c \"select 1\""))
                 .WithCleanUp(true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted($"psql -U {User} -d postgres -c 'CREATE DATABASE {DatabaseHangfire}';" +
+                                                                                  $"export PGPASSWORD='{Password}';psql -U {User} -d '{DatabaseHangfire}' -c \"select 1\";" +
+                                                                                  $"psql -U {User} -d postgres -c 'CREATE DATABASE {Database}';" +
+                                                                                  $"export PGPASSWORD='{Password}';psql -U {User} -d '{Database}' -c \"select 1\";"))
                 .Build();
         }
     }

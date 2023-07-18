@@ -11,7 +11,8 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiController]
+    [Route("api/v1/[controller]")]
     [Authorize]
     public class GroupTaskController : ODataController
     {
