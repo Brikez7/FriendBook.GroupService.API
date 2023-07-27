@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -27,9 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IntegrationTests\TestHelpers\" />
+    <Folder Include="TestHelpers\" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\FriendBook.GroupService.API.DAL\FriendBook.GroupService.API.DAL.csproj" />
     <ProjectReference Include="..\FriendBook.GroupService.API.Domain\FriendBook.GroupService.API.Domain.csproj" />

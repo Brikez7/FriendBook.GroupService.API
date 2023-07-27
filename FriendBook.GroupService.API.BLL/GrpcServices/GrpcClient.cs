@@ -1,19 +1,18 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
-using FriendBook.GroupService.API.BLL.gRPCServices.ContactService;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountClient;
+using FriendBook.GroupService.API.BLL.gRPCClients.ContactClient;
 using FriendBook.GroupService.API.Domain.Response;
 using FriendBook.GroupService.API.Domain.Settings;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
-using Code = FriendBook.GroupService.API.Domain.Response.Code;
 
 namespace FriendBook.GroupService.API.BLL.GrpcServices
 {
-    public class GrpcService : IGrpcService
+    public class GrpcClient : IGrpcClient
     {
         private readonly GrpcSettings _identityGrpcSettings;
 
-        public GrpcService(IOptions<GrpcSettings> identityGrpcSettings)
+        public GrpcClient(IOptions<GrpcSettings> identityGrpcSettings)
         {
             _identityGrpcSettings = identityGrpcSettings.Value;
         }
@@ -31,12 +30,12 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
 
             if (response.Exists)
             {
-                return new StandartResponse<ResponseUserExists> { Data = response, StatusCode = Code.UserExists };
+                return new StandartResponse<ResponseUserExists> { Data = response, StatusCode = ServiceCode.UserExists };
             }
             return new StandartResponse<ResponseUserExists>()
             {
                 Message = "Account not exists or server not connected",
-                StatusCode = Code.UserNotExists,
+                StatusCode = ServiceCode.UserNotExists,
             };
         }
 
@@ -61,9 +60,9 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
             }
             if (response.Profiles is null)
             {
-                return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = Code.EntityNotFound };
+                return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = ServiceCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseProfiles> { Data = response, StatusCode = Code.GrpcProfileRead };
+            return new StandartResponse<ResponseProfiles> { Data = response, StatusCode = ServiceCode.GrpcProfileReadied };
         }
 
         public async Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId)
@@ -82,9 +81,9 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
             }
             if (response.Users is null)
             {
-                return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = Code.EntityNotFound };
+                return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = ServiceCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseUsers> { Data = response, StatusCode = Code.GrpcUsersRead };
+            return new StandartResponse<ResponseUsers> { Data = response, StatusCode = ServiceCode.GrpcUsersReadied };
         }
     }
 }

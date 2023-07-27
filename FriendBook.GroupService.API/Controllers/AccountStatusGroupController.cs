@@ -1,4 +1,4 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountClient;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using FriendBook.GroupService.API.BLL.Helpers;
 using FriendBook.GroupService.API.BLL.Interfaces;
@@ -18,10 +18,10 @@ namespace FriendBook.GroupService.API.Controllers
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
         private readonly IValidationService<AccountStatusGroupDTO> _accountStatusGroupDTOValidationService;
-        private readonly IGrpcService _grpcService;
+        private readonly IGrpcClient _grpcService;
         public Lazy<DataAccessToken> UserToken { get; set; }
         public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService,
-            IGrpcService grpcService, IHttpContextAccessor httpContextAccessor)
+            IGrpcClient grpcService, IHttpContextAccessor httpContextAccessor)
         {
             _accountStatusGroupService = accountStatusGroupService;
             _accountStatusGroupDTOValidationService = validationService;
@@ -40,12 +40,12 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
+            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
 
-            if (responseAnotherAPI.StatusCode != Code.UserExists) 
+            if (responseAnotherAPI.StatusCode != ServiceCode.UserExists) 
             {
                 return Ok(responseAnotherAPI);
             }
@@ -58,7 +58,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
+            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
@@ -71,7 +71,7 @@ namespace FriendBook.GroupService.API.Controllers
             string accessToken = Request.Headers["Authorization"].ToString();
 
             var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
-            if (responseAnotherApi.StatusCode != Code.GrpcProfileRead)
+            if (responseAnotherApi.StatusCode != ServiceCode.GrpcProfileReadied)
             {
                 return Ok(responseAnotherApi);
             }

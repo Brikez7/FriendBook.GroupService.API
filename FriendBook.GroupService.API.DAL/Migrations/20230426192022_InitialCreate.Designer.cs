@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
-    [DbContext(typeof(GroupAppDBContext))]
+    [DbContext(typeof(GroupDBContext))]
     [Migration("20230426192022_InitialCreate")]
     partial class InitialCreate
     {

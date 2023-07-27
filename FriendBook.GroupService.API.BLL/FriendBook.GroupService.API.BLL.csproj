@@ -28,4 +28,9 @@
     <Protobuf Include="Protos\Services\*.proto" GrpcServices="Client" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Protobuf Update="Protos\Services\AccountService.proto" GrpcServices="Client" />
+    <Protobuf Update="Protos\Services\ContactService.proto" GrpcServices="Client" />
+  </ItemGroup>
+
 </Project>

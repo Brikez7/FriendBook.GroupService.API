@@ -1,6 +1,6 @@
 ﻿using Testcontainers.MongoDb;
 
-namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.ContainerBuilders
+namespace FriendBook.GroupService.Tests.WebAppFactories.ContainerBuilders
 {
     internal static class ContainerBuilderMongoDB
     {
@@ -9,7 +9,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.Contain
         public const string ExposedPort = "27017";
         public const string PortBinding = "27016";
         public const string Image = "mongo:latest";
-        public static MongoDbContainer CreateMongoDBContainer() 
+        public static MongoDbContainer CreateMongoDBContainer()
         {
             var dbBuilderMongoDB = new MongoDbBuilder();
 

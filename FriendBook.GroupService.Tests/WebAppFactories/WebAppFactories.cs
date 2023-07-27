@@ -1,5 +1,4 @@
 ﻿using FriendBook.GroupService.API.Domain.Settings;
-using FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.ContainerBuilders;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -12,10 +11,10 @@ using Testcontainers.MongoDb;
 using Testcontainers.PostgreSql;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Google.Api;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-
-namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
+using FriendBook.GroupService.API.BLL.GrpcServices;
+using FriendBook.GroupService.Tests.WebAppFactories.ContainerBuilders;
+namespace FriendBook.GroupService.Tests.WebAppFactories
 {
     internal class WebHostFactory<TProgram, TDbContext> : WebApplicationFactory<TProgram>
         where TProgram : class where TDbContext : DbContext
@@ -39,6 +38,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
                 services.ReplaceDbContext<TDbContext>(_postgresContainer.GetConnectionString());
                 services.ReplaceConnectionHangfire(_postgresContainer.GetConnectionString());
                 services.ReplaceConnectionMongoDB(_mongoDbContainer.GetConnectionString());
+                services.ReplaceGrpcService(this);
+
+                var serviceProvider = services.BuildServiceProvider();
+                using var scope = serviceProvider.CreateScope();
+                var scopedServices = scope.ServiceProvider;
+                var context = scopedServices.GetRequiredService<IGlobalConfiguration<PostgreSqlStorage>>();
             });
 
             builder.UseEnvironment("Test");
@@ -53,13 +58,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
         internal async Task ClearData()
         {
             var dbPostges = Services.GetRequiredService<TDbContext>();
-            var repStage =  Services.GetRequiredService<IStageGroupTaskRepository>();
+            var repStage = Services.GetRequiredService<IStageGroupTaskRepository>();
 
-            var task2 = dbPostges.Database.EnsureDeletedAsync();
+            var taskClearPostgres = dbPostges.Database.EnsureDeletedAsync();
+            var taskClearStageTasks = repStage.Delete(x => true);
 
-            var task1 = repStage.Delete(x => true);
-
-            await Task.WhenAll(task1, task2);
+            await Task.WhenAll(taskClearStageTasks, taskClearPostgres);
 
             await dbPostges.Database.MigrateAsync();
         }
@@ -84,6 +88,15 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
 
             services.AddDbContext<T>(options => { options.UseNpgsql(connectionMainPostgres); });
         }
+        internal static void ReplaceGrpcService<TProgram, TDbContext>
+            (this IServiceCollection services, WebHostFactory<TProgram, TDbContext> webApplication)
+            where TProgram : class where TDbContext : DbContext
+        {
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IGrpcClient));
+            if (descriptor != null) services.Remove(descriptor);
+
+            services.AddScoped<IGrpcClient,TestGrpcClient>();
+        }
         internal static void ReplaceConnectionMongoDB(this IServiceCollection services, string newConnectionMongoDB)
         {
             var existingOptions = services.BuildServiceProvider().GetRequiredService<IOptions<MongoDBSettings>>();
@@ -97,13 +110,22 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories
         {
             var connectionHangfirePostgres = newConnectionPostgres.Replace("Database=postgres", $"Database={ContainerBuilderPostgres.DatabaseHangfire}");
 
-            services.AddHangfire(configuration =>
+            var existingHangfireConfiguration = services.FirstOrDefault(x => x.ServiceType == typeof(IGlobalConfiguration<PostgreSqlStorage>));
+            if (existingHangfireConfiguration != null)
+            {
+                services.Remove(existingHangfireConfiguration);
+            }
+
+            services.AddHangfire((configuration) =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
                              .UseRecommendedSerializerSettings()
                              .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                             .UsePostgreSqlStorage(new PostgreSqlStorage(connectionHangfirePostgres))
                              .UsePostgreSqlStorage(connectionHangfirePostgres);
             });
+
+            services.AddHangfireServer();
         }
     }
 }

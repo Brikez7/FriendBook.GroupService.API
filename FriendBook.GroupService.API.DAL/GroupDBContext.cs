@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace FriendBook.GroupService.API.DAL
 {
-    public partial class GroupAppDBContext : DbContext
+    public partial class GroupDBContext : DbContext
     {
         public const string NameConnection = "NpgConnectionString";
         public DbSet<Group> Groups { get; set; }
@@ -14,9 +14,8 @@ namespace FriendBook.GroupService.API.DAL
         {
             await Database.MigrateAsync();
         }
-        public GroupAppDBContext(DbContextOptions<GroupAppDBContext> options) : base(options)
+        public GroupDBContext(DbContextOptions<GroupDBContext> options) : base(options)
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

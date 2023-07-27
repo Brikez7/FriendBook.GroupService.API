@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
-    [DbContext(typeof(GroupAppDBContext))]
+    [DbContext(typeof(GroupDBContext))]
     partial class GroupAppDBContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

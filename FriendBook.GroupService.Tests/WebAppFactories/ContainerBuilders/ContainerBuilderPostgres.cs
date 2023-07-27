@@ -1,7 +1,7 @@
 ﻿using DotNet.Testcontainers.Builders;
 using Testcontainers.PostgreSql;
 
-namespace FriendBook.GroupService.Tests.IntegrationTests.WebAppFactories.ContainerBuilders
+namespace FriendBook.GroupService.Tests.WebAppFactories.ContainerBuilders
 {
     internal class ContainerBuilderPostgres
     {

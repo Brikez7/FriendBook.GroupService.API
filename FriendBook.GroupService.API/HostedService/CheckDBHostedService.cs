@@ -49,7 +49,7 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             CreateUniqueIndex(collection);
 
             using var scope = _serviceScopeFactory.CreateScope();
-            var appDbContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
+            var appDbContext = scope.ServiceProvider.GetRequiredService<GroupDBContext>();
 
             if (!await appDbContext.Database.CanConnectAsync(cancellationToken) || (await appDbContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())
             {

@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "FriendBook.GroupService.API.BLL.gRPCServices.AccountService";
+option csharp_namespace = "FriendBook.GroupService.API.BLL.gRPCClients.AccountClient";
 import "Protos/Google/API/annotations.proto";
 
 package AccountService;

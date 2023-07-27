@@ -2,6 +2,7 @@
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.JWT;
+using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -31,7 +32,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateStageGroupTask([FromRoute] Guid groupId, [FromBody] RequestStageGroupTasNew requestStageGroupTasNew) 
         {
             var responseValidation = await _requestStageGroupTasNewValidationService.ValidateAsync(requestStageGroupTasNew);
-            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
+            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Create(requestStageGroupTasNew, UserToken.Value.Id, groupId);
@@ -41,7 +42,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateStageGroupTask([FromRoute] Guid groupId, [FromBody] StageGroupTaskDTO stageGroupTaskDTO)
         {
             var responseValidation = await _stageGroupTaskDTOValidationService.ValidateAsync(stageGroupTaskDTO);
-            if (responseValidation.StatusCode != Domain.Response.Code.EntityIsValidated)
+            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);

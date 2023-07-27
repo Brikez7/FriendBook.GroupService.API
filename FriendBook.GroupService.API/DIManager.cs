@@ -64,7 +64,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
-            webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
+            webApplicationBuilder.Services.AddScoped<IGrpcClient, GrpcClient>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupUpdate>, ValidationService<RequestGroupUpdate>>();
@@ -112,8 +112,8 @@ namespace FriendBook.GroupService.API
         }
         public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
-                 webApplicationBuilder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
+            webApplicationBuilder.Services.AddDbContext<GroupDBContext>(opt => opt.UseNpgsql(
+                 webApplicationBuilder.Configuration.GetConnectionString(GroupDBContext.NameConnection)));
         }
         public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
         {

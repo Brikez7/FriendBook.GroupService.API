@@ -32,12 +32,12 @@ namespace FriendBook.GroupService.API.BLL.Services
             if (!isValid)
             {
 
-                reponse.StatusCode = Code.EntityIsNotValidated;
+                reponse.StatusCode = ServiceCode.EntityIsNotValidated;
                 reponse.Message = $"Error validation: {validationResult.Errors.First().ErrorMessage}";
                 reponse.Data = validationResult.Errors.Select(x => new Tuple<string, string>(x.PropertyName, x.ErrorMessage)).ToList();
                 return reponse;
             }
-            reponse.StatusCode = Code.EntityIsValidated;
+            reponse.StatusCode = ServiceCode.EntityIsValidated;
             return reponse;
         }
     }

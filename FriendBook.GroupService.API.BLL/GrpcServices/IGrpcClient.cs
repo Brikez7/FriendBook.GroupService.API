@@ -1,10 +1,10 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
-using FriendBook.GroupService.API.BLL.gRPCServices.ContactService;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.AccountClient;
+using FriendBook.GroupService.API.BLL.gRPCClients.ContactClient;
 using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.GrpcServices
 {
-    public interface IGrpcService
+    public interface IGrpcClient
     {
         public Task<BaseResponse<ResponseUserExists>> CheckUserExists(Guid userId);
         public Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId);
