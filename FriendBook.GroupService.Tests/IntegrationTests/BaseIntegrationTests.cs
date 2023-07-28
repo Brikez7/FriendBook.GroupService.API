@@ -25,7 +25,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         }
 
         [OneTimeSetUp]
-        public async Task Initialization()
+        public virtual async Task Initialization()
         {
             _webHost = new WebHostFactory<Program, GroupDBContext>();
             await _webHost.InitializeAsync();
@@ -34,7 +34,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         }
 
         [SetUp]
-        public void SetUp()
+        public virtual Task SetUp()
         {
             var jWTSettings = _webHost.Services.GetRequiredService<IOptions<JWTSettings>>().Value;
             var accessToken = TokenHelpers.GenerateAccessToken(DataAccessToken, jWTSettings);
@@ -45,16 +45,17 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
                 Data = new ResponseUserExists() { Exists = true },
                 StatusCode = ServiceCode.UserExists
             }));
+            return Task.CompletedTask;
         }
 
         [TearDown]
-        public async Task Clear()
+        public virtual async Task Clear()
         {
             await _webHost.ClearData();
         }
 
         [OneTimeTearDown]
-        public async Task Dispose()
+        public virtual async Task Dispose()
         {
             await _webHost.DisposeAsync();
         }

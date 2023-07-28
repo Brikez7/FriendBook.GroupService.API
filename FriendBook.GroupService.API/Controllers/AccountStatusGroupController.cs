@@ -30,14 +30,14 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpDelete("Delete/{groupId}")]
-        public async Task<IActionResult> DeleteAccountStatusGroup([FromRoute] Guid groupId, [FromQuery] Guid userId)
+        public async Task<IActionResult> Delete([FromRoute] Guid groupId, [FromQuery] Guid userId)
         {
             var response = await _accountStatusGroupService.DeleteAccountStatusGroup(userId,UserToken.Value.Id, groupId);
             return Ok(response);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
+        public async Task<IActionResult> Create([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
             if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
@@ -55,7 +55,7 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateAccountStatusGroup([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
+        public async Task<IActionResult> Update([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
             if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
