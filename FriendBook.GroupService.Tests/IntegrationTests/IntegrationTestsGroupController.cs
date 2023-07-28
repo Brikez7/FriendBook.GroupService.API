@@ -18,14 +18,14 @@ using System.Net.Http.Headers;
 namespace FriendBook.GroupService.Tests.IntegrationTests
 {
     [TestFixtureSource(typeof(IntegrationTestFixtureSource))]
-    public class IntegrationTestsGroupController2
+    public class IntegrationTestsGroupController
     {
         private WebHostFactory<Program, GroupDBContext> _webHost;
         private HttpClient _httpClient;
         private DataAccessToken DataAccessToken;
         internal const string UrlController = "api/v1/Group";
 
-        public IntegrationTestsGroupController2(DataAccessToken dataAccessToken)
+        public IntegrationTestsGroupController(DataAccessToken dataAccessToken)
         {
             DataAccessToken = dataAccessToken;
         }
@@ -62,7 +62,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public async Task CreateGroup() 
         {
             string newGroup = "TestGroup";
-            TestGrpcClient.MockGrpcService.CheckUserExists(DataAccessToken.Id).Returns(Task.FromResult<BaseResponse<ResponseUserExists>>(new StandartResponse<ResponseUserExists>()
+            _webHost.DecoratorGrpcClient.CheckUserExists(DataAccessToken.Id).Returns(Task.FromResult<BaseResponse<ResponseUserExists>>(new StandartResponse<ResponseUserExists>()
             {
                 Data = new ResponseUserExists() { Exists = true },
                 StatusCode = ServiceCode.UserExists

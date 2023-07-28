@@ -14,6 +14,7 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using FriendBook.GroupService.Tests.WebAppFactories.ContainerBuilders;
+
 namespace FriendBook.GroupService.Tests.WebAppFactories
 {
     internal class WebHostFactory<TProgram, TDbContext> : WebApplicationFactory<TProgram>
@@ -21,10 +22,12 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
     {
         private readonly PostgreSqlContainer _postgresContainer;
         private readonly MongoDbContainer _mongoDbContainer;
+        internal TestGrpcClient DecoratorGrpcClient;
         internal WebHostFactory()
         {
             _postgresContainer = ContainerBuilderPostgres.CreatePostgreSQLContainer();
             _mongoDbContainer = ContainerBuilderMongoDB.CreateMongoDBContainer();
+            DecoratorGrpcClient = new TestGrpcClient();
         }
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -38,12 +41,7 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
                 services.ReplaceDbContext<TDbContext>(_postgresContainer.GetConnectionString());
                 services.ReplaceConnectionHangfire(_postgresContainer.GetConnectionString());
                 services.ReplaceConnectionMongoDB(_mongoDbContainer.GetConnectionString());
-                services.ReplaceGrpcService(this);
-
-                var serviceProvider = services.BuildServiceProvider();
-                using var scope = serviceProvider.CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var context = scopedServices.GetRequiredService<IGlobalConfiguration<PostgreSqlStorage>>();
+                services.ReplaceGrpcService(DecoratorGrpcClient);
             });
 
             builder.UseEnvironment("Test");
@@ -88,14 +86,12 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
 
             services.AddDbContext<T>(options => { options.UseNpgsql(connectionMainPostgres); });
         }
-        internal static void ReplaceGrpcService<TProgram, TDbContext>
-            (this IServiceCollection services, WebHostFactory<TProgram, TDbContext> webApplication)
-            where TProgram : class where TDbContext : DbContext
+        internal static void ReplaceGrpcService(this IServiceCollection services, IGrpcClient testGrpcClient)
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IGrpcClient));
+            var descriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IGrpcClient));
             if (descriptor != null) services.Remove(descriptor);
 
-            services.AddScoped<IGrpcClient,TestGrpcClient>();
+            services.AddSingleton(testGrpcClient);
         }
         internal static void ReplaceConnectionMongoDB(this IServiceCollection services, string newConnectionMongoDB)
         {
@@ -110,18 +106,20 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
         {
             var connectionHangfirePostgres = newConnectionPostgres.Replace("Database=postgres", $"Database={ContainerBuilderPostgres.DatabaseHangfire}");
 
-            var existingHangfireConfiguration = services.FirstOrDefault(x => x.ServiceType == typeof(IGlobalConfiguration<PostgreSqlStorage>));
-            if (existingHangfireConfiguration != null)
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(JobStorage));
+            if (descriptor != null) services.Remove(descriptor);
+
+            services.AddScoped<JobStorage>(x =>
             {
-                services.Remove(existingHangfireConfiguration);
-            }
+                var jobStorage = new PostgreSqlStorage(connectionHangfirePostgres);
+                return jobStorage;
+            });
 
             services.AddHangfire((configuration) =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
                              .UseRecommendedSerializerSettings()
                              .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                             .UsePostgreSqlStorage(new PostgreSqlStorage(connectionHangfirePostgres))
                              .UsePostgreSqlStorage(connectionHangfirePostgres);
             });
 

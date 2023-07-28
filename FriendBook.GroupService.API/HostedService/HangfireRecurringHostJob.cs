@@ -5,9 +5,7 @@ namespace FriendBook.GroupService.API.HostedService
 {
     public class HangfireRecurringHostJob : IHostedService
     {
-        private IGroupTaskService? _groupTaskService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-
         public HangfireRecurringHostJob(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
@@ -16,9 +14,10 @@ namespace FriendBook.GroupService.API.HostedService
         {
             using var scope = _serviceScopeFactory.CreateScope();
 
-            _groupTaskService = scope.ServiceProvider.GetRequiredService<IGroupTaskService>();
+            var groupTaskService = scope.ServiceProvider.GetRequiredService<IGroupTaskService>();
+            var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-            RecurringJob.AddOrUpdate("UpdateStatusTask", () => _groupTaskService!.UpdateStatusInGroupTasks(), Cron.Daily);
+            backgroundJobClient.AddOrUpdate("UpdateStatusTask", () => groupTaskService!.UpdateStatusInGroupTasks(), Cron.Daily);
 
             return Task.CompletedTask;
         }

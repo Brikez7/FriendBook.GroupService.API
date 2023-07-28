@@ -29,6 +29,9 @@ using Microsoft.Extensions.Options;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 using FriendBook.GroupService.API.BLL.GrpcServices;
+using Google.Api;
+using Hangfire.Client;
+using Hangfire.States;
 
 namespace FriendBook.GroupService.API
 {
@@ -78,6 +81,31 @@ namespace FriendBook.GroupService.API
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {
+            webApplicationBuilder.Services.AddScoped<JobStorage>(x =>
+            {
+                var jobStorage = new PostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString("HangfireNpgConnectionString"));
+                return jobStorage;
+            });
+            webApplicationBuilder.Services.AddScoped<IBackgroundJobFactory>(x => 
+            {
+                var backgroundJobFactory = new BackgroundJobFactory();
+                return backgroundJobFactory;
+            });
+            webApplicationBuilder.Services.AddScoped<IBackgroundJobStateChanger>(x => 
+            {
+                var backgroundJobStateChanger = new BackgroundJobStateChanger();
+                return backgroundJobStateChanger;
+            });
+
+            webApplicationBuilder.Services.AddScoped<IBackgroundJobClient>(x => new BackgroundJobClient(
+                x.GetRequiredService<JobStorage>(),
+                x.GetRequiredService<IBackgroundJobFactory>(),
+                x.GetRequiredService<IBackgroundJobStateChanger>()));
+
+            webApplicationBuilder.Services.AddScoped<IRecurringJobManager>(x => new RecurringJobManager(
+                x.GetRequiredService<JobStorage>(),
+                x.GetRequiredService<IBackgroundJobFactory>()));
+
             webApplicationBuilder.Services.AddHangfire(configuration =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
