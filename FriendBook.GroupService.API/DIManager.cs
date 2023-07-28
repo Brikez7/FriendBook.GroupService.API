@@ -29,7 +29,6 @@ using Microsoft.Extensions.Options;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 using FriendBook.GroupService.API.BLL.GrpcServices;
-using Google.Api;
 using Hangfire.Client;
 using Hangfire.States;
 
@@ -52,7 +51,7 @@ namespace FriendBook.GroupService.API
         {
             webApplicationBuilder.Services.AddScoped<IValidator<AccountStatusGroupDTO>, ValidatorAccountStatusGroupDTO>();
 
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupUpdate>, ValidatorRequestGroupUpdate>();
+            webApplicationBuilder.Services.AddScoped<IValidator<RequestUpdateGroup>, ValidatorRequestGroupUpdate>();
 
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
             webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
@@ -70,7 +69,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGrpcClient, GrpcClient>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupUpdate>, ValidationService<RequestGroupUpdate>>();
+            webApplicationBuilder.Services.AddScoped<IValidationService<RequestUpdateGroup>, ValidationService<RequestUpdateGroup>>();
 
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
             webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();

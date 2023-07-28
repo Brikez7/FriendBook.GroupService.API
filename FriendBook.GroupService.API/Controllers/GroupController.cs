@@ -13,15 +13,15 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 namespace FriendBook.GroupService.API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("GroupService/v1/[controller]")]
     [Authorize]
     public class GroupController : ODataController
     {
         private readonly IContactGroupService _groupService;
-        private readonly IValidationService<RequestGroupUpdate> _groupDTOValidationService;
+        private readonly IValidationService<RequestUpdateGroup> _groupDTOValidationService;
         private readonly IGrpcClient _grpcIdentityClient;
         public Lazy<DataAccessToken> UserToken { get; set; }
-        public GroupController(IContactGroupService groupService, IValidationService<RequestGroupUpdate> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContext)
+        public GroupController(IContactGroupService groupService, IValidationService<RequestUpdateGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
@@ -48,7 +48,7 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateGroup([FromBody] RequestGroupUpdate requestGroupUpdate)
+        public async Task<IActionResult> UpdateGroup([FromBody] RequestUpdateGroup requestGroupUpdate)
         {
             var responseValidation = await _groupDTOValidationService.ValidateAsync(requestGroupUpdate);
             if (responseValidation.StatusCode == ServiceCode.EntityIsNotValidated)
@@ -58,16 +58,14 @@ namespace FriendBook.GroupService.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("OData/Get")]
-        [EnableQuery]
+        [HttpGet("GetMyGroups")]
         public async Task<IActionResult> GetMyGroups()
         {
             var response = await _groupService.GetGroupsByCreaterId(UserToken.Value.Id);
             return Ok(response);
         }
 
-        [HttpGet("OData/GetMyGroupsWithMyStatus")]
-        [EnableQuery]
+        [HttpGet("GetMyGroupsWithMyStatus")]
         public async Task<IActionResult> GetMyGroupsWithMyStatus()
         {
             var response = await _groupService.GetGroupsWithStatusByUserId(UserToken.Value.Id);

@@ -8,7 +8,7 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
     public interface IContactGroupService
     {
         public Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid createrId);
-        public Task<BaseResponse<RequestGroupUpdate>> UpdateGroup(RequestGroupUpdate group, Guid createrId);
+        public Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup group, Guid createrId);
         public Task<BaseResponse<bool>> DeleteGroup(Guid groupid, Guid createrId);
         public BaseResponse<IQueryable<Group>> GetGroupOData();
         public Task<BaseResponse<ResponseGroupView[]>> GetGroupsByCreaterId(Guid userId);

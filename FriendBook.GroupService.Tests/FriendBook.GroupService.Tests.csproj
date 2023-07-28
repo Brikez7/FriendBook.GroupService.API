@@ -25,10 +25,6 @@
     <PackageReference Include="Testcontainers.MongoDb" Version="3.3.0" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="3.3.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="TestHelpers\" />
-  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\FriendBook.GroupService.API.DAL\FriendBook.GroupService.API.DAL.csproj" />

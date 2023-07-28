@@ -91,7 +91,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
             return new StandartResponse<ResponseGroupView[]>
             {
-                Message = "Grous not found",
+                Message = "Groups not found",
                 StatusCode = ServiceCode.EntityNotFound
             };
         }
@@ -119,23 +119,23 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandartResponse<ResponseAccountGroup[]>
             {
                 Data = accountGroupDTOs,
-                StatusCode = ServiceCode.AccountStatusGroupReadied
+                StatusCode = ServiceCode.GroupWithStatusMapped
             };
         }
 
-        public async Task<BaseResponse<RequestGroupUpdate>> UpdateGroup(RequestGroupUpdate groupDTO, Guid createrId)
+        public async Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup groupDTO, Guid creatorId)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == groupDTO.GroupId))
-                return new StandartResponse<RequestGroupUpdate> { Message = "Group not found or you not access update group", StatusCode = ServiceCode.UserNotAccess };
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == groupDTO.GroupId))
+                return new StandartResponse<ResponseGroupView> { Message = "Group not found or you not access update group", StatusCode = ServiceCode.UserNotAccess };
 
-            Group? updatedGroup = new Group(groupDTO.Name,createrId);
+            Group updatedGroup = new(groupDTO.Name,creatorId);
             updatedGroup = _groupRepository.Update(updatedGroup);
 
             await _groupRepository.SaveAsync();
 
-            return new StandartResponse<RequestGroupUpdate>()
+            return new StandartResponse<ResponseGroupView>()
             {
-                Data = new RequestGroupUpdate(updatedGroup!),
+                Data = new ResponseGroupView(updatedGroup),
                 StatusCode = ServiceCode.GroupUpdated
             };
         }

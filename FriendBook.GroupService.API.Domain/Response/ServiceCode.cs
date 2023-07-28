@@ -9,6 +9,7 @@
         GroupDeleted = 2003,
         GroupReadied = 2004,
         GroupAlreadyExists = 2005,
+        GroupWithStatusMapped = 2006,
 
         AccountStatusGroupCreated = 2011,
         AccountStatusGroupUpdated = 2012,

@@ -3,7 +3,7 @@ using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators
 {
-    public class ValidatorRequestGroupUpdate : AbstractValidator<RequestGroupUpdate>
+    public class ValidatorRequestGroupUpdate : AbstractValidator<RequestUpdateGroup>
     {
         public ValidatorRequestGroupUpdate() 
         {

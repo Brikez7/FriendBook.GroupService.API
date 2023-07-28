@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 namespace FriendBook.GroupService.API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("GroupService/v1/[controller]")]
     [Authorize]
     public class GroupTaskController : ODataController
     {
