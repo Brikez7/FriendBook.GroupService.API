@@ -22,9 +22,9 @@ namespace FriendBook.GroupService.API.BLL.Services
         {
             if (await _groupRepository.GetAll().AnyAsync(x => x.Name == groupName)) 
             {
-                return new StandartResponse<ResponseGroupView>()
+                return new StandardResponse<ResponseGroupView>()
                 {
-                    StatusCode = ServiceCode.GroupAlreadyExists,
+                    ServiceCode = ServiceCode.GroupAlreadyExists,
                     Message = "Group with name already exists"
                 };
             }
@@ -37,10 +37,10 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             await _groupRepository.SaveAsync();
 
-            return new StandartResponse<ResponseGroupView>()
+            return new StandardResponse<ResponseGroupView>()
             {
                 Data = new ResponseGroupView(createdGroup),
-                StatusCode = ServiceCode.GroupCreated
+                ServiceCode = ServiceCode.GroupCreated
             };
         }
 
@@ -50,20 +50,20 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if (entity is null) 
             {
-                return new StandartResponse<bool>()
+                return new StandardResponse<bool>()
                 {
                     Message = "Group not found",
-                    StatusCode = ServiceCode.EntityNotFound
+                    ServiceCode = ServiceCode.EntityNotFound
                 };
             }
 
             var result = _groupRepository.Delete(entity);
             await _groupRepository.SaveAsync();
 
-            return new StandartResponse<bool>()
+            return new StandardResponse<bool>()
             {
                 Data = result,
-                StatusCode = ServiceCode.GroupDeleted
+                ServiceCode = ServiceCode.GroupDeleted
             };
         }
 
@@ -71,10 +71,10 @@ namespace FriendBook.GroupService.API.BLL.Services
         {
             var groups = _groupRepository.GetAll();
 
-            return new StandartResponse<IQueryable<Group>>()
+            return new StandardResponse<IQueryable<Group>>()
             {
                 Data = groups,
-                StatusCode = ServiceCode.GroupReadied
+                ServiceCode = ServiceCode.GroupReadied
             };
         }
 
@@ -87,12 +87,12 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if(listGroupDTO?.Length > 0) 
             {
-                return new StandartResponse<ResponseGroupView[]>() { Data = listGroupDTO, StatusCode = ServiceCode.GroupReadied};
+                return new StandardResponse<ResponseGroupView[]>() { Data = listGroupDTO, ServiceCode = ServiceCode.GroupReadied};
             }
-            return new StandartResponse<ResponseGroupView[]>
+            return new StandardResponse<ResponseGroupView[]>
             {
                 Message = "Groups not found",
-                StatusCode = ServiceCode.EntityNotFound
+                ServiceCode = ServiceCode.EntityNotFound
             };
         }
 
@@ -109,34 +109,34 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             if (accountGroupDTOs.Length == 0)
             {
-                return new StandartResponse<ResponseAccountGroup[]>
+                return new StandardResponse<ResponseAccountGroup[]>
                 {
                     Message = "Groups not found",
-                    StatusCode = ServiceCode.EntityNotFound
+                    ServiceCode = ServiceCode.EntityNotFound
                 };
             }
 
-            return new StandartResponse<ResponseAccountGroup[]>
+            return new StandardResponse<ResponseAccountGroup[]>
             {
                 Data = accountGroupDTOs,
-                StatusCode = ServiceCode.GroupWithStatusMapped
+                ServiceCode = ServiceCode.GroupWithStatusMapped
             };
         }
 
         public async Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup groupDTO, Guid creatorId)
         {
             if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == groupDTO.GroupId))
-                return new StandartResponse<ResponseGroupView> { Message = "Group not found or you not access update group", StatusCode = ServiceCode.UserNotAccess };
+                return new StandardResponse<ResponseGroupView> { Message = "Group not found or you not access update group", ServiceCode = ServiceCode.UserNotAccess };
 
             Group updatedGroup = new(groupDTO.Name,creatorId);
             updatedGroup = _groupRepository.Update(updatedGroup);
 
             await _groupRepository.SaveAsync();
 
-            return new StandartResponse<ResponseGroupView>()
+            return new StandardResponse<ResponseGroupView>()
             {
                 Data = new ResponseGroupView(updatedGroup),
-                StatusCode = ServiceCode.GroupUpdated
+                ServiceCode = ServiceCode.GroupUpdated
             };
         }
     }

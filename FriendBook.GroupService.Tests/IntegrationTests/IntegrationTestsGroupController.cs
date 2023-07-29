@@ -22,19 +22,19 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
             await base.SetUp();
 
             HttpResponseMessage httpResponseGroupView = await _httpClient.PostAsync($"{UrlController}/Create/{"TestGroup"}", null);
-            _testGroupView = (await DeserializeHelper.TryDeserializeStandartResponse<ResponseGroupView>(httpResponseGroupView)).Data;
+            _testGroupView = (await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseGroupView)).Data;
         }
 
         [Test]
         public async Task CreateGroup() 
         {
             HttpResponseMessage httpResponseGroupView = await _httpClient.PostAsync($"{UrlController}/Create/{$"{_testGroupView.Name}Test"}", null);
-            var responseGroupView = await DeserializeHelper.TryDeserializeStandartResponse<ResponseGroupView>(httpResponseGroupView);
+            var responseGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseGroupView);
 
             Assert.Multiple(() =>
             {
                 Assert.That(httpResponseGroupView.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseGroupView.StatusCode, Is.EqualTo(ServiceCode.GroupCreated));
+                Assert.That(responseGroupView.ServiceCode, Is.EqualTo(ServiceCode.GroupCreated));
                 Assert.That(responseGroupView?.Data, Is.Not.Null);
             });
         }
@@ -43,12 +43,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public async Task DeleteGroup()
         {
             HttpResponseMessage httpResponseDeletedGroup = await _httpClient.DeleteAsync($"{UrlController}/Delete/{_testGroupView.GroupId}");
-            var responseDeletedGroup = await DeserializeHelper.TryDeserializeStandartResponse<bool>(httpResponseDeletedGroup);
+            var responseDeletedGroup = await DeserializeHelper.TryDeserializeStandardResponse<bool>(httpResponseDeletedGroup);
 
             Assert.Multiple(() =>
             {
                 Assert.That(httpResponseDeletedGroup.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseDeletedGroup.StatusCode, Is.EqualTo(ServiceCode.GroupDeleted));
+                Assert.That(responseDeletedGroup.ServiceCode, Is.EqualTo(ServiceCode.GroupDeleted));
                 Assert.That(responseDeletedGroup?.Data, Is.True);
             });
         }
@@ -59,13 +59,14 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
             var newGroupName = $"{_testGroupView.Name}Updated";
             var requestUpdateGroup = new RequestUpdateGroup(_testGroupView.GroupId, newGroupName);
             var requestUpdateGroupContent = JsonContent.Create(requestUpdateGroup);
+
             HttpResponseMessage httpResponseUpdatedGroup = await _httpClient.PutAsync($"{UrlController}/Update", requestUpdateGroupContent);
-            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandartResponse<ResponseGroupView>(httpResponseUpdatedGroup);
+            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseUpdatedGroup);
             
             Assert.Multiple(() =>
             {
                 Assert.That(httpResponseUpdatedGroup.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseUpdatedGroup.StatusCode, Is.EqualTo(ServiceCode.GroupUpdated));
+                Assert.That(responseUpdatedGroup.ServiceCode, Is.EqualTo(ServiceCode.GroupUpdated));
                 Assert.That(responseUpdatedGroup?.Data.Name, Is.EqualTo(newGroupName));
             });
         }
@@ -74,12 +75,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public async Task GetMyGroups()
         {
             HttpResponseMessage httpResponseUpdatedGroup = await _httpClient.GetAsync($"{UrlController}/GetMyGroups");
-            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandartResponse<ResponseGroupView[]>(httpResponseUpdatedGroup);
+            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView[]>(httpResponseUpdatedGroup);
 
             Assert.Multiple(() =>
             {
                 Assert.That(httpResponseUpdatedGroup.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseUpdatedGroup.StatusCode, Is.EqualTo(ServiceCode.GroupReadied));
+                Assert.That(responseUpdatedGroup.ServiceCode, Is.EqualTo(ServiceCode.GroupReadied));
                 Assert.That(responseUpdatedGroup?.Data, Has.Length.EqualTo(1));
                 Assert.That(responseUpdatedGroup?.Data[0].GroupId, Is.EqualTo(_testGroupView.GroupId));
             });
@@ -89,12 +90,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public async Task GetMyGroupsWithMyStatus()
         {
             HttpResponseMessage httpResponseUpdatedGroup = await _httpClient.GetAsync($"{UrlController}/GetMyGroupsWithMyStatus");
-            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandartResponse<ResponseAccountGroup[]>(httpResponseUpdatedGroup);
+            var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandardResponse<ResponseAccountGroup[]>(httpResponseUpdatedGroup);
 
             Assert.Multiple(() =>
             {
                 Assert.That(httpResponseUpdatedGroup.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseUpdatedGroup.StatusCode, Is.EqualTo(ServiceCode.GroupWithStatusMapped));
+                Assert.That(responseUpdatedGroup.ServiceCode, Is.EqualTo(ServiceCode.GroupWithStatusMapped));
                 Assert.That(responseUpdatedGroup?.Data, Has.Length.EqualTo(1));
                 Assert.That(responseUpdatedGroup?.Data[0].GroupId, Is.EqualTo(_testGroupView.GroupId));
                 Assert.That(responseUpdatedGroup?.Data[0].IsAdmin, Is.True);

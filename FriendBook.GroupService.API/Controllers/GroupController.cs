@@ -7,7 +7,6 @@ using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
@@ -40,7 +39,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateGroup([FromRoute] string groupName)
         {
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcIdentityClient.CheckUserExists(UserToken.Value.Id);
-            if (responseAnotherAPI.StatusCode != ServiceCode.UserExists)
+            if (responseAnotherAPI.ServiceCode != ServiceCode.UserExists)
                 return Ok(responseAnotherAPI);
 
             var response = await _groupService.CreateGroup(groupName, UserToken.Value.Id);
@@ -51,7 +50,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateGroup([FromBody] RequestUpdateGroup requestGroupUpdate)
         {
             var responseValidation = await _groupDTOValidationService.ValidateAsync(requestGroupUpdate);
-            if (responseValidation.StatusCode == ServiceCode.EntityIsNotValidated)
+            if (responseValidation.ServiceCode == ServiceCode.EntityIsNotValidated)
                 return Ok(responseValidation);
 
             var response = await _groupService.UpdateGroup(requestGroupUpdate, UserToken.Value.Id);

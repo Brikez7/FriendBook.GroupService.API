@@ -17,7 +17,7 @@ namespace FriendBook.GroupService.API.HostedService
             var groupTaskService = scope.ServiceProvider.GetRequiredService<IGroupTaskService>();
             var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-            backgroundJobClient.AddOrUpdate("UpdateStatusTask", () => groupTaskService!.UpdateStatusInGroupTasks(), Cron.Daily);
+            backgroundJobClient.AddOrUpdate("UpdateStatusTask", () => groupTaskService!.UpdateStatusInGroupTasks().Wait(), Cron.Daily);
 
             return Task.CompletedTask;
         }

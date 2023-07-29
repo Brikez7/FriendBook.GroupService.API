@@ -41,7 +41,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> DeleteGroupTask([FromBody] RequestGroupTaskKey groupTaskKey)
         {
             var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKey);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, UserToken.Value.Id);
@@ -52,7 +52,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> CreateGroupTask([FromBody] RequestGroupTaskNew newGroupTaskDTO)
         {
             var responseValidation = await _groupTaskNewValidationService.ValidateAsync(newGroupTaskDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _groupTaskService.CreateGroupTask(newGroupTaskDTO,UserToken.Value.Id, UserToken.Value.Login);
@@ -64,7 +64,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UpdateGroupTask([FromBody] RequestGroupTaskChanged groupTaskDTO)
         {
             var responseValidation = await _groupTaskChangedValidationService.ValidateAsync(groupTaskDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _groupTaskService.UpdateGroupTask(groupTaskDTO, UserToken.Value.Id);
@@ -75,7 +75,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> SubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
             var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,UserToken.Value.Id);
@@ -85,7 +85,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> UnsubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
         {
             var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, UserToken.Value.Id);
@@ -96,7 +96,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> GetTasksByNameTaskAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
         {
             var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, groupId);
-            if(responseAccountStatusGroup.StatusCode != ServiceCode.AccountStatusGroupReadied) 
+            if(responseAccountStatusGroup.ServiceCode != ServiceCode.AccountStatusGroupReadied) 
                 return Ok(responseAccountStatusGroup);
 
             var usersIdFromGroup = responseAccountStatusGroup.Data.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
@@ -104,7 +104,7 @@ namespace FriendBook.GroupService.API.Controllers
             var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
 
             var responseAnotherApi = await _grpcService.GetUsersLoginWithId(usersIdFromGroup);
-            if (responseAnotherApi.StatusCode != Domain.Response.ServiceCode.GrpcUsersReadied) 
+            if (responseAnotherApi.ServiceCode != Domain.Response.ServiceCode.GrpcUsersReadied) 
                 return Ok(responseAnotherApi);
 
             var response = _accountStatusGroupService.GetTasksPage(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);

@@ -40,15 +40,12 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> Create([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
-
-            if (responseAnotherAPI.StatusCode != ServiceCode.UserExists) 
-            {
+            if (responseAnotherAPI.ServiceCode != ServiceCode.UserExists) 
                 return Ok(responseAnotherAPI);
-            }
 
             var response = await _accountStatusGroupService.CreateAccountStatusGroup(UserToken.Value.Id,accountStatusGroupDTO);
             return Ok(response);
@@ -58,7 +55,7 @@ namespace FriendBook.GroupService.API.Controllers
         public async Task<IActionResult> Update([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
         {
             var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
-            if (responseValidation.StatusCode != ServiceCode.EntityIsValidated)
+            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
             var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
@@ -68,13 +65,9 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetProfilesByIdGroup")]
         public async Task<IActionResult> GetProfilesByGroupId([FromQuery] Guid groupId, [FromQuery] string login = "")
         {
-            string accessToken = Request.Headers["Authorization"].ToString();
-
-            var responseAnotherApi = await _grpcService.GetProfiles(login, accessToken);
-            if (responseAnotherApi.StatusCode != ServiceCode.GrpcProfileReadied)
-            {
+            var responseAnotherApi = await _grpcService.GetProfiles(login, Request.Headers["Authorization"].ToString());
+            if (responseAnotherApi.ServiceCode != ServiceCode.GrpcProfileReadied)
                 return Ok(responseAnotherApi);
-            }
 
             var response = await _accountStatusGroupService.GetProfilesByIdGroup(groupId, responseAnotherApi.Data);
             return Ok(response);

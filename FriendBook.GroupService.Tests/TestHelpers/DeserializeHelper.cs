@@ -5,10 +5,15 @@ namespace FriendBook.GroupService.Tests.TestHelpers
 {
     internal static class DeserializeHelper
     {
-        internal static async Task<StandartResponse<T>> TryDeserializeStandartResponse<T>(HttpResponseMessage httpResponseMessage)
+        internal static async Task<StandardResponse<T>> TryDeserializeStandardResponse<T>(HttpResponseMessage httpResponseMessage)
         {
-            return JsonConvert.DeserializeObject<StandartResponse<T>>(await httpResponseMessage.Content.ReadAsStringAsync())
-                ?? throw new JsonException($"Error deserialize JSON: StandartResponse<{typeof(T)}>");
+            return JsonConvert.DeserializeObject<StandardResponse<T>>(await httpResponseMessage.Content.ReadAsStringAsync())
+                ?? throw new JsonException($"Error deserialize JSON: StandardResponse<{typeof(T)}>");
+        }
+        internal static async Task<T> TryDeserialize<T>(HttpResponseMessage httpResponseMessage)
+        {
+            return JsonConvert.DeserializeObject<T>(await httpResponseMessage.Content.ReadAsStringAsync())
+                ?? throw new JsonException($"Error deserialize JSON: {typeof(T)}");
         }
     }
 }

@@ -16,6 +16,7 @@
         AccountStatusGroupDeleted = 2013,
         AccountStatusGroupReadied = 2014,
         AccountStatusGroupAlreadyExists = 2015,
+        AccountStatusWithGroupMapped = 2016,
 
         GroupTaskCreated = 2021,
         GroupTaskUpdated = 2022,

@@ -15,13 +15,16 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
 {
     internal abstract class BaseIntegrationTests
     {
+        internal const string UrlAPI = "GroupService/v1";
+
+        private protected DataAccessToken _mainUserData;
+
         private protected WebHostFactory<Program, GroupDBContext> _webHost;
         private protected HttpClient _httpClient;
-        private protected DataAccessToken DataAccessToken;
-        internal const string UrlAPI = "GroupService/v1";
+
         public BaseIntegrationTests(DataAccessToken dataAccessToken)
         {
-            DataAccessToken = dataAccessToken;
+            _mainUserData = dataAccessToken;
         }
 
         [OneTimeSetUp]
@@ -37,13 +40,13 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public virtual Task SetUp()
         {
             var jWTSettings = _webHost.Services.GetRequiredService<IOptions<JWTSettings>>().Value;
-            var accessToken = TokenHelpers.GenerateAccessToken(DataAccessToken, jWTSettings);
+            var accessToken = TokenHelper.GenerateAccessToken(_mainUserData, jWTSettings);
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            _webHost.DecoratorGrpcClient.CheckUserExists(DataAccessToken.Id).Returns(Task.FromResult<BaseResponse<ResponseUserExists>>(new StandartResponse<ResponseUserExists>()
+            _webHost.DecoratorGrpcClient.CheckUserExists(_mainUserData.Id).Returns(Task.FromResult<BaseResponse<ResponseUserExists>>(new StandardResponse<ResponseUserExists>()
             {
                 Data = new ResponseUserExists() { Exists = true },
-                StatusCode = ServiceCode.UserExists
+                ServiceCode = ServiceCode.UserExists
             }));
             return Task.CompletedTask;
         }

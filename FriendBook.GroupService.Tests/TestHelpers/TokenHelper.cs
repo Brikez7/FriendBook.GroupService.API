@@ -8,7 +8,7 @@ using System.Text;
 
 namespace FriendBook.GroupService.Tests.TestHelpers
 {
-    internal static class TokenHelpers
+    internal static class TokenHelper
     {
         public static string GenerateAccessToken(DataAccessToken account, JWTSettings jWTSettings)
         {

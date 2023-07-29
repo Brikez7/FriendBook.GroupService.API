@@ -30,12 +30,12 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
 
             if (response.Exists)
             {
-                return new StandartResponse<ResponseUserExists> { Data = response, StatusCode = ServiceCode.UserExists };
+                return new StandardResponse<ResponseUserExists> { Data = response, ServiceCode = ServiceCode.UserExists };
             }
-            return new StandartResponse<ResponseUserExists>()
+            return new StandardResponse<ResponseUserExists>()
             {
                 Message = "Account not exists or server not connected",
-                StatusCode = ServiceCode.UserNotExists,
+                ServiceCode = ServiceCode.UserNotExists,
             };
         }
 
@@ -60,9 +60,9 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
             }
             if (response.Profiles is null)
             {
-                return new StandartResponse<ResponseProfiles> { Message = "Profiles not found", StatusCode = ServiceCode.EntityNotFound };
+                return new StandardResponse<ResponseProfiles> { Message = "Profiles not found", ServiceCode = ServiceCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseProfiles> { Data = response, StatusCode = ServiceCode.GrpcProfileReadied };
+            return new StandardResponse<ResponseProfiles> { Data = response, ServiceCode = ServiceCode.GrpcProfileReadied };
         }
 
         public async Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId)
@@ -81,9 +81,9 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
             }
             if (response.Users is null)
             {
-                return new StandartResponse<ResponseUsers> { Message = "Users with id not found", StatusCode = ServiceCode.EntityNotFound };
+                return new StandardResponse<ResponseUsers> { Message = "Users with id not found", ServiceCode = ServiceCode.EntityNotFound };
             }
-            return new StandartResponse<ResponseUsers> { Data = response, StatusCode = ServiceCode.GrpcUsersReadied };
+            return new StandardResponse<ResponseUsers> { Data = response, ServiceCode = ServiceCode.GrpcUsersReadied };
         }
     }
 }
