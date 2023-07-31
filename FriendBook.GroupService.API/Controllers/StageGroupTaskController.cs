@@ -5,7 +5,6 @@ using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using MongoDB.Bson;
 
 namespace FriendBook.GroupService.API.Controllers
@@ -13,7 +12,7 @@ namespace FriendBook.GroupService.API.Controllers
     [ApiController]
     [Route("GroupService/v1/[controller]")]
     [Authorize]
-    public class StageGroupTaskController : ODataController
+    public class StageGroupTaskController : ControllerBase
     {
         private readonly IStageGroupTaskService _stageGroupTaskService;
         private readonly IValidationService<RequestStageGroupTasNew> _requestStageGroupTasNewValidationService;

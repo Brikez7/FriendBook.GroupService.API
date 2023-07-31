@@ -7,14 +7,13 @@ using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
 {
     [ApiController]
     [Route("GroupService/v1/[controller]")]
     [Authorize]
-    public class GroupController : ODataController
+    public class GroupController : ControllerBase
     {
         private readonly IContactGroupService _groupService;
         private readonly IValidationService<RequestUpdateGroup> _groupDTOValidationService;

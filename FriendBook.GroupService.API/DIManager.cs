@@ -1,6 +1,4 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain.Entities;
-using Microsoft.AspNet.OData.Builder;
 using System.Text;
 using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
@@ -8,12 +6,6 @@ using FriendBook.GroupService.API.BackgroundHostedService;
 using FriendBook.GroupService.API.DAL.Repositories;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.BLL.Services;
-using FluentValidation;
-using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
-using FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators;
-using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOValidators;
-using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
 using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -22,12 +14,9 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.HostedService;
-using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using MongoDB.Driver;
 using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using Microsoft.Extensions.Options;
-using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using Hangfire.Client;
 using Hangfire.States;
@@ -43,22 +32,13 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
             webApplicationBuilder.Services.AddScoped<IStageGroupTaskRepository, StageGroupTaskRepository>();
         }
-        public static void AddGrpcProperty(this WebApplicationBuilder webApplicationBuilder) 
+        public static void AddGrpc(this WebApplicationBuilder webApplicationBuilder) 
         {
             webApplicationBuilder.Services.Configure<GrpcSettings>(webApplicationBuilder.Configuration.GetSection(GrpcSettings.Name));
         }
         public static void AddValidators(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddScoped<IValidator<AccountStatusGroupDTO>, ValidatorAccountStatusGroupDTO>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestUpdateGroup>, ValidatorRequestGroupUpdate>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskKey>, ValidatorRequestGroupTaskKey>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestStageGroupTasNew>, ValidatorRequestStageGroupTasNew>();
-            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskDTO>, ValidatorStageGroupTaskDTO>();
+            webApplicationBuilder.Services.AddValidators();
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
@@ -67,16 +47,6 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 
             webApplicationBuilder.Services.AddScoped<IGrpcClient, GrpcClient>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestUpdateGroup>, ValidationService<RequestUpdateGroup>>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestStageGroupTasNew>, ValidationService<RequestStageGroupTasNew>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<StageGroupTaskDTO>, ValidationService<StageGroupTaskDTO>>();
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {
@@ -142,22 +112,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddDbContext<GroupDBContext>(opt => opt.UseNpgsql(
                  webApplicationBuilder.Configuration.GetConnectionString(GroupDBContext.NameConnection)));
         }
-        public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
-        {
-            var odataBuilder = new ODataConventionModelBuilder();
-
-            odataBuilder.EntitySet<Group>("Group");
-            odataBuilder.EntitySet<AccountStatusGroup>("AccountStatusGroup");
-            odataBuilder.EntitySet<GroupTask>("GroupTask");
-
-            webApplicationBuilder.Services.AddControllers().AddOData(opt =>
-            {
-                opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(5000);
-                opt.TimeZone = TimeZoneInfo.Utc;
-            });
-        }
-
-        public static void AddAuthProperty(this WebApplicationBuilder webApplicationBuilder)
+        public static void AddAuth(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddHttpContextAccessor();
             webApplicationBuilder.Services.Configure<JWTSettings>(webApplicationBuilder.Configuration.GetSection(JWTSettings.Name));

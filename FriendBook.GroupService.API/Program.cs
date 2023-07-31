@@ -17,9 +17,8 @@ namespace FriendBook.GroupService.API
             builder.AddValidators();
             builder.AddServices();
 
-            builder.AddGrpcProperty();
-            builder.AddAuthProperty();
-            builder.AddODataProperty();
+            builder.AddGrpc();
+            builder.AddAuth();
 
             builder.AddHangfire();
             builder.AddHostedServices();

@@ -7,15 +7,13 @@ using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace FriendBook.GroupService.API.Controllers
 {
     [ApiController]
     [Route("GroupService/v1/[controller]")]
     [Authorize]
-    public class GroupTaskController : ODataController
+    public class GroupTaskController : ControllerBase
     {
         private readonly IGroupTaskService _groupTaskService;
         private readonly IAccountStatusGroupService _accountStatusGroupService;
@@ -91,8 +89,7 @@ namespace FriendBook.GroupService.API.Controllers
             var response = await _groupTaskService.UnsubcsribeGroupTask(groupTaskKeyDTO, UserToken.Value.Id);
             return Ok(response);
         }
-        [HttpGet("OData/GetTasks/{groupId}")]
-        [EnableQuery]
+        [HttpGet("GetTasks/{groupId}")]
         public async Task<IActionResult> GetTasksByNameTaskAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
         {
             var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, groupId);
