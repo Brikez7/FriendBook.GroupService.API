@@ -1,5 +1,4 @@
 ﻿using FriendBook.GroupService.API;
-using FriendBook.GroupService.API.BLL.gRPCClients.AccountClient;
 using FriendBook.GroupService.API.DAL;
 using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Net.Http.Headers;
 
-namespace FriendBook.GroupService.Tests.IntegrationTests
+namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
 {
     internal abstract class BaseIntegrationTests
     {
@@ -43,11 +42,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
             var accessToken = TokenHelper.GenerateAccessToken(_mainUserData, jWTSettings);
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            _webHost.DecoratorGrpcClient.CheckUserExists(_mainUserData.Id).Returns(Task.FromResult<BaseResponse<ResponseUserExists>>(new StandardResponse<ResponseUserExists>()
-            {
-                Data = new ResponseUserExists() { Exists = true },
-                ServiceCode = ServiceCode.UserExists
-            }));
+            _webHost.DecoratorGrpcClient.CheckUserExists(_mainUserData.Id).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
             return Task.CompletedTask;
         }
 

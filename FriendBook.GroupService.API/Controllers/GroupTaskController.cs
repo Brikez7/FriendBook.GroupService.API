@@ -90,7 +90,7 @@ namespace FriendBook.GroupService.API.Controllers
             return Ok(response);
         }
         [HttpGet("GetTasks/{groupId}")]
-        public async Task<IActionResult> GetTasksByNameTaskAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
+        public async Task<IActionResult> GetTasksByNameAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
         {
             var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, groupId);
             if(responseAccountStatusGroup.ServiceCode != ServiceCode.AccountStatusGroupReadied) 
