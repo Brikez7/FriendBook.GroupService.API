@@ -8,10 +8,10 @@ namespace FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs
         public Guid IdGroupTask { get; set; }
         public string Name { get; set; } = null!;
         public string Text { get; set; } = string.Empty;
-        public DateTime DateUpdate { get; set; }
-        public DateTime DateCreate { get; set; }
+        public DateTimeOffset DateUpdate { get; set; }
+        public DateTimeOffset DateCreate { get; set; }
 
-        public StageGroupTaskDTO(Guid idGroupTask, string name, string text, DateTime dateUpdate, DateTime dateCreate)
+        public StageGroupTaskDTO(Guid idGroupTask, string name, string text, DateTimeOffset dateUpdate, DateTimeOffset dateCreate)
         {
             IdGroupTask = idGroupTask;
             Name = name;

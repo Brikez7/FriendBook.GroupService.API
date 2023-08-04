@@ -1,4 +1,6 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
+using NodaTime;
+using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
@@ -7,7 +9,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
         public Guid? Id { get; set; }
         public Guid CreaterId { get; set; }
         public string Name { get; set; } = null!;
-        public DateTime CreatedDate { get; set; }
+        public OffsetDateTime CreatedDate { get; set; }
 
         public Group()
         {
@@ -17,7 +19,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
         {
             Name = nameGroup;
             CreaterId = accountId;
-            CreatedDate = DateTime.UtcNow;
+            CreatedDate = DateTimeOffset.UtcNow.ToOffsetDateTime();
         }
 
         public Group(ResponseGroupView groupDTO, Guid accountId)

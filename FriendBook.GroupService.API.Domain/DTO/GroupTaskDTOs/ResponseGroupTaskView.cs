@@ -1,5 +1,7 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using NodaTime;
+using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
@@ -10,8 +12,8 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         public string Name { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
         public StatusTask Status { get; set; } = StatusTask.Process;
-        public DateTime DateEndWork { get; set; }
-        public DateTime DateStartWork { get; set; } = DateTime.UtcNow;
+        public OffsetDateTime DateEndWork { get; set; }
+        public OffsetDateTime DateStartWork { get; set; } = DateTimeOffset.UtcNow.ToOffsetDateTime();
         public string[]? Users { get; set; }
         public List<ResponseStageGroupTaskIcon> StagesGroupTask { get; set; } = new List<ResponseStageGroupTaskIcon>();
 

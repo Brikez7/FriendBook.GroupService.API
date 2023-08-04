@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace FriendBook.GroupService.API
 {
-    public static class ReflectionEjector
+    public static class ReflectionInjector
     {
         public static void AddValidators(this IServiceCollection services)
         {
@@ -18,9 +18,9 @@ namespace FriendBook.GroupService.API
             {
                 var validatorBase = validatorType.BaseType;
 
-                services.AddSingleton(typeof(IValidator<>).MakeGenericType(validatorBase!.GenericTypeArguments), validatorType);
+                services.AddTransient(typeof(IValidator<>).MakeGenericType(validatorBase!.GenericTypeArguments), validatorType);
 
-                services.AddSingleton(typeof(IValidationService<>).MakeGenericType(validatorBase!.GenericTypeArguments), 
+                services.AddTransient(typeof(IValidationService<>).MakeGenericType(validatorBase!.GenericTypeArguments), 
                                       typeof(ValidationService<>).MakeGenericType(validatorBase!.GenericTypeArguments));
             }
         }

@@ -1,4 +1,5 @@
 ﻿using FriendBook.GroupService.API.Domain.Entities.Postgres;
+using NodaTime;
 
 namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
@@ -8,9 +9,9 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         public string OldName { get; set; } = null!;
         public string NewName { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
-        public DateTime DateEndWork { get; set; }
+        public OffsetDateTime DateEndWork { get; set; }
         public StatusTask Status { get; set; }
-        public RequestGroupTaskChanged(Guid groupId, string oldName, string newName, string description, DateTime dateEndWork, StatusTask statusTask)
+        public RequestGroupTaskChanged(Guid groupId, string oldName, string newName, string description, OffsetDateTime dateEndWork, StatusTask statusTask)
         {
             GroupId = groupId;
             OldName = oldName;

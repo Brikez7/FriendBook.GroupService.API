@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using Hangfire.Client;
 using Hangfire.States;
+using Npgsql;
 
 namespace FriendBook.GroupService.API
 {
@@ -110,7 +111,7 @@ namespace FriendBook.GroupService.API
         public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddDbContext<GroupDBContext>(opt => opt.UseNpgsql(
-                 webApplicationBuilder.Configuration.GetConnectionString(GroupDBContext.NameConnection)));
+                webApplicationBuilder.Configuration.GetConnectionString(GroupDBContext.NameConnection), o => o.UseNodaTime()));
         }
         public static void AddAuth(this WebApplicationBuilder webApplicationBuilder)
         {

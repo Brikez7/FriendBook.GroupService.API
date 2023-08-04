@@ -40,13 +40,6 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasPrincipalKey(p => p.Id)
                    .HasForeignKey(d => d.IdGroup)
                    .OnDelete(DeleteBehavior.Cascade);
-
-/*            builder.HasOne(d => d.GroupTask)
-                   .WithMany(p => p.AccountsStatusGroup)
-                   .HasForeignKey(d => d.IdGroup)
-                   .HasPrincipalKey(x => x.GroupId)
-                   .IsRequired(false)
-                   .OnDelete(DeleteBehavior.Restrict);*/
         }
     }
 }

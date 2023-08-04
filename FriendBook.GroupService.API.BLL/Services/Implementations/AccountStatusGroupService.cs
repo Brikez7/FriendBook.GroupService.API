@@ -28,7 +28,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == accountStatusGroupDTO.GroupId))
                 return new StandardResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access add new account", ServiceCode = ServiceCode.UserNotAccess };
 
-            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creater)
+            if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creator)
             {
                 return new StandardResponse<AccountStatusGroupDTO>()
                 {
@@ -206,12 +206,12 @@ namespace FriendBook.GroupService.API.BLL.Services
             }
 
             accountStatus.RoleAccount = accountStatusGroupDTO.RoleAccount;
-            var updatedAccountaStatusGroup = _accountStatusGroupRepository.Update(accountStatus);
+            var updatedAccountStatusGroup = _accountStatusGroupRepository.Update(accountStatus);
             var result = await _accountStatusGroupRepository.SaveAsync();
 
             return new StandardResponse<AccountStatusGroupDTO>()
             {
-                Data = new AccountStatusGroupDTO(updatedAccountaStatusGroup),
+                Data = new AccountStatusGroupDTO(updatedAccountStatusGroup),
                 ServiceCode = ServiceCode.AccountStatusGroupUpdated
             };
             

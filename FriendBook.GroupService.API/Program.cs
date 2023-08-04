@@ -1,4 +1,6 @@
 using Hangfire;
+using NodaTime;
+using NodaTime.Serialization.JsonNet;
 
 namespace FriendBook.GroupService.API
 {
@@ -19,11 +21,10 @@ namespace FriendBook.GroupService.API
 
             builder.AddGrpc();
             builder.AddAuth();
-
             builder.AddHangfire();
             builder.AddHostedServices();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddNewtonsoftJson(s => s.SerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb));
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
         

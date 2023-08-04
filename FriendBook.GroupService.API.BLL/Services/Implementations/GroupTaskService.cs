@@ -7,6 +7,7 @@ using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using MongoDB.Driver;
 using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
+using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -22,7 +23,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             _stageGroupTaskRepository = stageGroupTask;
         }
 
-        public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestGroupTaskNew requestGroupTaskNew, Guid adminId, string loginAdmin)
+        public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestNewGroupTask requestGroupTaskNew, Guid adminId, string loginAdmin)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == adminId && x.IdGroup == requestGroupTaskNew.GroupId && x.RoleAccount > RoleAccount.Default))
             {
@@ -58,7 +59,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             return new StandardResponse<ResponseGroupTaskView>()
             {
                 Data = viewDTO,
-                ServiceCode = ServiceCode.GroupCreated
+                ServiceCode = ServiceCode.GroupTaskCreated
             };
         }
 
@@ -105,7 +106,7 @@ namespace FriendBook.GroupService.API.BLL.Services
                 ServiceCode = ServiceCode.GroupUpdated
             };
         }
-        public async Task<BaseResponse<bool>> UnsubcsribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
+        public async Task<BaseResponse<bool>> UnsubscribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == requestGroupTaskKey.GroupId && userId == x.AccountId))
             {
@@ -237,8 +238,8 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<int>> UpdateStatusInGroupTasks()
         {
-            DateTime nowDate = DateTime.UtcNow.Date;
-            int countUpdatedTask = await _groupTaskRepository.GetAll().Where(x => x.DateEndWork < nowDate && x.Status == StatusTask.Process).ExecuteUpdateAsync(x => x.SetProperty(prop => prop.Status, StatusTask.MissedDate));
+            var nowDate = DateTimeOffset.UtcNow.ToOffsetDateTime().Date;
+            int countUpdatedTask = await _groupTaskRepository.GetAll().Where(x => x.DateEndWork.Date < nowDate && x.Status == StatusTask.Process).ExecuteUpdateAsync(x => x.SetProperty(prop => prop.Status, StatusTask.MissedDate));
 
             return new StandardResponse<int> { Data = countUpdatedTask, ServiceCode = ServiceCode.GroupTaskUpdated };
         }

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
+using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators
 {
@@ -17,10 +18,10 @@ namespace FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators
 
             RuleFor(dto => dto.Description).Length(0, 100);
 
-            DateTime currentDate = DateTime.Now.AddDays(-1);
-            RuleFor(dto => dto.DateEndWork).GreaterThan(currentDate)
-                                           .LessThan(new DateTime(currentDate.Year + 50, currentDate.Month, currentDate.Day))
-                                           .NotEmpty();
+            var currentDate = DateTimeOffset.UtcNow.AddDays(-1).ToOffsetDateTime().Date.ToDateOnly();
+            var MaxDate = new DateTimeOffset(new DateTime(currentDate.Year + 50, currentDate.Month, currentDate.Day)).ToOffsetDateTime().Date.ToDateOnly();
+            RuleFor(dto => dto.DateEndWork.Date.ToDateOnly()).GreaterThan(currentDate)
+                                               .LessThan(MaxDate);
 
             RuleFor(dto => dto.Status).IsInEnum();
         }

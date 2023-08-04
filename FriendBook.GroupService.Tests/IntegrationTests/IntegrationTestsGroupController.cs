@@ -20,6 +20,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         public async Task CreateGroup() 
         {
             var nameGroup = "TestGroup";
+
             HttpResponseMessage httpResponseGroupView = await _httpClient.PostAsync($"{UrlController}/Create/{nameGroup}", null);
             var responseGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseGroupView);
 

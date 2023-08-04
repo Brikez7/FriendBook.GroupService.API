@@ -32,8 +32,8 @@ namespace FriendBook.GroupService.API.BLL.Services
             Group group = new Group(groupName, createrId);
             var createdGroup = await _groupRepository.AddAsync(group);
 
-            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id!,RoleAccount.Creater);
-            var accountCreaterStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
+            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id!,RoleAccount.Creator);
+            var accountCreatorStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
 
             await _groupRepository.SaveAsync();
 

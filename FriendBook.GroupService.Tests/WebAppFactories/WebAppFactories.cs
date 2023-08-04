@@ -14,6 +14,7 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using FriendBook.GroupService.Tests.WebAppFactories.ContainerBuilders;
+using Npgsql;
 
 namespace FriendBook.GroupService.Tests.WebAppFactories
 {
@@ -84,7 +85,7 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
 
             var connectionMainPostgres = newConnectionPostgres.Replace("Database=postgres", $"Database={ContainerBuilderPostgres.Database}");
 
-            services.AddDbContext<T>(options => { options.UseNpgsql(connectionMainPostgres); });
+            services.AddDbContext<T>(options => { options.UseNpgsql(connectionMainPostgres,o => o.UseNodaTime()); });
         }
         internal static void ReplaceGrpcService(this IServiceCollection services, IGrpcClient testGrpcClient)
         {
