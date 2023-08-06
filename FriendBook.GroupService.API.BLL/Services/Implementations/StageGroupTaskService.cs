@@ -33,7 +33,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             StageGroupTask stageGroupTask = new StageGroupTask(entity.IdGroupTask,entity.Name,"", now, now);
             var newEntity = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
 
-            ResponseStageGroupTaskIcon stageGroupTaskIcon = new ResponseStageGroupTaskIcon(newEntity.Id,newEntity.Name,newEntity.IdGroupTask);
+            ResponseStageGroupTaskIcon stageGroupTaskIcon = new(newEntity.Id,newEntity.Name,newEntity.IdGroupTask);
             return new StandardResponse<ResponseStageGroupTaskIcon> { Data = stageGroupTaskIcon, ServiceCode = ServiceCode.StageGroupTaskCreated };
         }
 

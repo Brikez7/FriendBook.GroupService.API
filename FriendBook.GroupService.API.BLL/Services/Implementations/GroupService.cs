@@ -8,17 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
-    public class ContactGroupService : IContactGroupService
+    public class GroupService : IGroupService
     {
         private readonly IGroupRepository _groupRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
-        public ContactGroupService(IGroupRepository groupRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
+        public GroupService(IGroupRepository groupRepository, IAccountStatusGroupRepository accountStatusGroupRepository)
         {
             _groupRepository = groupRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;
         }
 
-        public async Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid createrId)
+        public async Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid creatorId)
         {
             if (await _groupRepository.GetAll().AnyAsync(x => x.Name == groupName)) 
             {
@@ -29,10 +29,10 @@ namespace FriendBook.GroupService.API.BLL.Services
                 };
             }
 
-            Group group = new Group(groupName, createrId);
+            Group group = new Group(groupName, creatorId);
             var createdGroup = await _groupRepository.AddAsync(group);
 
-            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreaterId,(Guid)createdGroup.Id!,RoleAccount.Creator);
+            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreatorId,(Guid)createdGroup.Id!,RoleAccount.Creator);
             var accountCreatorStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
 
             await _groupRepository.SaveAsync();
@@ -44,9 +44,9 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid createrId)
+        public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid creatorId)
         {
-            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreaterId == createrId);
+            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreatorId == creatorId);
 
             if (entity is null) 
             {
@@ -78,10 +78,10 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<ResponseGroupView[]>> GetGroupsByCreaterId(Guid userId)
+        public async Task<BaseResponse<ResponseGroupView[]>> GetGroupsByCreatorId(Guid userId)
         {
             var listGroupDTO = await _groupRepository.GetAll()
-                                                     .Where(x => x.CreaterId == userId)
+                                                     .Where(x => x.CreatorId == userId)
                                                      .Select(x => new ResponseGroupView(x))
                                                      .ToArrayAsync();
 
@@ -125,7 +125,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup groupDTO, Guid creatorId)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == groupDTO.GroupId))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == creatorId && x.Id == groupDTO.GroupId))
                 return new StandardResponse<ResponseGroupView> { Message = "Group not found or you not access update group", ServiceCode = ServiceCode.UserNotAccess };
 
             Group updatedGroup = new(groupDTO.Name,creatorId);

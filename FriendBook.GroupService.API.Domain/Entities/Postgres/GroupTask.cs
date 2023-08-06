@@ -7,7 +7,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
     public class GroupTask
     {
         public Guid? Id { get; set; }
-        public Guid CreaterId { get; set; }
+        public Guid CreatorId { get; set; }
         public Guid GroupId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -32,7 +32,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             Status = groupDTO.Status;
             DateEndWork = groupDTO.DateEndWork;
             DateStartWork = groupDTO.DateStartWork;
-            CreaterId = userId;
+            CreatorId = userId;
         }
 
         public GroupTask(RequestNewGroupTask groupDTO, Guid userId)
@@ -41,7 +41,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             Name = groupDTO.Name;
             Description = groupDTO.Description;
             DateEndWork = groupDTO.DateEndWork;
-            CreaterId = userId;
+            CreatorId = userId;
             Team = new Guid[] { userId };
         }
 

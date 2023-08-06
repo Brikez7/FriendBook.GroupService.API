@@ -63,7 +63,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             };
         }
 
-        public async Task<BaseResponse<bool>> SubcsribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
+        public async Task<BaseResponse<bool>> SubscribeGroupTask(RequestGroupTaskKey requestGroupTaskKey, Guid userId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.IdGroup == requestGroupTaskKey.GroupId && userId == x.AccountId)) 
             {

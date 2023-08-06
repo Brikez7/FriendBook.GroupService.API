@@ -15,7 +15,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.HasKey(e => new { e.Id });
 
-            builder.HasIndex(e => e.CreaterId);
+            builder.HasIndex(e => e.CreatorId);
 
             builder.HasIndex(e => e.Name)
                    .IsUnique();
@@ -24,7 +24,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("pk_group_id");
 
-            builder.Property(e => e.CreaterId)
+            builder.Property(e => e.CreatorId)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("account_id");
 
@@ -33,6 +33,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnName("name");
 
             builder.Property(e => e.CreatedDate)
+                   .HasColumnType(EntityDataTypes.DateTimeYtc)
                    .HasColumnName("create_date");
         }
     }

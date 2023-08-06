@@ -5,13 +5,13 @@ using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
-    public interface IContactGroupService
+    public interface IGroupService
     {
-        public Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid createrId);
-        public Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup group, Guid createrId);
-        public Task<BaseResponse<bool>> DeleteGroup(Guid groupid, Guid createrId);
+        public Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid creatorId);
+        public Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup group, Guid creatorId);
+        public Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid creatorId);
         public BaseResponse<IQueryable<Group>> GetGroupOData();
-        public Task<BaseResponse<ResponseGroupView[]>> GetGroupsByCreaterId(Guid userId);
+        public Task<BaseResponse<ResponseGroupView[]>> GetGroupsByCreatorId(Guid userId);
         public Task<BaseResponse<ResponseAccountGroup[]>> GetGroupsWithStatusByUserId(Guid userId);
     }
 }

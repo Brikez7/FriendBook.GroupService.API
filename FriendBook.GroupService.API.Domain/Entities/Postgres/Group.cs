@@ -7,9 +7,9 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
     public class Group
     {
         public Guid? Id { get; set; }
-        public Guid CreaterId { get; set; }
+        public Guid CreatorId { get; set; }
         public string Name { get; set; } = null!;
-        public OffsetDateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         public Group()
         {
@@ -18,15 +18,15 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
         public Group(string nameGroup, Guid accountId)
         {
             Name = nameGroup;
-            CreaterId = accountId;
-            CreatedDate = DateTimeOffset.UtcNow.ToOffsetDateTime();
+            CreatorId = accountId;
+            CreatedDate = DateTime.Now;
         }
 
         public Group(ResponseGroupView groupDTO, Guid accountId)
         {
             Name = groupDTO.Name;
             Id = groupDTO.GroupId;
-            CreaterId = accountId;
+            CreatorId = accountId;
         }
 
         public Group(Guid? id)

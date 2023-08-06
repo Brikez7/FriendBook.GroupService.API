@@ -15,11 +15,11 @@ namespace FriendBook.GroupService.API.Controllers
     [Authorize]
     public class GroupController : ControllerBase
     {
-        private readonly IContactGroupService _groupService;
+        private readonly IGroupService _groupService;
         private readonly IValidationService<RequestUpdateGroup> _groupDTOValidationService;
         private readonly IGrpcClient _grpcIdentityClient;
         public Lazy<DataAccessToken> UserToken { get; set; }
-        public GroupController(IContactGroupService groupService, IValidationService<RequestUpdateGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContext)
+        public GroupController(IGroupService groupService, IValidationService<RequestUpdateGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;
             _groupDTOValidationService = validationService;
@@ -59,7 +59,7 @@ namespace FriendBook.GroupService.API.Controllers
         [HttpGet("GetMyGroups")]
         public async Task<IActionResult> GetMyGroups()
         {
-            var response = await _groupService.GetGroupsByCreaterId(UserToken.Value.Id);
+            var response = await _groupService.GetGroupsByCreatorId(UserToken.Value.Id);
             return Ok(response);
         }
 

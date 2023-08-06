@@ -8,7 +8,6 @@ using FriendBook.GroupService.Tests.IntegrationTests.IntegrationTestFixtureSourc
 using FriendBook.GroupService.Tests.TestHelpers;
 using NSubstitute;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace FriendBook.GroupService.Tests.IntegrationTests
 {
@@ -23,7 +22,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         {
             var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
             _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContent.Create(newAccountStatusGroupDTO);
+            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
 
             HttpResponseMessage httpResponseAccountStatusGroupDTO = await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
             var responseAccountStatusGroupDTO = await DeserializeHelper.TryDeserializeStandardResponse<AccountStatusGroupDTO>(httpResponseAccountStatusGroupDTO);
@@ -42,7 +41,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         {
             var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
             _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContent.Create(newAccountStatusGroupDTO);
+            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
 
             await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
 
@@ -62,12 +61,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         {
             var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
             _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContent.Create(newAccountStatusGroupDTO);
+            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
 
             await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
 
             newAccountStatusGroupDTO.RoleAccount = RoleAccount.Default;
-            var updatedAccountStatusGroupDTOContent = JsonContent.Create(newAccountStatusGroupDTO);
+            var updatedAccountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
             HttpResponseMessage httpUpdatedAccountStatusGroupDTO = await _httpClient.PutAsync($"{UrlController}/Update", updatedAccountStatusGroupDTOContent);
             var responseUpdatedAccountStatusGroupDTO = await DeserializeHelper.TryDeserializeStandardResponse<AccountStatusGroupDTO>(httpUpdatedAccountStatusGroupDTO);
 
@@ -90,7 +89,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
                 FabricGrpcResponseHelper.CreateTaskResponseProfiles(ServiceCode.GrpcProfileReadied, newUser, (_mainUserData.Id, _mainUserData.Login))
             );
             var requestAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, newUser.Item1, RoleAccount.Admin);
-            var accountStatusGroupDTOContent = JsonContent.Create(requestAccountStatusGroupDTO);
+            var accountStatusGroupDTOContent = JsonContentHelper.Create(requestAccountStatusGroupDTO);
 
             await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
 

@@ -33,7 +33,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
 
             builder.Property(e => e.RoleAccount)
                    .HasColumnName("role_account")
-                   .HasColumnType(EntityDataTypes.Smallint);
+                   .HasColumnType(EntityDataTypes.SmallInt);
 
             builder.HasOne(d => d.Group)
                    .WithMany(p => p.AccountStatusGroups)

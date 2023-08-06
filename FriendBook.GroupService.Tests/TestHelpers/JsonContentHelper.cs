@@ -5,7 +5,7 @@ namespace FriendBook.GroupService.Tests.TestHelpers
 {
     internal static class JsonContentHelper
     {
-        internal static HttpContent CreateContent(object obj, string contentType = "application/json")
+        internal static HttpContent Create(object obj, string contentType = "application/json")
         {
             var myContent = JsonConvert.SerializeObject(obj);
             var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);

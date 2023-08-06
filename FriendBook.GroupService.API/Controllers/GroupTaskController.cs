@@ -76,7 +76,7 @@ namespace FriendBook.GroupService.API.Controllers
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
-            var response = await _groupTaskService.SubcsribeGroupTask(groupTaskKeyDTO,UserToken.Value.Id);
+            var response = await _groupTaskService.SubscribeGroupTask(groupTaskKeyDTO,UserToken.Value.Id);
             return Ok(response);
         }
         [HttpPut("UnsubscribeTask")]

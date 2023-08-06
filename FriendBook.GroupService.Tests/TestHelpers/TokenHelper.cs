@@ -12,7 +12,7 @@ namespace FriendBook.GroupService.Tests.TestHelpers
     {
         public static string GenerateAccessToken(DataAccessToken account, JWTSettings jWTSettings)
         {
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(CustomClaimType.Login,account.Login),
                 new Claim(CustomClaimType.AccountId, account.Id.ToString()!)

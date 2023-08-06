@@ -1,6 +1,5 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using System.Text;
-using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
 using FriendBook.GroupService.API.BackgroundHostedService;
 using FriendBook.GroupService.API.DAL.Repositories;
@@ -43,7 +42,7 @@ namespace FriendBook.GroupService.API
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddScoped<IContactGroupService, ContactGroupService>();
+            webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
 

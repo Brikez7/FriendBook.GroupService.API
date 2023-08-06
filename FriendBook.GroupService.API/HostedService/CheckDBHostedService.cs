@@ -22,7 +22,7 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             _settings = options.Value;
             _configuration = configuration;
         }
-        public static async void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
+        private static async void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
         {
             var indexKeys = Builders<StageGroupTask>.IndexKeys.Combine(
                 Builders<StageGroupTask>.IndexKeys.Ascending(x => x.IdGroupTask),

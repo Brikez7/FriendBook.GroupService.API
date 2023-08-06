@@ -6,7 +6,6 @@ using FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests;
 using FriendBook.GroupService.Tests.IntegrationTests.IntegrationTestFixtureSources;
 using FriendBook.GroupService.Tests.TestHelpers;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace FriendBook.GroupService.Tests.IntegrationTests
 {
@@ -61,7 +60,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
             var responseGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseGroupView);
 
             var requestUpdateGroup = new RequestUpdateGroup(responseGroupView.Data.GroupId, updatedNameGroup);
-            var requestUpdateGroupContent = JsonContent.Create(requestUpdateGroup);
+            var requestUpdateGroupContent = JsonContentHelper.Create(requestUpdateGroup);
 
             HttpResponseMessage httpResponseUpdatedGroup = await _httpClient.PutAsync($"{UrlController}/Update", requestUpdateGroupContent);
             var responseUpdatedGroup = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupView>(httpResponseUpdatedGroup);

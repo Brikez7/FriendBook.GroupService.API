@@ -25,7 +25,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid creatorId,AccountStatusGroupDTO accountStatusGroupDTO)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == accountStatusGroupDTO.GroupId))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == creatorId && x.Id == accountStatusGroupDTO.GroupId))
                 return new StandardResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access add new account", ServiceCode = ServiceCode.UserNotAccess };
 
             if (accountStatusGroupDTO.RoleAccount == RoleAccount.Creator)
@@ -59,7 +59,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid deletedStatusAccountId, Guid creatorId, Guid groupId)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == creatorId && x.Id == groupId))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == creatorId && x.Id == groupId))
                 return new StandardResponse<bool> { Message = "Account not found or you not access delete account", ServiceCode = ServiceCode.UserNotAccess };
 
             var accountStatusGroup = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.AccountId == deletedStatusAccountId && x.IdGroup == groupId);
@@ -192,7 +192,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         public async Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroupDTO, Guid createrId)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreaterId == createrId && x.Id == accountStatusGroupDTO.GroupId))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == createrId && x.Id == accountStatusGroupDTO.GroupId))
                 return new StandardResponse<AccountStatusGroupDTO> { Message = "Account not found or you not access update account", ServiceCode = ServiceCode.UserNotAccess };
 
             var accountStatus = await _accountStatusGroupRepository.GetAll().SingleOrDefaultAsync(x => x.IdGroup == accountStatusGroupDTO.GroupId && x.AccountId == accountStatusGroupDTO.AccountId);

@@ -20,7 +20,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         {
             var requestNewGroupTask = new RequestNewGroupTask(_testGroup.GroupId, "TestTask", "Description", DateTimeOffset.UtcNow.AddDays(10).ToOffsetDateTime());
 
-            var requestNewGroupTaskContent = JsonContentHelper.CreateContent(requestNewGroupTask);
+            var requestNewGroupTaskContent = JsonContentHelper.Create(requestNewGroupTask);
 
             HttpResponseMessage httpResponseGroupTaskView = await _httpClient.PostAsync($"{UrlController}/Create", requestNewGroupTaskContent);
             var responseGroupTaskView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupTaskView>(httpResponseGroupTaskView);
