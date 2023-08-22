@@ -21,60 +21,37 @@ namespace FriendBook.GroupService.API.BLL.Services
         public async Task<BaseResponse<ResponseGroupView>> CreateGroup(string groupName, Guid creatorId)
         {
             if (await _groupRepository.GetAll().AnyAsync(x => x.Name == groupName)) 
-            {
-                return new StandardResponse<ResponseGroupView>()
-                {
-                    ServiceCode = ServiceCode.GroupAlreadyExists,
-                    Message = "Group with name already exists"
-                };
-            }
+                return new StandardResponse<ResponseGroupView> { ServiceCode = ServiceCode.GroupAlreadyExists, Message = "Group with name already exists" };
 
-            Group group = new Group(groupName, creatorId);
-            var createdGroup = await _groupRepository.AddAsync(group);
+            var newGroup = new Group(groupName, creatorId);
+            var addedGroup = await _groupRepository.AddAsync(newGroup);
 
-            var accountStatusGroup = new AccountStatusGroup(createdGroup.CreatorId,(Guid)createdGroup.Id!,RoleAccount.Creator);
-            var accountCreatorStatus = await _accountStatusGroupRepository.AddAsync(accountStatusGroup);
+            var newAccountStatusGroup = new AccountStatusGroup(addedGroup.CreatorId,(Guid)addedGroup.Id!,RoleAccount.Creator);
+            var addedAccountCreatorStatus = await _accountStatusGroupRepository.AddAsync(newAccountStatusGroup);
 
             await _groupRepository.SaveAsync();
 
             return new StandardResponse<ResponseGroupView>()
             {
-                Data = new ResponseGroupView(createdGroup),
+                Data = new ResponseGroupView(addedGroup),
                 ServiceCode = ServiceCode.GroupCreated
             };
         }
 
         public async Task<BaseResponse<bool>> DeleteGroup(Guid groupId, Guid creatorId)
         {
-            var entity = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreatorId == creatorId);
+            var deleteGroup = await _groupRepository.GetAll().SingleOrDefaultAsync( x => x.Id == groupId && x.CreatorId == creatorId);
 
-            if (entity is null) 
-            {
-                return new StandardResponse<bool>()
-                {
-                    Message = "Group not found",
-                    ServiceCode = ServiceCode.EntityNotFound
-                };
-            }
+            if (deleteGroup is null) 
+                return new StandardResponse<bool> { Message = "Group not found", ServiceCode = ServiceCode.EntityNotFound };
 
-            var result = _groupRepository.Delete(entity);
+            var result = _groupRepository.Delete(deleteGroup);
             await _groupRepository.SaveAsync();
 
             return new StandardResponse<bool>()
             {
                 Data = result,
                 ServiceCode = ServiceCode.GroupDeleted
-            };
-        }
-
-        public BaseResponse<IQueryable<Group>> GetGroupOData()
-        {
-            var groups = _groupRepository.GetAll();
-
-            return new StandardResponse<IQueryable<Group>>()
-            {
-                Data = groups,
-                ServiceCode = ServiceCode.GroupReadied
             };
         }
 
@@ -85,50 +62,42 @@ namespace FriendBook.GroupService.API.BLL.Services
                                                      .Select(x => new ResponseGroupView(x))
                                                      .ToArrayAsync();
 
-            if(listGroupDTO?.Length > 0) 
+            if(listGroupDTO is null || listGroupDTO.Length < 1) 
+                return new StandardResponse<ResponseGroupView[]>{ Message = "Groups not found", ServiceCode = ServiceCode.EntityNotFound };
+
+            return new StandardResponse<ResponseGroupView[]>() 
             {
-                return new StandardResponse<ResponseGroupView[]>() { Data = listGroupDTO, ServiceCode = ServiceCode.GroupReadied};
-            }
-            return new StandardResponse<ResponseGroupView[]>
-            {
-                Message = "Groups not found",
-                ServiceCode = ServiceCode.EntityNotFound
+                Data = listGroupDTO,
+                ServiceCode = ServiceCode.GroupReadied
             };
         }
 
         public async Task<BaseResponse<ResponseAccountGroup[]>> GetGroupsWithStatusByUserId(Guid userId)
         {
 
-            var accountStatusGroup = await _accountStatusGroupRepository.GetAll()
-                                                                        .Where(x => x.AccountId == userId)
-                                                                        .Include(x => x.Group)
-                                                                        .ToListAsync();
+            var accountStatusGroups = _accountStatusGroupRepository.GetAll()
+                                                                   .Where(x => x.AccountId == userId)
+                                                                   .Include(x => x.Group);
 
-            ResponseAccountGroup[] accountGroupDTOs = accountStatusGroup.Select(x => new ResponseAccountGroup(x.Group!.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
-                                                                        .ToArray();
+            ResponseAccountGroup[] responseAccountGroups = await accountStatusGroups.Select(x => new ResponseAccountGroup(x.Group!.Name, x.IdGroup, x.RoleAccount > RoleAccount.Default))
+                                                                                    .ToArrayAsync();
 
-            if (accountGroupDTOs.Length == 0)
-            {
-                return new StandardResponse<ResponseAccountGroup[]>
-                {
-                    Message = "Groups not found",
-                    ServiceCode = ServiceCode.EntityNotFound
-                };
-            }
+            if (responseAccountGroups.Length == 0)
+                return new StandardResponse<ResponseAccountGroup[]>{ Message = "Groups not found", ServiceCode = ServiceCode.EntityNotFound };
 
             return new StandardResponse<ResponseAccountGroup[]>
             {
-                Data = accountGroupDTOs,
+                Data = responseAccountGroups,
                 ServiceCode = ServiceCode.GroupWithStatusMapped
             };
         }
 
-        public async Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup groupDTO, Guid creatorId)
+        public async Task<BaseResponse<ResponseGroupView>> UpdateGroup(RequestUpdateGroup requestUpdateGroup, Guid creatorId)
         {
-            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == creatorId && x.Id == groupDTO.GroupId))
+            if (!await _groupRepository.GetAll().AnyAsync(x => x.CreatorId == creatorId && x.Id == requestUpdateGroup.GroupId))
                 return new StandardResponse<ResponseGroupView> { Message = "Group not found or you not access update group", ServiceCode = ServiceCode.UserNotAccess };
 
-            Group updatedGroup = new(groupDTO.Name,creatorId);
+            var updatedGroup = new Group(requestUpdateGroup.Name,creatorId);
             updatedGroup = _groupRepository.Update(updatedGroup);
 
             await _groupRepository.SaveAsync();

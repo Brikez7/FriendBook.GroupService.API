@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 
 namespace FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOValidators
 {
-    public class ValidatorAccountStatusGroupDTO : AbstractValidator<AccountStatusGroupDTO>
+    public class ValidatorRequestNewAccountStatusGroup : AbstractValidator<RequestNewAccountStatusGroup>
     {
-        public ValidatorAccountStatusGroupDTO()
+        public ValidatorRequestNewAccountStatusGroup()
         {
             RuleFor(dto => dto.GroupId).NotEmpty();
 

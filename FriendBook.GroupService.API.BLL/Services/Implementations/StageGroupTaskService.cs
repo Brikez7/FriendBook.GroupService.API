@@ -7,6 +7,8 @@ using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using NodaTime;
+using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -26,14 +28,14 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandardResponse<ResponseStageGroupTaskIcon> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
 
 
-            if (await _stageGroupTaskRepository.GetAll().AnyAsync(x => x.IdGroupTask == entity.IdGroupTask && x.Name == entity.Name)) 
+            if (await _stageGroupTaskRepository.GetQueryable().AnyAsync(x => x.IdGroupTask == entity.IdGroupTask && x.Name == entity.Name)) 
                 return new StandardResponse<ResponseStageGroupTaskIcon> { Message = "Stage with name exists in this group", ServiceCode = ServiceCode.StageGroupTaskExists };
 
             DateTime now = DateTime.UtcNow;
-            StageGroupTask stageGroupTask = new StageGroupTask(entity.IdGroupTask,entity.Name,"", now, now);
+            StageGroupTask stageGroupTask = new StageGroupTask(entity.IdGroupTask,entity.Name,"", entity.DateCreate.ToOffsetDateTime(), entity.DateCreate.DateTime);
             var newEntity = await _stageGroupTaskRepository.AddAsync(stageGroupTask);
 
-            ResponseStageGroupTaskIcon stageGroupTaskIcon = new(newEntity.Id,newEntity.Name,newEntity.IdGroupTask);
+            ResponseStageGroupTaskIcon stageGroupTaskIcon = new(newEntity.Id,newEntity.Name);
             return new StandardResponse<ResponseStageGroupTaskIcon> { Data = stageGroupTaskIcon, ServiceCode = ServiceCode.StageGroupTaskCreated };
         }
 
@@ -42,7 +44,7 @@ namespace FriendBook.GroupService.API.BLL.Services
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && groupId == x.IdGroup && x.RoleAccount > RoleAccount.Default))
                 return new StandardResponse<bool> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
 
-            if (!await _stageGroupTaskRepository.GetAll().AnyAsync(x => x.Id == stageGroupTaskId))
+            if (!await _stageGroupTaskRepository.GetQueryable().AnyAsync(x => x.Id == stageGroupTaskId))
                 return new StandardResponse<bool> { Message = "Stage with name not exists in this group", ServiceCode = ServiceCode.StageGroupTaskExists };
 
             bool result = await _stageGroupTaskRepository.Delete(x => x.Id == stageGroupTaskId);
@@ -55,23 +57,23 @@ namespace FriendBook.GroupService.API.BLL.Services
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && idGroupTask == x.IdGroup))
                 return new StandardResponse<StageGroupTaskDTO?> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
 
-            var stageGroupTask = await _stageGroupTaskRepository.GetAll().FirstOrDefaultAsync(x => x.IdGroupTask == idGroupTask && x.Id == id);
+            var stageGroupTask = await _stageGroupTaskRepository.GetQueryable().FirstOrDefaultAsync(x => x.IdGroupTask == idGroupTask && x.Id == id);
             if (stageGroupTask == null)
                 return new StandardResponse<StageGroupTaskDTO?> { ServiceCode= ServiceCode.EntityNotFound, Message = "Stage group task not found" };
 
-            StageGroupTaskDTO stageGroupTaskDTO = new StageGroupTaskDTO(stageGroupTask!.IdGroupTask, stageGroupTask.Name, stageGroupTask.Text, stageGroupTask.DateUpdate, (DateTime)stageGroupTask.DateCreate!);
+            StageGroupTaskDTO stageGroupTaskDTO = new StageGroupTaskDTO(stageGroupTask.Id, stageGroupTask!.IdGroupTask, stageGroupTask.Name, stageGroupTask.Text, stageGroupTask.DateUpdate, (DateTime)stageGroupTask.DateCreate!);
 
             return new StandardResponse<StageGroupTaskDTO> { Data = stageGroupTaskDTO, ServiceCode = ServiceCode.StageGroupTaskReadied}!; 
         }
 
-        public async Task<BaseResponse<List<ResponseStageGroupTaskIcon>>> GetStagesGroupTaskIconByGroupId(Guid groupId, Guid userId)
+        public async Task<BaseResponse<ResponseStageGroupTaskIcon[]>> GetStagesGroupTaskIconByGroupId(Guid groupId, Guid userId)
         {
             if (await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && groupId == x.IdGroup))
-                return new StandardResponse<List<ResponseStageGroupTaskIcon>> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
+                return new StandardResponse<ResponseStageGroupTaskIcon[]> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
 
-            var list = await _stageGroupTaskRepository.GetAll().Select(x => new ResponseStageGroupTaskIcon(x.Id,x.Name,x.IdGroupTask)).ToListAsync();
+            var list = await _stageGroupTaskRepository.GetQueryable().Select(x => new ResponseStageGroupTaskIcon(x.Id,x.Name)).ToArrayAsync();
 
-            return new StandardResponse<List<ResponseStageGroupTaskIcon>> { Data = list, ServiceCode = ServiceCode.StageGroupTaskReadied};
+            return new StandardResponse<ResponseStageGroupTaskIcon[]> { Data = list, ServiceCode = ServiceCode.StageGroupTaskReadied};
         }
 
         public async Task<BaseResponse<StageGroupTaskDTO>> Update(StageGroupTaskDTO stageGroupTaskDTO, Guid userId, Guid groupId)
@@ -80,14 +82,14 @@ namespace FriendBook.GroupService.API.BLL.Services
                 return new StandardResponse<StageGroupTaskDTO> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotExists };
 
 
-            if (!await _stageGroupTaskRepository.GetAll().AnyAsync(x => x.IdGroupTask == stageGroupTaskDTO.IdGroupTask && x.Name == stageGroupTaskDTO.Name))
+            if (!await _stageGroupTaskRepository.GetQueryable().AnyAsync(x => x.IdGroupTask == stageGroupTaskDTO.IdGroupTask && x.Name == stageGroupTaskDTO.Name))
                 return new StandardResponse<StageGroupTaskDTO> { Message = "Stage with name not exists in this group", ServiceCode = ServiceCode.StageGroupTaskExists };
 
 
-            DateTime now = DateTime.UtcNow;
+            OffsetDateTime now = DateTimeOffset.UtcNow.ToOffsetDateTime();
 
-            var filter = Builders<StageGroupTask>.Filter.Where(x => x.Id == stageGroupTaskDTO.StageGroupTaskId);
-            var updater = Builders<StageGroupTask>.Update.Set(x =>  x.DateUpdate ,now)
+            var filter = Builders<StageGroupTask>.Filter.Where(x => x.Id == stageGroupTaskDTO.StageId);
+            var updater = Builders<StageGroupTask>.Update.Set(x => x.DateUpdate, now)
                                                          .Set(x => x.Text, stageGroupTaskDTO.Text);
 
             var result = await _stageGroupTaskRepository.Update(filter, updater);

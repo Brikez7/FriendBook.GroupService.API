@@ -46,13 +46,13 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateGroup([FromBody] RequestUpdateGroup requestGroupUpdate)
+        public async Task<IActionResult> UpdateGroup([FromBody] RequestUpdateGroup requestUpdateGroup)
         {
-            var responseValidation = await _groupDTOValidationService.ValidateAsync(requestGroupUpdate);
+            var responseValidation = await _groupDTOValidationService.ValidateAsync(requestUpdateGroup);
             if (responseValidation.ServiceCode == ServiceCode.EntityIsNotValidated)
                 return Ok(responseValidation);
 
-            var response = await _groupService.UpdateGroup(requestGroupUpdate, UserToken.Value.Id);
+            var response = await _groupService.UpdateGroup(requestUpdateGroup, UserToken.Value.Id);
             return Ok(response);
         }
 

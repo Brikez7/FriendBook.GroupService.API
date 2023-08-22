@@ -37,6 +37,7 @@ namespace FriendBook.GroupService.API.Controllers
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Create(requestStageGroupTasNew, UserToken.Value.Id, groupId);
             return Ok(stageGroupTaskIconDTO);
         }
+
         [HttpPut("Update/{groupId}")]
         public async Task<IActionResult> UpdateStageGroupTask([FromRoute] Guid groupId, [FromBody] StageGroupTaskDTO stageGroupTaskDTO)
         {
@@ -47,12 +48,14 @@ namespace FriendBook.GroupService.API.Controllers
             var stageGroupTaskIconDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);
             return Ok(stageGroupTaskIconDTO);
         }
+
         [HttpDelete("Delete/{groupId}")]
         public async Task<IActionResult> DeleteStageGroupTask([FromRoute] Guid groupId, [FromQuery] ObjectId stageGroupTaskId)
         {
             var result = await _stageGroupTaskService.Delete(stageGroupTaskId, UserToken.Value.Id, groupId);
             return Ok(stageGroupTaskId);
         }
+
         [HttpGet("Get/{groupId}")]
         public async Task<IActionResult> GetStageGroupTask([FromRoute] Guid groupId, [FromQuery] ObjectId stageGroupTaskId)
         {

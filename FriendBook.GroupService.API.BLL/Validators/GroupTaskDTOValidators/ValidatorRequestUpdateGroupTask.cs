@@ -4,16 +4,13 @@ using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators
 {
-    public class ValidatorRequestGroupTaskChanged : AbstractValidator<RequestGroupTaskChanged>
+    public class ValidatorRequestUpdateGroupTask : AbstractValidator<UpdateGroupTaskDTO>
     {
-        public ValidatorRequestGroupTaskChanged()
+        public ValidatorRequestUpdateGroupTask()
         {
-            RuleFor(dto => dto.GroupId).NotEmpty();
+            RuleFor(dto => dto.Id).NotEmpty();
 
-            RuleFor(dto => dto.OldName).Length(2, 50)
-                                       .NotEmpty();
-
-            RuleFor(dto => dto.NewName).Length(2, 50)
+            RuleFor(dto => dto.Name).Length(2, 50)
                                        .NotEmpty();
 
             RuleFor(dto => dto.Description).Length(0, 100);

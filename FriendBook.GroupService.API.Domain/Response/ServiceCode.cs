@@ -23,6 +23,7 @@
         GroupTaskDeleted = 2023,
         GroupTaskReadied = 2024,
         GroupTaskAlreadyExists = 2025,
+        GroupTaskNotDeleted = 2026,
 
         SubscribeTaskError = 2028,
         UnsubscribeTaskError = 2029,

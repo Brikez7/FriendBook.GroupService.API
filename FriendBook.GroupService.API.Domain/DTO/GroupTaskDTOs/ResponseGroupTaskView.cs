@@ -7,7 +7,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
 {
     public class ResponseGroupTaskView
     {
-        public Guid GroupTaskId { get; set; }
+        public Guid Id { get; set; }
         public Guid GroupId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
@@ -15,11 +15,11 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         public OffsetDateTime DateEndWork { get; set; }
         public OffsetDateTime DateStartWork { get; set; } = DateTimeOffset.UtcNow.ToOffsetDateTime();
         public string[]? Users { get; set; }
-        public List<ResponseStageGroupTaskIcon> StagesGroupTask { get; set; } = new List<ResponseStageGroupTaskIcon>();
+        public ResponseStageGroupTaskIcon[] StagesGroupTask { get; set; } = Array.Empty<ResponseStageGroupTaskIcon>();
 
-        public ResponseGroupTaskView(GroupTask groupTask, string[] users, List<ResponseStageGroupTaskIcon> stagesGroupTask)
+        public ResponseGroupTaskView(GroupTask groupTask, string[] users, ResponseStageGroupTaskIcon[] stagesGroupTask)
         {
-            GroupTaskId = (Guid)groupTask.Id!;
+            Id = (Guid)groupTask.Id!;
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
             Description = groupTask.Description;
@@ -30,9 +30,9 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
             StagesGroupTask = stagesGroupTask;
         }
 
-        public ResponseGroupTaskView(GroupTask groupTask, List<ResponseStageGroupTaskIcon> stagesGroupTask)
+        public ResponseGroupTaskView(GroupTask groupTask, ResponseStageGroupTaskIcon[] stagesGroupTask)
         {
-            GroupTaskId = (Guid)groupTask.Id!;
+            Id = (Guid)groupTask.Id!;
             GroupId = groupTask.GroupId;
             Name = groupTask.Name;
             Description = groupTask.Description;
@@ -42,7 +42,9 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
             StagesGroupTask = stagesGroupTask;
         }
 
-        public ResponseGroupTaskView()
+        public ResponseGroupTaskView(){}
+
+        public ResponseGroupTaskView(UpdateGroupTaskDTO requestUpdateGroupTask)
         {
         }
     }

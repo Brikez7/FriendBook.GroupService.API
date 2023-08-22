@@ -7,9 +7,7 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupDTOs
         public Guid GroupId { get; set; }
         public string Name { get; set; } = null!;
 
-        public RequestUpdateGroup()
-        {
-        }
+        public RequestUpdateGroup(){}
 
         public RequestUpdateGroup(Guid groupId, string name)
         {

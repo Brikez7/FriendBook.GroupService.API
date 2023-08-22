@@ -12,7 +12,7 @@ namespace FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidat
     {
         public ValidatorStageGroupTaskDTO() 
         {
-            RuleFor(dto => dto.StageGroupTaskId).NotEmpty();
+            RuleFor(dto => dto.StageId).NotEmpty();
 
             RuleFor(dto => dto.Name).NotEmpty()
                                     .NotNull()

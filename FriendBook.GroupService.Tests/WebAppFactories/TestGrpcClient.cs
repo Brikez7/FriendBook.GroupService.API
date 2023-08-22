@@ -10,9 +10,7 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
     {
         internal IGrpcClient MockGrpcClient = Substitute.For<IGrpcClient>();
 
-        public TestGrpcClient()
-        {
-        }
+        public TestGrpcClient(){}
 
         public Task<BaseResponse<ResponseUserExists>> CheckUserExists(Guid userId)
         {
@@ -24,9 +22,9 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
             return MockGrpcClient.GetProfiles(login, accessToken);
         }
 
-        public Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId)
+        public Task<BaseResponse<ResponseUsers>> GetUsers(Guid[] usersId)
         {
-            return MockGrpcClient.GetUsersLoginWithId(usersId);
+            return MockGrpcClient.GetUsers(usersId);
         }
 
         public void Refresh()

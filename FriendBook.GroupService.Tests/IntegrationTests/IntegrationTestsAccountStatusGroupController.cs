@@ -1,5 +1,5 @@
 ﻿using FriendBook.GroupService.API.BLL.gRPCClients.ContactClient;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
@@ -20,75 +20,80 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
         [Test]
         public async Task Create() 
         {
-            var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
-            _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
+            var requestNewAccountStatusGroup = new RequestNewAccountStatusGroup(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
+            _webHost.DecoratorGrpcClient.CheckUserExists(requestNewAccountStatusGroup.AccountId).Returns(FabricGrpcResponse.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
+            var requestNewAccountStatusGroupContent = JsonContentHelper.Create(requestNewAccountStatusGroup);
 
-            HttpResponseMessage httpResponseAccountStatusGroupDTO = await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
-            var responseAccountStatusGroupDTO = await DeserializeHelper.TryDeserializeStandardResponse<AccountStatusGroupDTO>(httpResponseAccountStatusGroupDTO);
+            HttpResponseMessage httpResponseAccountStatusGroupView = await _httpClient.PostAsync($"{UrlController}/Create", requestNewAccountStatusGroupContent);
+            var responseAccountStatusGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseAccountStatusGroupView>(httpResponseAccountStatusGroupView);
 
             Assert.Multiple(() =>
             {
-                Assert.That(httpResponseAccountStatusGroupDTO.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseAccountStatusGroupDTO.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupCreated));
-                Assert.That(responseAccountStatusGroupDTO?.Data.AccountId, Is.EqualTo(newAccountStatusGroupDTO.AccountId));
-                Assert.That(responseAccountStatusGroupDTO?.Data.RoleAccount, Is.EqualTo(RoleAccount.Admin));
+                Assert.That(httpResponseAccountStatusGroupView.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(responseAccountStatusGroupView.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupCreated));
+                Assert.That(responseAccountStatusGroupView?.Data.RoleAccount, Is.EqualTo(RoleAccount.Admin));
             });
         }
 
         [Test]
         public async Task Delete()
         {
-            var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
-            _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
+            var requestNewAccountStatusGroup = new RequestNewAccountStatusGroup(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
+            _webHost.DecoratorGrpcClient.CheckUserExists(requestNewAccountStatusGroup.AccountId).Returns(FabricGrpcResponse.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
+            var requestNewAccountStatusGroupContent = JsonContentHelper.Create(requestNewAccountStatusGroup);
 
-            await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
+            HttpResponseMessage httpResponseAccountStatusGroupView = await _httpClient.PostAsync($"{UrlController}/Create", requestNewAccountStatusGroupContent);
+            var responseAccountStatusGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseAccountStatusGroupView>(httpResponseAccountStatusGroupView);
 
-            HttpResponseMessage httpResponseAccountDeleted = await _httpClient.DeleteAsync($"{UrlController}/Delete/{_testGroup.GroupId}?userId={newAccountStatusGroupDTO.AccountId}");
-            var responseAccountDeleted = await DeserializeHelper.TryDeserializeStandardResponse<bool>(httpResponseAccountDeleted);
+            HttpResponseMessage httpResponseAccountStatusGroupDeleted = await _httpClient.DeleteAsync($"{UrlController}/Delete/{responseAccountStatusGroupView.Data.Id}");
+            var responseAccountStatusGroupDeleted = await DeserializeHelper.TryDeserializeStandardResponse<bool>(httpResponseAccountStatusGroupDeleted);
 
             Assert.Multiple(() =>
             {
-                Assert.That(httpResponseAccountDeleted.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseAccountDeleted.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupDeleted));
-                Assert.That(responseAccountDeleted?.Data, Is.True);
+                Assert.That(httpResponseAccountStatusGroupDeleted.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(responseAccountStatusGroupDeleted.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupDeleted));
+                Assert.That(responseAccountStatusGroupDeleted?.Data, Is.True);
             });
         }
 
         [Test]
         public async Task Update()
         {
-            var newAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
-            _webHost.DecoratorGrpcClient.CheckUserExists(newAccountStatusGroupDTO.AccountId).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
-            var accountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
+            var requestNewAccountStatusGroup = new RequestNewAccountStatusGroup(_testGroup.GroupId, Guid.NewGuid(), RoleAccount.Admin);
+            _webHost.DecoratorGrpcClient.CheckUserExists(requestNewAccountStatusGroup.AccountId).Returns(FabricGrpcResponse.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
+            var requestNewAccountStatusGroupContent = JsonContentHelper.Create(requestNewAccountStatusGroup);
 
-            await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
+            HttpResponseMessage httpResponseAccountStatusGroupView = await _httpClient.PostAsync($"{UrlController}/Create", requestNewAccountStatusGroupContent);
+            var responseAccountStatusGroupView = await DeserializeHelper.TryDeserializeStandardResponse<ResponseAccountStatusGroupView>(httpResponseAccountStatusGroupView);
 
-            newAccountStatusGroupDTO.RoleAccount = RoleAccount.Default;
-            var updatedAccountStatusGroupDTOContent = JsonContentHelper.Create(newAccountStatusGroupDTO);
-            HttpResponseMessage httpUpdatedAccountStatusGroupDTO = await _httpClient.PutAsync($"{UrlController}/Update", updatedAccountStatusGroupDTOContent);
-            var responseUpdatedAccountStatusGroupDTO = await DeserializeHelper.TryDeserializeStandardResponse<AccountStatusGroupDTO>(httpUpdatedAccountStatusGroupDTO);
+            var requestUpdateAccountStatusGroup = new RequestUpdateAccountStatusGroup(responseAccountStatusGroupView.Data.Id, RoleAccount.Default);
+            var requestUpdateAccountStatusGroupContent = JsonContentHelper.Create(requestUpdateAccountStatusGroup);
+
+            HttpResponseMessage httpResponseAccountStatusGroupView2 = await _httpClient.PutAsync($"{UrlController}/Update", requestUpdateAccountStatusGroupContent);
+            var responseAccountStatusGroupView2 = await DeserializeHelper.TryDeserializeStandardResponse<ResponseAccountStatusGroupView>(httpResponseAccountStatusGroupView2);
 
             Assert.Multiple(() =>
             {
-                Assert.That(httpUpdatedAccountStatusGroupDTO.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseUpdatedAccountStatusGroupDTO.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupUpdated));
-                Assert.That(responseUpdatedAccountStatusGroupDTO?.Data.AccountId, Is.EqualTo(newAccountStatusGroupDTO.AccountId));
-                Assert.That(responseUpdatedAccountStatusGroupDTO?.Data.RoleAccount, Is.EqualTo(RoleAccount.Default));
+                Assert.That(httpResponseAccountStatusGroupView2.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(responseAccountStatusGroupView2.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusGroupUpdated));
+                Assert.That(responseAccountStatusGroupView2?.Data.RoleAccount, Is.EqualTo(RoleAccount.Default));
             });
         }
 
         [Test]
         public async Task GetProfilesByGroupId()
         {
-            var newUser = (Guid.NewGuid(), "NewTestUser");
-            _webHost.DecoratorGrpcClient.CheckUserExists(newUser.Item1).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
+            var mainUserProfile = new Profile() { Id = _mainUserData.Id.ToString(), Login = _mainUserData.Login, FullName = $"FN {_mainUserData.Login}" };
+            var idNewTestUser = Guid.NewGuid();
+            var newUser = new Profile() { Id = idNewTestUser.ToString(), Login = "NewTestUser", FullName = "FN NewTestUser" };
+
             var searchedLogin = "";
+            _webHost.DecoratorGrpcClient.CheckUserExists(Guid.Parse(newUser.Id)).Returns(FabricGrpcResponse.CreateTaskResponseUserExists(true, ServiceCode.UserExists));
             _webHost.DecoratorGrpcClient.GetProfiles(searchedLogin, Arg.Any<string>()).Returns(
-                FabricGrpcResponseHelper.CreateTaskResponseProfiles(ServiceCode.GrpcProfileReadied, newUser, (_mainUserData.Id, _mainUserData.Login))
+                FabricGrpcResponse.CreateTaskResponseProfiles(ServiceCode.GrpcProfileReadied, newUser, mainUserProfile)
             );
-            var requestAccountStatusGroupDTO = new AccountStatusGroupDTO(_testGroup.GroupId, newUser.Item1, RoleAccount.Admin);
+
+            var requestAccountStatusGroupDTO = new RequestNewAccountStatusGroup(_testGroup.GroupId, idNewTestUser, RoleAccount.Admin);
             var accountStatusGroupDTOContent = JsonContentHelper.Create(requestAccountStatusGroupDTO);
 
             await _httpClient.PostAsync($"{UrlController}/Create", accountStatusGroupDTOContent);
@@ -102,7 +107,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
 
                 Assert.That(responseProfiles.ServiceCode, Is.EqualTo(ServiceCode.AccountStatusWithGroupMapped));
                 Assert.That(responseProfiles?.Data, Has.Length.EqualTo(2));
-                Assert.That(responseProfiles?.Data.First(x => x.Id == newUser.Item1.ToString()).Login, Is.EqualTo(newUser.Item2));
+                Assert.That(responseProfiles?.Data.First(x => x.Id == newUser.Id).Login, Is.EqualTo(newUser.Login));
                 Assert.That(responseProfiles?.Data.First(x => x.Id == _mainUserData.Id.ToString()).Login, Is.EqualTo(_mainUserData.Login));
             });
         }

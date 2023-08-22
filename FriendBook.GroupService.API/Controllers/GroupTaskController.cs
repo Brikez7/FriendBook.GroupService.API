@@ -1,8 +1,6 @@
-﻿using FriendBook.GroupService.API.BLL.GrpcServices;
-using FriendBook.GroupService.API.BLL.Helpers;
+﻿using FriendBook.GroupService.API.BLL.Helpers;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -16,38 +14,27 @@ namespace FriendBook.GroupService.API.Controllers
     public class GroupTaskController : ControllerBase
     {
         private readonly IGroupTaskService _groupTaskService;
-        private readonly IAccountStatusGroupService _accountStatusGroupService;
         private readonly IValidationService<RequestNewGroupTask> _groupTaskNewValidationService;
-        private readonly IValidationService<RequestGroupTaskKey> _groupTaskKeyValidationService;
-        private readonly IValidationService<RequestGroupTaskChanged> _groupTaskChangedValidationService;
-        private readonly IGrpcClient _grpcService;
+        private readonly IValidationService<UpdateGroupTaskDTO> _groupTaskChangedValidationService;
         public Lazy<DataAccessToken> UserToken { get; set; }
-        public GroupTaskController(IGroupTaskService groupTaskService, IAccountStatusGroupService accountStatusGroupService,
-            IValidationService<RequestNewGroupTask> requestGroupTaskNewValidationService, IValidationService<RequestGroupTaskKey> requestGroupTaskKeyValidationService,
-            IValidationService<RequestGroupTaskChanged> requestGroupTaskChangedValidationService, IGrpcClient grpcService, IHttpContextAccessor httpContextAccessor)
+        public GroupTaskController(IGroupTaskService groupTaskService, IValidationService<RequestNewGroupTask> requestGroupTaskNewValidationService,
+             IValidationService<UpdateGroupTaskDTO> requestGroupTaskChangedValidationService,IHttpContextAccessor httpContextAccessor)
         {
             _groupTaskService = groupTaskService;
-            _accountStatusGroupService = accountStatusGroupService;
             _groupTaskNewValidationService = requestGroupTaskNewValidationService;
-            _groupTaskKeyValidationService = requestGroupTaskKeyValidationService;
             _groupTaskChangedValidationService = requestGroupTaskChangedValidationService;
-            _grpcService = grpcService;
             UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
         }
 
-        [HttpDelete("Delete")]
-        public async Task<IActionResult> DeleteGroupTask([FromBody] RequestGroupTaskKey groupTaskKey)
+        [HttpDelete("Delete/{GroupTaskId}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid GroupTaskId)
         {
-            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKey);
-            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
-                return Ok(responseValidation);
-
-            var response = await _groupTaskService.DeleteGroupTask(groupTaskKey, UserToken.Value.Id);
+            var response = await _groupTaskService.DeleteGroupTask(GroupTaskId, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateGroupTask([FromBody] RequestNewGroupTask newGroupTaskDTO)
+        public async Task<IActionResult> Create([FromBody] RequestNewGroupTask newGroupTaskDTO)
         {
             var responseValidation = await _groupTaskNewValidationService.ValidateAsync(newGroupTaskDTO);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
@@ -59,7 +46,7 @@ namespace FriendBook.GroupService.API.Controllers
 
 
         [HttpPut("Update")]
-        public async Task<IActionResult> UpdateGroupTask([FromBody] RequestGroupTaskChanged groupTaskDTO)
+        public async Task<IActionResult> Update([FromBody] UpdateGroupTaskDTO groupTaskDTO)
         {
             var responseValidation = await _groupTaskChangedValidationService.ValidateAsync(groupTaskDTO);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
@@ -69,42 +56,24 @@ namespace FriendBook.GroupService.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("SubscribeTask")]
-        public async Task<IActionResult> SubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
+        [HttpPut("SubscribeTask/{GroupTaskId}")]
+        public async Task<IActionResult> SubscribeTask([FromRoute] Guid GroupTaskId)
         {
-            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
-            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
-                return Ok(responseValidation);
-
-            var response = await _groupTaskService.SubscribeGroupTask(groupTaskKeyDTO,UserToken.Value.Id);
+            var response = await _groupTaskService.SubscribeGroupTask(GroupTaskId, UserToken.Value.Id);
             return Ok(response);
         }
-        [HttpPut("UnsubscribeTask")]
-        public async Task<IActionResult> UnsubscribeTask([FromBody] RequestGroupTaskKey groupTaskKeyDTO)
-        {
-            var responseValidation = await _groupTaskKeyValidationService.ValidateAsync(groupTaskKeyDTO);
-            if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
-                return Ok(responseValidation);
 
-            var response = await _groupTaskService.UnsubscribeGroupTask(groupTaskKeyDTO, UserToken.Value.Id);
+        [HttpPut("UnsubscribeTask/{GroupTaskId}")]
+        public async Task<IActionResult> UnsubscribeTask([FromRoute] Guid GroupTaskId)
+        {
+            var response = await _groupTaskService.UnsubscribeGroupTask(GroupTaskId, UserToken.Value.Id);
             return Ok(response);
         }
-        [HttpGet("GetTasks/{groupId}")]
-        public async Task<IActionResult> GetTasksByNameAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
+
+        [HttpGet("GetMyTasksByNameAndGroupId/{groupId}")]
+        public async Task<IActionResult> GetMyTasksByNameAndGroupId([FromRoute] Guid groupId, [FromQuery] string nameTask = "")
         {
-            var responseAccountStatusGroup = await _accountStatusGroupService.GetAccountStatusesGroupFromUserGroup(UserToken.Value.Id, groupId);
-            if(responseAccountStatusGroup.ServiceCode != ServiceCode.AccountStatusGroupReadied) 
-                return Ok(responseAccountStatusGroup);
-
-            var usersIdFromGroup = responseAccountStatusGroup.Data.Group.AccountStatusGroups.Select(x => x.AccountId).ToArray();
-            var tasksFromGroup = responseAccountStatusGroup.Data.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
-            var isAdmin = responseAccountStatusGroup.Data.RoleAccount > RoleAccount.Default;
-
-            var responseAnotherApi = await _grpcService.GetUsersLoginWithId(usersIdFromGroup);
-            if (responseAnotherApi.ServiceCode != Domain.Response.ServiceCode.GrpcUsersReadied) 
-                return Ok(responseAnotherApi);
-
-            var response = _accountStatusGroupService.GetTasksPage(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
+            var response = await _groupTaskService.GetTasksPage(nameTask, UserToken.Value.Id, groupId);
             return Ok(response);
         }
     }

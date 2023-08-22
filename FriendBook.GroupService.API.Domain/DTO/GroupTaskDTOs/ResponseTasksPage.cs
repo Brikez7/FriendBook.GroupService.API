@@ -11,8 +11,6 @@
             IsAdmin = isAdmin;
         }
 
-        public ResponseTasksPage()
-        {
-        }
+        public ResponseTasksPage(){}
     }
 }

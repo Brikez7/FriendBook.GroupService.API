@@ -1,6 +1,4 @@
 ﻿using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
-using NodaTime;
-using NodaTime.Extensions;
 
 namespace FriendBook.GroupService.API.Domain.Entities.Postgres
 {
@@ -11,9 +9,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
         public string Name { get; set; } = null!;
         public DateTime CreatedDate { get; set; }
 
-        public Group()
-        {
-        }
+        public Group(){}
 
         public Group(string nameGroup, Guid accountId)
         {
@@ -29,11 +25,8 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             CreatorId = accountId;
         }
 
-        public Group(Guid? id)
-        {
-            Id = id;
-        }
+        public Group(Guid? id){ Id = id; }
         public IEnumerable<AccountStatusGroup> AccountStatusGroups { get; set; } = new List<AccountStatusGroup>();
-        public IEnumerable<GroupTask>? GroupTasks { get; set; } = new List<GroupTask>();
+        public IEnumerable<GroupTask> GroupTasks { get; set; } = new List<GroupTask>();
     }
 }

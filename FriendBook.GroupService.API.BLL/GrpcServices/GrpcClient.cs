@@ -65,7 +65,7 @@ namespace FriendBook.GroupService.API.BLL.GrpcServices
             return new StandardResponse<ResponseProfiles> { Data = response, ServiceCode = ServiceCode.GrpcProfileReadied };
         }
 
-        public async Task<BaseResponse<ResponseUsers>> GetUsersLoginWithId(Guid[] usersId)
+        public async Task<BaseResponse<ResponseUsers>> GetUsers(Guid[] usersId)
         {
             HttpClientHandler httpClientHandler = new HttpClientHandler();
             httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;

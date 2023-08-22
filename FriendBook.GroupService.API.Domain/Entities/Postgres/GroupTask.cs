@@ -11,18 +11,13 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
         public Guid GroupId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public Guid[] Team { get; set; } = new Guid[0];
+        public Guid[] Team { get; set; } = Array.Empty<Guid>();
         public StatusTask Status { get; set; }
         public OffsetDateTime DateStartWork { get; set; } = DateTimeOffset.UtcNow.ToOffsetDateTime();
         public OffsetDateTime DateEndWork { get; set; }
-        public GroupTask()
-        {
-        }
+        public GroupTask(){}
 
-        public GroupTask(Guid id)
-        {
-            Id = id;
-        }
+        public GroupTask(Guid id){ Id = id; }
 
         public GroupTask(ResponseGroupTaskView groupDTO, Guid userId)
         {
@@ -45,23 +40,22 @@ namespace FriendBook.GroupService.API.Domain.Entities.Postgres
             Team = new Guid[] { userId };
         }
 
-        public GroupTask(RequestGroupTaskChanged groupTaskDTO)
+        public GroupTask(UpdateGroupTaskDTO groupTaskDTO)
         {
-            GroupId = groupTaskDTO.GroupId;
-            Name = groupTaskDTO.OldName;
+            Id = groupTaskDTO.Id;
+            Name = groupTaskDTO.Name;
             Description = groupTaskDTO.Description;
             Status = groupTaskDTO.Status;
             DateEndWork = groupTaskDTO.DateEndWork;
         }
-
 
         public Group? Group { get; set; }
     }
     public enum StatusTask
     {
         Process = 0,
-        Successes = 1,
+        MissedDate  = 1,
         Denied = 2,
-        MissedDate = 3,
+        Successes = 3,
     }
 }

@@ -42,7 +42,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
             var accessToken = TokenHelper.GenerateAccessToken(_mainUserData, jWTSettings);
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            _webHost.DecoratorGrpcClient.CheckUserExists(_mainUserData.Id).Returns(FabricGrpcResponseHelper.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
+            _webHost.DecoratorGrpcClient.CheckUserExists(_mainUserData.Id).Returns(FabricGrpcResponse.CreateTaskResponseUserExists(true,ServiceCode.UserExists));
             return Task.CompletedTask;
         }
 

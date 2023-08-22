@@ -2,7 +2,7 @@
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using FriendBook.GroupService.API.BLL.Helpers;
 using FriendBook.GroupService.API.BLL.Interfaces;
-using FriendBook.GroupService.API.Domain.Entities;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.API.Domain.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -16,48 +16,50 @@ namespace FriendBook.GroupService.API.Controllers
     public class AccountStatusGroupController : ControllerBase
     {
         private readonly IAccountStatusGroupService _accountStatusGroupService;
-        private readonly IValidationService<AccountStatusGroupDTO> _accountStatusGroupDTOValidationService;
+        private readonly IValidationService<RequestNewAccountStatusGroup> _requestNewValidationService;
+        private readonly IValidationService<RequestUpdateAccountStatusGroup> _requestUpdateValidationService;
         private readonly IGrpcClient _grpcService;
         public Lazy<DataAccessToken> UserToken { get; set; }
-        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<AccountStatusGroupDTO> validationService,
-            IGrpcClient grpcService, IHttpContextAccessor httpContextAccessor)
+        public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<RequestNewAccountStatusGroup> validationService1,
+            IValidationService<RequestUpdateAccountStatusGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContextAccessor)
         {
             _accountStatusGroupService = accountStatusGroupService;
-            _accountStatusGroupDTOValidationService = validationService;
+            _requestUpdateValidationService = validationService;
+            _requestNewValidationService = validationService1;
             UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
             _grpcService = grpcService;
         }
 
-        [HttpDelete("Delete/{groupId}")]
-        public async Task<IActionResult> Delete([FromRoute] Guid groupId, [FromQuery] Guid userId)
+        [HttpDelete("Delete/{accountStatusGroupId}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid accountStatusGroupId)
         {
-            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(userId,UserToken.Value.Id, groupId);
+            var response = await _accountStatusGroupService.DeleteAccountStatusGroup(accountStatusGroupId, UserToken.Value.Id);
             return Ok(response);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
+        public async Task<IActionResult> Create([FromBody] RequestNewAccountStatusGroup requestNewAccountStatusGroup)
         {
-            var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
+            var responseValidation = await _requestNewValidationService.ValidateAsync(requestNewAccountStatusGroup);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
-            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(accountStatusGroupDTO.AccountId);
+            BaseResponse<ResponseUserExists> responseAnotherAPI = await _grpcService.CheckUserExists(requestNewAccountStatusGroup.AccountId);
             if (responseAnotherAPI.ServiceCode != ServiceCode.UserExists) 
                 return Ok(responseAnotherAPI);
 
-            var response = await _accountStatusGroupService.CreateAccountStatusGroup(UserToken.Value.Id,accountStatusGroupDTO);
+            var response = await _accountStatusGroupService.CreateAccountStatusGroup(UserToken.Value.Id,requestNewAccountStatusGroup);
             return Ok(response);
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> Update([FromBody] AccountStatusGroupDTO accountStatusGroupDTO)
+        public async Task<IActionResult> Update([FromBody] RequestUpdateAccountStatusGroup requestUpdateAccountStatusGroup)
         {
-            var responseValidation = await _accountStatusGroupDTOValidationService.ValidateAsync(accountStatusGroupDTO);
+            var responseValidation = await _requestUpdateValidationService.ValidateAsync(requestUpdateAccountStatusGroup);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
-            var response = await _accountStatusGroupService.UpdateAccountStatusGroup(accountStatusGroupDTO, UserToken.Value.Id);
+            var response = await _accountStatusGroupService.UpdateAccountStatusGroup(requestUpdateAccountStatusGroup, UserToken.Value.Id);
             return Ok(response);
         }
 
