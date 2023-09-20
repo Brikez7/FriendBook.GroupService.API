@@ -19,7 +19,7 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IValidationService<RequestNewAccountStatusGroup> _requestNewValidationService;
         private readonly IValidationService<RequestUpdateAccountStatusGroup> _requestUpdateValidationService;
         private readonly IGrpcClient _grpcService;
-        public Lazy<DataAccessToken> UserToken { get; set; }
+        public Lazy<AccessToken> UserToken { get; set; }
         public AccountStatusGroupController(IAccountStatusGroupService accountStatusGroupService, IValidationService<RequestNewAccountStatusGroup> validationService1,
             IValidationService<RequestUpdateAccountStatusGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContextAccessor)
         {

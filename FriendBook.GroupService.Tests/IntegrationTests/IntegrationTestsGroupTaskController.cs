@@ -16,7 +16,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
     internal class IntegrationTestsGroupTaskController : BaseIntegrationTestsGroup
     {
         internal const string UrlController = $"{UrlAPI}/GroupTask";
-        public IntegrationTestsGroupTaskController(DataAccessToken dataAccessToken) : base(dataAccessToken) { }
+        public IntegrationTestsGroupTaskController(AccessToken dataAccessToken) : base(dataAccessToken) { }
 
         [Test]
         public async Task Create()

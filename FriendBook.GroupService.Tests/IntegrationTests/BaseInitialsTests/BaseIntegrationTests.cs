@@ -16,12 +16,12 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
     {
         internal const string UrlAPI = "GroupService/v1";
 
-        private protected DataAccessToken _mainUserData;
+        private protected AccessToken _mainUserData;
 
         private protected WebHostFactory<Program, GroupDBContext> _webHost;
         private protected HttpClient _httpClient;
 
-        public BaseIntegrationTests(DataAccessToken dataAccessToken)
+        public BaseIntegrationTests(AccessToken dataAccessToken)
         {
             _mainUserData = dataAccessToken;
         }

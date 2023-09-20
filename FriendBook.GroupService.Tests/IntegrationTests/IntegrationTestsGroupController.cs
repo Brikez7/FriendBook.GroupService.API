@@ -13,7 +13,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
     internal class IntegrationTestsGroupController : BaseIntegrationTests
     {
         internal const string UrlController = $"{UrlAPI}/Group";
-        public IntegrationTestsGroupController(DataAccessToken dataAccessToken) : base(dataAccessToken){}
+        public IntegrationTestsGroupController(AccessToken dataAccessToken) : base(dataAccessToken){}
 
         [Test]
         public async Task CreateGroup() 

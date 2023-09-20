@@ -16,7 +16,7 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IGroupTaskService _groupTaskService;
         private readonly IValidationService<RequestNewGroupTask> _groupTaskNewValidationService;
         private readonly IValidationService<UpdateGroupTaskDTO> _groupTaskChangedValidationService;
-        public Lazy<DataAccessToken> UserToken { get; set; }
+        public Lazy<AccessToken> UserToken { get; set; }
         public GroupTaskController(IGroupTaskService groupTaskService, IValidationService<RequestNewGroupTask> requestGroupTaskNewValidationService,
              IValidationService<UpdateGroupTaskDTO> requestGroupTaskChangedValidationService,IHttpContextAccessor httpContextAccessor)
         {

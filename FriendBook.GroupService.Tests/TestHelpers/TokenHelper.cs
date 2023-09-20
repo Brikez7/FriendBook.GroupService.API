@@ -10,7 +10,7 @@ namespace FriendBook.GroupService.Tests.TestHelpers
 {
     internal static class TokenHelper
     {
-        public static string GenerateAccessToken(DataAccessToken account, JWTSettings jWTSettings)
+        public static string GenerateAccessToken(AccessToken account, JWTSettings jWTSettings)
         {
             List<Claim> claims = new()
             {

@@ -18,7 +18,7 @@ namespace FriendBook.GroupService.API.Controllers
         private readonly IGroupService _groupService;
         private readonly IValidationService<RequestUpdateGroup> _groupDTOValidationService;
         private readonly IGrpcClient _grpcIdentityClient;
-        public Lazy<DataAccessToken> UserToken { get; set; }
+        public Lazy<AccessToken> UserToken { get; set; }
         public GroupController(IGroupService groupService, IValidationService<RequestUpdateGroup> validationService, IGrpcClient grpcService, IHttpContextAccessor httpContext)
         {
             _groupService = groupService;

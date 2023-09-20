@@ -7,7 +7,7 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
     internal abstract class BaseIntegrationTestsGroup : BaseIntegrationTests
     {
         private protected ResponseGroupView _testGroup;
-        protected BaseIntegrationTestsGroup(DataAccessToken dataAccessToken) : base(dataAccessToken){}
+        protected BaseIntegrationTestsGroup(AccessToken dataAccessToken) : base(dataAccessToken){}
 
         public override async Task SetUp()
         {
