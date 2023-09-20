@@ -44,11 +44,11 @@ namespace FriendBook.GroupService.Tests.IntegrationTests
             HttpResponseMessage httpResponseNewStageGroupTask = await _httpClient.PostAsync($"{UrlController}/Create/{_testGroup.GroupId}", requestStageGroupTaskNewContent);
             var responseNewStageGroupTask = (await DeserializeHelper.TryDeserializeStandardResponse<ResponseStageGroupTaskView>(httpResponseNewStageGroupTask)).Data;
 
-            var requestUpdateStageGroupTask = new StageGroupTaskDTO(responseNewStageGroupTask.StageId, responseNewStageGroupTask.IdGroupTask, "UpdatedStage", "UpdatedText", DateTimeOffset.UtcNow.ToOffsetDateTime());
+            var requestUpdateStageGroupTask = new UpdateStageGroupTaskDTO(responseNewStageGroupTask.StageId, responseNewStageGroupTask.IdGroupTask, "UpdatedStage", "UpdatedText", DateTimeOffset.UtcNow.ToOffsetDateTime());
             var requestUpdateStageGroupTaskContent = JsonContentHelper.Create(requestUpdateStageGroupTask);
 
             HttpResponseMessage httpResponseUpdatedStageGroupTask = await _httpClient.PutAsync($"{UrlController}/Update/{_testGroup.GroupId}", requestUpdateStageGroupTaskContent);
-            var responseUpdatedStageGroupTask = await DeserializeHelper.TryDeserializeStandardResponse<StageGroupTaskDTO>(httpResponseUpdatedStageGroupTask);
+            var responseUpdatedStageGroupTask = await DeserializeHelper.TryDeserializeStandardResponse<UpdateStageGroupTaskDTO>(httpResponseUpdatedStageGroupTask);
 
             Assert.Multiple(() =>
             {

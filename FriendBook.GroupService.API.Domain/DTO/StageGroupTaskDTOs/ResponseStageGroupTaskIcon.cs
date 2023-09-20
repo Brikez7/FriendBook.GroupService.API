@@ -12,5 +12,6 @@ namespace FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs
             StageGroupTaskId = id;
             Name = name;
         }
+        public ResponseStageGroupTaskIcon() { }
     }
 }

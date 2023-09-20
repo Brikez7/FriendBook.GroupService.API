@@ -70,19 +70,19 @@ namespace FriendBook.GroupService.API.BLL.Services
         {
             var stagesGroupTaskIcons = _stageGroupTaskRepository.GetCollection()
                                                 .Where(x => x.IdGroupTask == groupTaskId)
-                                                .SelectToDocument(x => new ResponseStageGroupTaskIcon(x.Id,x.Name))
+                                                .SelectToDocument(x => x.Id,x => x.Name)
                                                 .Select(x => new ResponseStageGroupTaskIcon(x["_id"].AsObjectId, x["Name"].AsString)).ToArray();
 
             return stagesGroupTaskIcons;
         }
 
-        public async Task<BaseResponse<StageGroupTaskDTO>> Update(StageGroupTaskDTO stageGroupTaskDTO, Guid userId, Guid groupId)
+        public async Task<BaseResponse<UpdateStageGroupTaskDTO>> Update(UpdateStageGroupTaskDTO stageGroupTaskDTO, Guid userId, Guid groupId)
         {
             if (!await _accountStatusGroupRepository.GetAll().AnyAsync(x => x.AccountId == userId && groupId == x.IdGroup && x.RoleAccount > RoleAccount.Default))
-                return new StandardResponse<StageGroupTaskDTO> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotAccess };
+                return new StandardResponse<UpdateStageGroupTaskDTO> { Message = "User not exist in this group", ServiceCode = ServiceCode.UserNotAccess };
 
             if (!await _stageGroupTaskRepository.GetCollection().Where(x => x.IdGroupTask == stageGroupTaskDTO.IdGroupTask).AnyAsync())
-                return new StandardResponse<StageGroupTaskDTO> { Message = "Stage not exists in this group task", ServiceCode = ServiceCode.StageGroupTaskExists };
+                return new StandardResponse<UpdateStageGroupTaskDTO> { Message = "Stage not exists in this group task", ServiceCode = ServiceCode.StageGroupTaskExists };
 
 
             OffsetDateTime now = DateTimeOffset.UtcNow.ToOffsetDateTime();
@@ -93,7 +93,7 @@ namespace FriendBook.GroupService.API.BLL.Services
 
             var result = await _stageGroupTaskRepository.Update(filter, updater);
 
-            return new StandardResponse<StageGroupTaskDTO> { Data = stageGroupTaskDTO, ServiceCode = ServiceCode.StageGroupTaskUpdated };
+            return new StandardResponse<UpdateStageGroupTaskDTO> { Data = stageGroupTaskDTO, ServiceCode = ServiceCode.StageGroupTaskUpdated };
         }
     }
 }

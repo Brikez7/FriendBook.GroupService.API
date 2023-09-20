@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators
 {
-    public class ValidatorStageGroupTaskDTO : AbstractValidator<StageGroupTaskDTO>
+    public class ValidatorStageGroupTaskDTO : AbstractValidator<UpdateStageGroupTaskDTO>
     {
         public ValidatorStageGroupTaskDTO() 
         {

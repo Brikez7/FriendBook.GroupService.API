@@ -8,7 +8,7 @@ namespace FriendBook.GroupService.API.BLL.Interfaces
     public interface IStageGroupTaskService
     {
         public Task<BaseResponse<ResponseStageGroupTaskView>> Create(RequestNewStageGroupTask requestStageGroupTasNew, Guid adminId, Guid groupId);
-        public Task<BaseResponse<StageGroupTaskDTO>> Update(StageGroupTaskDTO stageGroupTaskDTO, Guid adminId, Guid groupId);
+        public Task<BaseResponse<UpdateStageGroupTaskDTO>> Update(UpdateStageGroupTaskDTO stageGroupTaskDTO, Guid adminId, Guid groupId);
         public Task<BaseResponse<bool>> Delete(ObjectId stageGroupTaskId, Guid adminId, Guid groupId);
         public ResponseStageGroupTaskIcon[] GetStagesGroupTaskIconByGroupId(Guid groupTaskId);
         public Task<BaseResponse<ResponseStageGroupTaskView?>> GetStageGroupTaskById(ObjectId stageGroupTaskId, Guid userId, Guid groupId);

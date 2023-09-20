@@ -1,5 +1,4 @@
 ﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using NodaTime;
 
 namespace FriendBook.GroupService.API.Domain.DTO.StageGroupTaskDTOs
@@ -22,7 +21,5 @@ namespace FriendBook.GroupService.API.Domain.DTO.StageGroupTaskDTOs
             DateUpdate = dateUpdate;
             DateCreate = dateCreate;
         }
-
-        
     }
 }

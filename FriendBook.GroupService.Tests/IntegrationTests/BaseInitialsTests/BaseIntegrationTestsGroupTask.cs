@@ -2,7 +2,6 @@
 using FriendBook.GroupService.API.Domain.JWT;
 using FriendBook.GroupService.Tests.TestHelpers;
 using NodaTime.Extensions;
-using System.Net.Http.Json;
 
 namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
 {

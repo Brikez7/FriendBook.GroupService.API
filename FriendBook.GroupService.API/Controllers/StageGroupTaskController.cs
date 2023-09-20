@@ -16,10 +16,10 @@ namespace FriendBook.GroupService.API.Controllers
     {
         private readonly IStageGroupTaskService _stageGroupTaskService;
         private readonly IValidationService<RequestNewStageGroupTask> _requestStageGroupTasNewValidationService;
-        private readonly IValidationService<StageGroupTaskDTO> _stageGroupTaskDTOValidationService;
+        private readonly IValidationService<UpdateStageGroupTaskDTO> _stageGroupTaskDTOValidationService;
         public Lazy<DataAccessToken> UserToken { get; set; }
         public StageGroupTaskController(IStageGroupTaskService stageGroupTaskService, IHttpContextAccessor httpContextAccessor,
-            IValidationService<RequestNewStageGroupTask> validatorStageGroupTasNew, IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
+            IValidationService<RequestNewStageGroupTask> validatorStageGroupTasNew, IValidationService<UpdateStageGroupTaskDTO> validatorStageGroupTaskDTO)
         {
             _stageGroupTaskService = stageGroupTaskService;
             UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
@@ -39,7 +39,7 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPut("Update/{groupId}")]
-        public async Task<IActionResult> UpdateStageGroupTask([FromRoute] Guid groupId, [FromBody] StageGroupTaskDTO stageGroupTaskDTO)
+        public async Task<IActionResult> UpdateStageGroupTask([FromRoute] Guid groupId, [FromBody] UpdateStageGroupTaskDTO stageGroupTaskDTO)
         {
             var responseValidation = await _stageGroupTaskDTOValidationService.ValidateAsync(stageGroupTaskDTO);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
