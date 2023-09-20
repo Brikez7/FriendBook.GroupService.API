@@ -5,9 +5,9 @@ namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class GroupTaskRepository : IGroupTaskRepository
     {
-        private readonly GroupAppDBContext _db;
+        private readonly GroupDBContext _db;
 
-        public GroupTaskRepository(GroupAppDBContext db)
+        public GroupTaskRepository(GroupDBContext db)
         {
             _db = db;
         }

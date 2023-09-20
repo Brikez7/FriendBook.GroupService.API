@@ -1,5 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using MongoDb.Bson.NodaTime;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using NodaTime;
 
 namespace FriendBook.GroupService.API.Domain.Entities.MongoDB
 {
@@ -8,14 +10,15 @@ namespace FriendBook.GroupService.API.Domain.Entities.MongoDB
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public ObjectId Id { get; set; }
-        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        [BsonGuidRepresentation(GuidRepresentation.CSharpLegacy)]
         public Guid IdGroupTask { get; set; }
         public string Name { get; set; } = null!;
         public string Text { get; set; } = string.Empty;
-        public DateTime DateUpdate { get; set; }
-        public DateTime? DateCreate { get; set; }
+        [BsonSerializer(typeof(OffsetDateTimeSerializer))]
+        public OffsetDateTime DateUpdate { get; set; }
+        public DateTime DateCreate { get; set; }
 
-        public StageGroupTask(Guid idGroupTask, string name, string text, DateTime dateUpdate, DateTime dateCreate)
+        public StageGroupTask(Guid idGroupTask, string name, string text, OffsetDateTime dateUpdate, DateTime dateCreate)
         {
             Id = ObjectId.GenerateNewId();
             IdGroupTask = idGroupTask;
@@ -25,7 +28,7 @@ namespace FriendBook.GroupService.API.Domain.Entities.MongoDB
             DateCreate = dateCreate;
         }
 
-        public StageGroupTask(ObjectId id, Guid idGroupTask, string name, string text, DateTime dateUpdate)
+        public StageGroupTask(ObjectId id, Guid idGroupTask, string name, string text, OffsetDateTime dateUpdate)
         {
             Id = id;
             IdGroupTask = idGroupTask;

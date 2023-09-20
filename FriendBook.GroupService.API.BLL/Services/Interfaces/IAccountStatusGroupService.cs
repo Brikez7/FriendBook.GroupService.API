@@ -1,20 +1,14 @@
-﻿using FriendBook.GroupService.API.BLL.gRPCServices.AccountService;
-using FriendBook.GroupService.API.BLL.gRPCServices.ContactService;
-using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Entities;
-using FriendBook.GroupService.API.Domain.Entities.Postgres;
+﻿using FriendBook.GroupService.API.BLL.gRPCClients.ContactClient;
+using FriendBook.GroupService.API.Domain.DTO.AccountStatusGroupDTOs;
 using FriendBook.GroupService.API.Domain.Response;
 
 namespace FriendBook.GroupService.API.BLL.Interfaces
 {
     public interface IAccountStatusGroupService
     {
-        public Task<BaseResponse<AccountStatusGroupDTO>> CreateAccountStatusGroup(Guid createrId, AccountStatusGroupDTO accountStatusGroupDTO);
-        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid accountStatusGroupId, Guid createrId, Guid groupId);
-        public Task<BaseResponse<AccountStatusGroupDTO>> UpdateAccountStatusGroup(AccountStatusGroupDTO accountStatusGroup, Guid createrId);
-        public BaseResponse<IQueryable<AccountStatusGroup>> GetAccountStatusGroupOData();
+        public Task<BaseResponse<ResponseAccountStatusGroupView>> CreateAccountStatusGroup(Guid creatorId, RequestNewAccountStatusGroup requestNewAccountStatusGroup);
+        public Task<BaseResponse<ResponseAccountStatusGroupView>> UpdateAccountStatusGroup(RequestUpdateAccountStatusGroup accountStatusGroup, Guid creatorId);
         public Task<BaseResponse<Profile[]>> GetProfilesByIdGroup(Guid groupId, ResponseProfiles responseProfiles);
-        public Task<BaseResponse<AccountStatusGroup?>> GetAccountStatusesGroupFromUserGroup(Guid userId, Guid groupId);
-        public Task<BaseResponse<ResponseTasksPage>> TasksAddSubscribedUserLogins(List<GroupTask> groupTasks, User[] users, bool isAdmin);
+        public Task<BaseResponse<bool>> DeleteAccountStatusGroup(Guid deletedAccountStatusGroupId, Guid creatorId);
     }
 }

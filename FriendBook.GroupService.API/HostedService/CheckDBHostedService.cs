@@ -4,23 +4,25 @@ using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Npgsql;
 
 namespace FriendBook.GroupService.API.BackgroundHostedService
 {
-    public class CheckDBHostedService : BackgroundService
+    public class CheckDBHostedService : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private GroupAppDBContext? _appDBContext;
         private readonly IMongoDatabase _mongoDatabase;
         private readonly MongoDBSettings _settings;
+        private readonly IConfiguration _configuration;
 
-        public CheckDBHostedService(IServiceScopeFactory serviceScopeFactory, IMongoDatabase mongoDatabase, IOptions<MongoDBSettings> options)
+        public CheckDBHostedService(IServiceScopeFactory serviceScopeFactory, IMongoDatabase mongoDatabase, IOptions<MongoDBSettings> options, IConfiguration configuration)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _mongoDatabase = mongoDatabase;
             _settings = options.Value;
+            _configuration = configuration;
         }
-        public static async void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
+        private static async void CreateUniqueIndex(IMongoCollection<StageGroupTask> collection)
         {
             var indexKeys = Builders<StageGroupTask>.IndexKeys.Combine(
                 Builders<StageGroupTask>.IndexKeys.Ascending(x => x.IdGroupTask),
@@ -33,31 +35,37 @@ namespace FriendBook.GroupService.API.BackgroundHostedService
             bool indexExists = existingIndexes.Any(i => i["name"] == indexModel.Options.Name);
 
             if (!indexExists)
-            {
                 await collection.Indexes.CreateOneAsync(indexModel);
-            }
         }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            bool collectionExists = await (await _mongoDatabase.ListCollectionNamesAsync()).AnyAsync();
+            bool collectionExists = await(await _mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken)).AnyAsync(cancellationToken);
             if (!collectionExists)
-            {
-                await _mongoDatabase.CreateCollectionAsync(_settings.Collection);
-            }
+                await _mongoDatabase.CreateCollectionAsync(_settings.Collection, cancellationToken: cancellationToken);
 
             var collection = _mongoDatabase.GetCollection<StageGroupTask>(_settings.Collection);
             CreateUniqueIndex(collection);
 
             using var scope = _serviceScopeFactory.CreateScope();
-            _appDBContext = scope.ServiceProvider.GetRequiredService<GroupAppDBContext>();
+            var appDbContext = scope.ServiceProvider.GetRequiredService<GroupDBContext>();
 
-            if (!await _appDBContext.Database.CanConnectAsync() || (await _appDBContext.Database.GetPendingMigrationsAsync(stoppingToken)).Any())
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(appDbContext.Database.GetConnectionString());
+            dataSourceBuilder.UseNodaTime();
+            dataSourceBuilder.Build();
+
+            if (!await appDbContext.Database.CanConnectAsync(cancellationToken) || (await appDbContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())
             {
-                await _appDBContext.Database.MigrateAsync(stoppingToken);
+                await appDbContext.Database.MigrateAsync(cancellationToken);
                 return;
             }
-            
+
             return;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

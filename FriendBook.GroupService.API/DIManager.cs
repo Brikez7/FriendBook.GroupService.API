@@ -1,19 +1,10 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
-using FriendBook.GroupService.API.Domain.Entities;
-using Microsoft.AspNet.OData.Builder;
 using System.Text;
-using Microsoft.AspNetCore.OData;
 using FriendBook.GroupService.API.Middleware;
 using FriendBook.GroupService.API.BackgroundHostedService;
 using FriendBook.GroupService.API.DAL.Repositories;
 using FriendBook.GroupService.API.BLL.Interfaces;
 using FriendBook.GroupService.API.BLL.Services;
-using FluentValidation;
-using FriendBook.GroupService.API.Domain.DTO.GroupDTOs;
-using FriendBook.GroupService.API.Domain.Validators.GroupTaskDTOValidators;
-using FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Validators.AccountStatusGroupDTOValidators;
-using FriendBook.GroupService.API.Domain.Validators.GroupDTOValidators;
 using FriendBook.GroupService.API.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -22,13 +13,13 @@ using Hangfire.PostgreSql;
 using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using FriendBook.GroupService.API.HostedService;
-using FriendBook.GroupService.API.Domain.Entities.Postgres;
 using MongoDB.Driver;
 using FriendBook.GroupService.API.Domain.Entities.MongoDB;
 using Microsoft.Extensions.Options;
-using FriendBook.GroupService.API.Domain.DTO.DocumentGroupTaskDTOs;
-using FriendBook.GroupService.API.Domain.Validators.StageGroupTaskDTOValidators;
 using FriendBook.GroupService.API.BLL.GrpcServices;
+using Hangfire.Client;
+using Hangfire.States;
+using Npgsql;
 
 namespace FriendBook.GroupService.API
 {
@@ -41,43 +32,50 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupTaskRepository, GroupTaskRepository>();
             webApplicationBuilder.Services.AddScoped<IStageGroupTaskRepository, StageGroupTaskRepository>();
         }
-        public static void AddGrpcProperty(this WebApplicationBuilder webApplicationBuilder) 
+        public static void AddGrpc(this WebApplicationBuilder webApplicationBuilder) 
         {
             webApplicationBuilder.Services.Configure<GrpcSettings>(webApplicationBuilder.Configuration.GetSection(GrpcSettings.Name));
         }
         public static void AddValidators(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddScoped<IValidator<AccountStatusGroupDTO>, ValidatorAccountStatusGroupDTO>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupUpdate>, ValidatorRequestGroupUpdate>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskNew>, ValidatorRequestGroupTaskNew>();
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskChanged>, ValidatorRequestGroupTaskChanged>();
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestGroupTaskKey>, ValidatorRequestGroupTaskKey>();
-
-            webApplicationBuilder.Services.AddScoped<IValidator<RequestStageGroupTasNew>, ValidatorRequestStageGroupTasNew>();
-            webApplicationBuilder.Services.AddScoped<IValidator<StageGroupTaskDTO>, ValidatorStageGroupTaskDTO>();
+            webApplicationBuilder.Services.AddValidators();
         }
         public static void AddServices(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddScoped<IContactGroupService, ContactGroupService>();
+            webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
+            webApplicationBuilder.Services.AddScoped<IStageGroupTaskService, StageGroupTaskService>();
 
-            webApplicationBuilder.Services.AddScoped<IGrpcService, GrpcService>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<AccountStatusGroupDTO>, ValidationService<AccountStatusGroupDTO>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupUpdate>, ValidationService<RequestGroupUpdate>>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskNew>, ValidationService<RequestGroupTaskNew>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskChanged>, ValidationService<RequestGroupTaskChanged>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestGroupTaskKey>, ValidationService<RequestGroupTaskKey>>();
-
-            webApplicationBuilder.Services.AddScoped<IValidationService<RequestStageGroupTasNew>, ValidationService<RequestStageGroupTasNew>>();
-            webApplicationBuilder.Services.AddScoped<IValidationService<StageGroupTaskDTO>, ValidationService<StageGroupTaskDTO>>();
+            webApplicationBuilder.Services.AddScoped<IGrpcClient, GrpcClient>();
         }
         public static void AddHangfire(this WebApplicationBuilder webApplicationBuilder) 
         {
+            webApplicationBuilder.Services.AddSingleton<JobStorage>(x =>
+            {
+                var jobStorage = new PostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString("HangfireNpgConnectionString"));
+                return jobStorage;
+            });
+            webApplicationBuilder.Services.AddSingleton<IBackgroundJobFactory>(x => 
+            {
+                var backgroundJobFactory = new BackgroundJobFactory();
+                return backgroundJobFactory;
+            });
+            webApplicationBuilder.Services.AddSingleton<IBackgroundJobStateChanger>(x => 
+            {
+                var backgroundJobStateChanger = new BackgroundJobStateChanger();
+                return backgroundJobStateChanger;
+            });
+
+            webApplicationBuilder.Services.AddSingleton<IBackgroundJobClient>(x => new BackgroundJobClient(
+                x.GetRequiredService<JobStorage>(),
+                x.GetRequiredService<IBackgroundJobFactory>(),
+                x.GetRequiredService<IBackgroundJobStateChanger>()));
+
+            webApplicationBuilder.Services.AddSingleton<IRecurringJobManager>(x => new RecurringJobManager(
+                x.GetRequiredService<JobStorage>(),
+                x.GetRequiredService<IBackgroundJobFactory>()));
+
             webApplicationBuilder.Services.AddHangfire(configuration =>
             {
                 configuration.UseSimpleAssemblyNameTypeSerializer()
@@ -85,6 +83,7 @@ namespace FriendBook.GroupService.API
                              .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                              .UsePostgreSqlStorage(webApplicationBuilder.Configuration.GetConnectionString("HangfireNpgConnectionString"));
             });
+
             webApplicationBuilder.Services.AddHangfireServer();
         }
         public static void AddMongoDB(this WebApplicationBuilder webApplicationBuilder) 
@@ -111,25 +110,10 @@ namespace FriendBook.GroupService.API
         }
         public static void AddPostgresDB(this WebApplicationBuilder webApplicationBuilder)
         {
-            webApplicationBuilder.Services.AddDbContext<GroupAppDBContext>(opt => opt.UseNpgsql(
-                 webApplicationBuilder.Configuration.GetConnectionString(GroupAppDBContext.NameConnection)));
+            webApplicationBuilder.Services.AddDbContext<GroupDBContext>(opt => opt.UseNpgsql(
+                webApplicationBuilder.Configuration.GetConnectionString(GroupDBContext.NameConnection), o => o.UseNodaTime()));
         }
-        public static void AddODataProperty(this WebApplicationBuilder webApplicationBuilder)
-        {
-            var odataBuilder = new ODataConventionModelBuilder();
-
-            odataBuilder.EntitySet<Group>("Group");
-            odataBuilder.EntitySet<AccountStatusGroup>("AccountStatusGroup");
-            odataBuilder.EntitySet<GroupTask>("GroupTask");
-
-            webApplicationBuilder.Services.AddControllers().AddOData(opt =>
-            {
-                opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(5000);
-                opt.TimeZone = TimeZoneInfo.Utc;
-            });
-        }
-
-        public static void AddAuthProperty(this WebApplicationBuilder webApplicationBuilder)
+        public static void AddAuth(this WebApplicationBuilder webApplicationBuilder)
         {
             webApplicationBuilder.Services.AddHttpContextAccessor();
             webApplicationBuilder.Services.Configure<JWTSettings>(webApplicationBuilder.Configuration.GetSection(JWTSettings.Name));

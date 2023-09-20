@@ -1,14 +1,13 @@
 ﻿using FriendBook.GroupService.API.DAL.Repositories.Interfaces;
 using FriendBook.GroupService.API.Domain.Entities.Postgres;
-using Microsoft.EntityFrameworkCore;
 
 namespace FriendBook.GroupService.API.DAL.Repositories
 {
     public class AccountStatusGroupRepository : IAccountStatusGroupRepository
     {
-        private GroupAppDBContext _dbContext;
+        private GroupDBContext _dbContext;
 
-        public AccountStatusGroupRepository(GroupAppDBContext dbContext)
+        public AccountStatusGroupRepository(GroupDBContext dbContext)
         {
             _dbContext = dbContext;
         }

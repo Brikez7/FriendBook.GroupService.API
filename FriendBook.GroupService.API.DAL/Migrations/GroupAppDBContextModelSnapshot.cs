@@ -4,13 +4,14 @@ using FriendBook.GroupService.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace FriendBook.GroupService.API.DAL.Migrations
 {
-    [DbContext(typeof(GroupAppDBContext))]
+    [DbContext(typeof(GroupDBContext))]
     partial class GroupAppDBContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -22,7 +23,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.AccountStatusGroup", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.AccountStatusGroup", b =>
                 {
                     b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
@@ -51,7 +52,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.ToTable(" account_status_groups", (string)null);
                 });
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Group", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.Group", b =>
                 {
                     b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +63,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("create_date");
 
-                    b.Property<Guid>("CreaterId")
+                    b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
 
@@ -73,7 +74,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreaterId");
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -81,23 +82,23 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.ToTable("groups", (string)null);
                 });
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.GroupTask", b =>
                 {
                     b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("pk_group_task_id");
 
-                    b.Property<Guid>("CreaterId")
+                    b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid")
                         .HasColumnName("creater_id");
 
-                    b.Property<DateTime>("DateEndWork")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<OffsetDateTime>("DateEndWork")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_end_work");
 
-                    b.Property<DateTime>("DateStartWork")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<OffsetDateTime>("DateStartWork")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_start_work");
 
                     b.Property<string>("Description")
@@ -133,9 +134,9 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.ToTable("group_tasks", (string)null);
                 });
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.AccountStatusGroup", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.AccountStatusGroup", b =>
                 {
-                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.Group", "Group")
+                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.Postgres.Group", "Group")
                         .WithMany("AccountStatusGroups")
                         .HasForeignKey("IdGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -144,9 +145,9 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.GroupTask", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.GroupTask", b =>
                 {
-                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.Group", "Group")
+                    b.HasOne("FriendBook.GroupService.API.Domain.Entities.Postgres.Group", "Group")
                         .WithMany("GroupTasks")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -155,7 +156,7 @@ namespace FriendBook.GroupService.API.DAL.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Group", b =>
+            modelBuilder.Entity("FriendBook.GroupService.API.Domain.Entities.Postgres.Group", b =>
                 {
                     b.Navigation("AccountStatusGroups");
 

@@ -27,17 +27,15 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         private static BaseResponse<List<Tuple<string, string>>?> GetErrors(ValidationResult validationResult)
         {
-            var isValid = validationResult.IsValid;
-            var reponse = new StandartResponse<List<Tuple<string, string>>?>();
-            if (!isValid)
+            var reponse = new StandardResponse<List<Tuple<string, string>>?>();
+            if (!validationResult.IsValid)
             {
-
-                reponse.StatusCode = StatusCode.ErrorValidation;
+                reponse.ServiceCode = ServiceCode.EntityIsNotValidated;
                 reponse.Message = $"Error validation: {validationResult.Errors.First().ErrorMessage}";
                 reponse.Data = validationResult.Errors.Select(x => new Tuple<string, string>(x.PropertyName, x.ErrorMessage)).ToList();
                 return reponse;
             }
-            reponse.StatusCode = StatusCode.EntityIsValid;
+            reponse.ServiceCode = ServiceCode.EntityIsValidated;
             return reponse;
         }
     }

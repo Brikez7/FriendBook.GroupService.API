@@ -27,7 +27,7 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("group_id");
 
-            builder.Property(e => e.CreaterId)
+            builder.Property(e => e.CreatorId)
                    .HasColumnType(EntityDataTypes.Guid)
                    .HasColumnName("creater_id");
 
@@ -40,13 +40,15 @@ namespace FriendBook.GroupService.API.DAL.Configuration
                    .HasColumnName("description");
 
             builder.Property(e => e.Status)
-                   .HasColumnType(EntityDataTypes.Smallint)
+                   .HasColumnType(EntityDataTypes.SmallInt)
                    .HasColumnName("status_task");
 
             builder.Property(e => e.DateStartWork)
+                   .HasColumnType(EntityDataTypes.DateTimeTZ)
                    .HasColumnName("date_start_work");
 
             builder.Property(e => e.DateEndWork)
+                   .HasColumnType(EntityDataTypes.DateTimeTZ)
                    .HasColumnName("date_end_work");
 
             builder.Property(e => e.Team)

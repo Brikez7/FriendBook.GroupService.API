@@ -1,4 +1,8 @@
+using FriendBook.GroupService.API.Domain;
 using Hangfire;
+using NodaTime;
+using NodaTime.Serialization.JsonNet;
+using NodaTime.Serialization.SystemTextJson;
 
 namespace FriendBook.GroupService.API
 {
@@ -17,17 +21,21 @@ namespace FriendBook.GroupService.API
             builder.AddValidators();
             builder.AddServices();
 
-            builder.AddGrpcProperty();
-            builder.AddAuthProperty();
-            builder.AddODataProperty();
-
+            builder.AddGrpc();
+            builder.AddAuth();
             builder.AddHangfire();
             builder.AddHostedServices();
+            
+            builder.Services.AddControllers()
+            .AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+                o.JsonSerializerOptions.Converters.Add(new BsonIdConverter());
+            });
 
-            builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-        
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -39,8 +47,11 @@ namespace FriendBook.GroupService.API
             app.AddCorsUI();
 
             app.UseAuthorization();
+
             app.MapControllers();
+
             app.UseHangfireDashboard("/hangfire", new DashboardOptions());
+
             app.Run();
         }
     }
