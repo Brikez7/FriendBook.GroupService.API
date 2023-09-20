@@ -11,6 +11,7 @@ using NodaTime.Extensions;
 using FriendBook.GroupService.API.BLL.gRPCClients.AccountClient;
 using FriendBook.GroupService.API.BLL.GrpcServices;
 using MongoDB.Driver.Linq;
+using FriendBook.GroupService.API.DAL;
 
 namespace FriendBook.GroupService.API.BLL.Services
 {
@@ -19,14 +20,16 @@ namespace FriendBook.GroupService.API.BLL.Services
         private readonly IGroupTaskRepository _groupTaskRepository;
         private readonly IAccountStatusGroupRepository _accountStatusGroupRepository;
         private readonly IStageGroupTaskRepository _stageGroupTaskRepository;
+        private readonly IStageGroupTaskService _stageGroupTaskService;
         private readonly IGrpcClient _grpcService;
         public GroupTaskService(IGroupTaskRepository groupTaskRepository, IAccountStatusGroupRepository accountStatusGroupRepository, IStageGroupTaskRepository stageGroupTask,
-            IGrpcClient grpcService)
+            IGrpcClient grpcService, IStageGroupTaskService stageGroupTaskService)
         {
             _groupTaskRepository = groupTaskRepository;
             _accountStatusGroupRepository = accountStatusGroupRepository;
             _stageGroupTaskRepository = stageGroupTask;
             _grpcService = grpcService;
+            _stageGroupTaskService = stageGroupTaskService;
         }
 
         public async Task<BaseResponse<ResponseGroupTaskView>> CreateGroupTask(RequestNewGroupTask requestNewGroupTask, Guid adminId, string loginAdmin)
@@ -181,26 +184,17 @@ namespace FriendBook.GroupService.API.BLL.Services
             var tasksFromGroup = responseFullAccountStatusGroup.Group.GroupTasks.Where(x => x.Name.ToLower().Contains(nameTask.ToLower())).ToList();
             var isAdmin = responseFullAccountStatusGroup.RoleAccount > RoleAccount.Default;
 
-            var response = await CreateTasks(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
-            return response;
+            var tasks = CreateTasks(tasksFromGroup, responseAnotherApi.Data.Users.ToArray(), isAdmin);
+            return new StandardResponse<ResponseTasksPage>() {Data = tasks, ServiceCode = ServiceCode.GroupTaskReadied };
         }
 
-        private async Task<BaseResponse<ResponseTasksPage>> CreateTasks(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
+        private ResponseTasksPage CreateTasks(List<GroupTask> groupTasks, User[] usersLoginWithId, bool isAdmin)
         {
             ResponseStageGroupTaskIcon[] stageGroupTask;
             ResponseGroupTaskView[] tasksPages = new ResponseGroupTaskView[groupTasks.Count];
             for(int i = 0; i < groupTasks.Count; i++)
             {
-                // Add extensions methods
-                var filt = Builders<StageGroupTask>.Filter.Where(x => x.IdGroupTask == groupTasks[i].Id);
-                var proj = Builders<StageGroupTask>.Projection.Include(x =>  x.Id).Include(x => x.Name);
-
-                stageGroupTask =  (await _stageGroupTaskRepository.GetCollection() // extensions methods
-                                                                  .Find(filt)
-                                                                  .Project(proj)
-                                                                  .ToListAsync())
-                                                                  .Select(x => new ResponseStageGroupTaskIcon(x["_id"].AsObjectId, x["Name"].AsString)) // extensions method 
-                                                                  .ToArray();
+                stageGroupTask = _stageGroupTaskService.GetStagesGroupTaskIconByGroupId((Guid)groupTasks[i].Id!);                
                 
                 var namesUser = groupTasks[i].Team.Join(
                                         usersLoginWithId,
@@ -211,17 +205,9 @@ namespace FriendBook.GroupService.API.BLL.Services
                 var groupTaskViewDTO = new ResponseGroupTaskView(groupTasks[i], namesUser, stageGroupTask);
                 tasksPages[i] = groupTaskViewDTO;
             }
-
-            if (tasksPages.Length == 0)
-                return new StandardResponse<ResponseTasksPage> { Message = "Tasks not found", ServiceCode = ServiceCode.EntityNotFound };
-
             var tasksPageDTO = new ResponseTasksPage(tasksPages, isAdmin);
 
-            return new StandardResponse<ResponseTasksPage>
-            {
-                Data = tasksPageDTO,
-                ServiceCode = ServiceCode.GroupTaskReadied
-            };
+            return tasksPageDTO;
         }
     }
 }

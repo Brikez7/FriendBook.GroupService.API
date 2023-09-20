@@ -15,8 +15,8 @@ namespace FriendBook.GroupService.Tests.IntegrationTests.BaseInitialsTests
         {
             await base.SetUp();
 
-            var requestGroupTaskNew = new RequestNewGroupTask(_testGroup.GroupId,"TestTask","Description", DateTimeOffset.UtcNow.AddDays(10).ToOffsetDateTime(), DateTimeOffset.UtcNow.ToOffsetDateTime());
-            var requestGroupTaskNewContent = JsonContent.Create(requestGroupTaskNew);
+            var requestGroupTaskNew = new RequestNewGroupTask(_testGroup.GroupId, "TestTask", "Description", DateTimeOffset.UtcNow.AddDays(10).ToOffsetDateTime(), DateTimeOffset.UtcNow.ToOffsetDateTime());
+            var requestGroupTaskNewContent = JsonContentHelper.Create(requestGroupTaskNew);
 
             HttpResponseMessage httpResponseGroupTaskView = await _httpClient.PostAsync($"{IntegrationTestsGroupTaskController.UrlController}/Create", requestGroupTaskNewContent);
             _testGroupTask = (await DeserializeHelper.TryDeserializeStandardResponse<ResponseGroupTaskView>(httpResponseGroupTaskView)).Data;

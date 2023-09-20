@@ -45,6 +45,7 @@ namespace FriendBook.GroupService.API
             webApplicationBuilder.Services.AddScoped<IGroupService, BLL.Services.GroupService>();
             webApplicationBuilder.Services.AddScoped<IAccountStatusGroupService, AccountStatusGroupService>();
             webApplicationBuilder.Services.AddScoped<IGroupTaskService, GroupTaskService>();
+            webApplicationBuilder.Services.AddScoped<IStageGroupTaskService, StageGroupTaskService>();
 
             webApplicationBuilder.Services.AddScoped<IGrpcClient, GrpcClient>();
         }

@@ -1,63 +1,41 @@
-﻿using FriendBook.GroupService.API.Domain.Response;
-using MongoDB.Bson;
-using Newtonsoft.Json;
+﻿using FriendBook.GroupService.API;
+using FriendBook.GroupService.API.Domain.Response;
+using System.Text.Json;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
+using NodaTime.Serialization.SystemTextJson;
+using FriendBook.GroupService.API.Domain;
 
 namespace FriendBook.GroupService.Tests.TestHelpers
 {
     internal static class DeserializeHelper
     {
-        private static readonly JsonSerializerSettings _jsonSerializerSettings;
+        internal static readonly JsonSerializerOptions _jsonSerializerSettings;
         static DeserializeHelper() 
         {
-            _jsonSerializerSettings = new JsonSerializerSettings
+            _jsonSerializerSettings = new JsonSerializerOptions() 
             {
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                DateParseHandling = DateParseHandling.None,
-                Converters = new List<JsonConverter> { new BsonObjectIdConvector() }
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
-            _jsonSerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+            _jsonSerializerSettings = _jsonSerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+            _jsonSerializerSettings.Converters.Add(new BsonIdConverter());
         }
         internal static async Task<StandardResponse<T>> TryDeserializeStandardResponse<T>(HttpResponseMessage httpResponseMessage)
         {
-            var content = await httpResponseMessage.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<StandardResponse<T>>(content, _jsonSerializerSettings)
+            var content = await httpResponseMessage.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<StandardResponse<T>>(content, _jsonSerializerSettings)
                 ?? throw new JsonException($"Error deserialize JSON: StandardResponse<{typeof(T)}>");
         }
         internal static async Task<T> TryDeserialize<T>(HttpResponseMessage httpResponseMessage)
         {
-            var content = await httpResponseMessage.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(content, _jsonSerializerSettings)
+            var content = await httpResponseMessage.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<T>(content, _jsonSerializerSettings)
                 ?? throw new JsonException($"Error deserialize JSON: {typeof(T)}");
         }
-        private class BsonObjectIdConvector : JsonConverter
+        internal static async Task<T> TryDeserialize<T>(Stream stream)
         {
-            public override bool CanConvert(Type objectType)
-                => typeof(ObjectId).IsAssignableFrom(objectType);
-            
-
-            public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-            {
-                if (reader.TokenType != JsonToken.String)
-                    throw new Exception($"Unexpected token parsing ObjectId. Expected String, got {reader.TokenType}.");
-
-                var value = (string?)reader?.Value;
-                return string.IsNullOrEmpty(value) ? ObjectId.Empty : new ObjectId(value);
-            }
-
-            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-            {
-                if (value is ObjectId objectId)
-                {
-                    writer.WriteValue(objectId != ObjectId.Empty ? objectId.ToString() : string.Empty);
-                }
-                else
-                {
-                    throw new Exception("Expected ObjectId value.");
-                }
-            }
+            return await JsonSerializer.DeserializeAsync<T>(stream, _jsonSerializerSettings)
+                ?? throw new JsonException($"Error deserialize JSON: {typeof(T)}");
         }
     }
 }

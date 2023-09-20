@@ -27,9 +27,8 @@ namespace FriendBook.GroupService.API.BLL.Services
 
         private static BaseResponse<List<Tuple<string, string>>?> GetErrors(ValidationResult validationResult)
         {
-            var isValid = validationResult.IsValid;
             var reponse = new StandardResponse<List<Tuple<string, string>>?>();
-            if (!isValid)
+            if (!validationResult.IsValid)
             {
                 reponse.ServiceCode = ServiceCode.EntityIsNotValidated;
                 reponse.Message = $"Error validation: {validationResult.Errors.First().ErrorMessage}";

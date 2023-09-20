@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using MongoDb.Bson.NodaTime;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using NodaTime;
 
@@ -13,8 +14,9 @@ namespace FriendBook.GroupService.API.Domain.Entities.MongoDB
         public Guid IdGroupTask { get; set; }
         public string Name { get; set; } = null!;
         public string Text { get; set; } = string.Empty;
+        [BsonSerializer(typeof(OffsetDateTimeSerializer))]
         public OffsetDateTime DateUpdate { get; set; }
-        public DateTime? DateCreate { get; set; }
+        public DateTime DateCreate { get; set; }
 
         public StageGroupTask(Guid idGroupTask, string name, string text, OffsetDateTime dateUpdate, DateTime dateCreate)
         {

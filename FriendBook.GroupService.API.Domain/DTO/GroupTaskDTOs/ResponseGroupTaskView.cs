@@ -43,9 +43,5 @@ namespace FriendBook.GroupService.API.Domain.DTO.GroupTaskDTOs
         }
 
         public ResponseGroupTaskView(){}
-
-        public ResponseGroupTaskView(UpdateGroupTaskDTO requestUpdateGroupTask)
-        {
-        }
     }
 }

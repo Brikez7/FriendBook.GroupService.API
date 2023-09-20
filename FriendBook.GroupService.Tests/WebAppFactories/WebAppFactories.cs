@@ -76,6 +76,7 @@ namespace FriendBook.GroupService.Tests.WebAppFactories
             GC.SuppressFinalize(this);
         }
     }
+
     internal static class ServiceCollectionExtensions
     {
         internal static void ReplaceDbContext<T>(this IServiceCollection services, string newConnectionPostgres) where T : DbContext

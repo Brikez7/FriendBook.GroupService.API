@@ -15,11 +15,11 @@ namespace FriendBook.GroupService.API.Controllers
     public class StageGroupTaskController : ControllerBase
     {
         private readonly IStageGroupTaskService _stageGroupTaskService;
-        private readonly IValidationService<RequestStageGroupTasNew> _requestStageGroupTasNewValidationService;
+        private readonly IValidationService<RequestNewStageGroupTask> _requestStageGroupTasNewValidationService;
         private readonly IValidationService<StageGroupTaskDTO> _stageGroupTaskDTOValidationService;
         public Lazy<DataAccessToken> UserToken { get; set; }
         public StageGroupTaskController(IStageGroupTaskService stageGroupTaskService, IHttpContextAccessor httpContextAccessor,
-            IValidationService<RequestStageGroupTasNew> validatorStageGroupTasNew, IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
+            IValidationService<RequestNewStageGroupTask> validatorStageGroupTasNew, IValidationService<StageGroupTaskDTO> validatorStageGroupTaskDTO)
         {
             _stageGroupTaskService = stageGroupTaskService;
             UserToken = AccessTokenHelper.CreateUser(httpContextAccessor.HttpContext!.User.Claims);
@@ -28,9 +28,9 @@ namespace FriendBook.GroupService.API.Controllers
         }
 
         [HttpPost("Create/{groupId}")]
-        public async Task<IActionResult> CreateStageGroupTask([FromRoute] Guid groupId, [FromBody] RequestStageGroupTasNew requestStageGroupTasNew) 
+        public async Task<IActionResult> Create([FromRoute] Guid groupId, [FromBody] RequestNewStageGroupTask requestStageGroupTasNew) 
         {
-            var responseValidation = await _requestStageGroupTasNewValidationService.ValidateAsync(requestStageGroupTasNew);
+           var responseValidation = await _requestStageGroupTasNewValidationService.ValidateAsync(requestStageGroupTasNew);
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
@@ -45,15 +45,15 @@ namespace FriendBook.GroupService.API.Controllers
             if (responseValidation.ServiceCode != ServiceCode.EntityIsValidated)
                 return Ok(responseValidation);
 
-            var stageGroupTaskIconDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);
-            return Ok(stageGroupTaskIconDTO);
+            var updatedStageGroupTaskDTO = await _stageGroupTaskService.Update(stageGroupTaskDTO, UserToken.Value.Id, groupId);
+            return Ok(updatedStageGroupTaskDTO);
         }
 
         [HttpDelete("Delete/{groupId}")]
         public async Task<IActionResult> DeleteStageGroupTask([FromRoute] Guid groupId, [FromQuery] ObjectId stageGroupTaskId)
         {
             var result = await _stageGroupTaskService.Delete(stageGroupTaskId, UserToken.Value.Id, groupId);
-            return Ok(stageGroupTaskId);
+            return Ok(result);
         }
 
         [HttpGet("Get/{groupId}")]
